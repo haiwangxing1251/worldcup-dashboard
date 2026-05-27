@@ -1,0 +1,86 @@
+{
+  "tournament": "FIFA World Cup 2026",
+  "hosts": ["USA", "Canada", "Mexico"],
+  "total_teams": 48,
+  "groups": 12,
+  "format": {
+    "group_stage": "12 groups x 4 teams, round-robin",
+    "qualification": "Top 2 from each group (24 teams) + 8 best 3rd-place teams = 32 teams advance",
+    "knockout": "Round of 32 → Round of 16 → Quarter-finals → Semi-finals → Final",
+    "third_place_match": true
+  },
+  "groups": {
+    "A": [
+      {"name": "Mexico", "code": "MEX", "confederation": "CONCACAF", "fifa_rank": 15},
+      {"name": "South Korea", "code": "KOR", "confederation": "AFC", "fifa_rank": 25},
+      {"name": "South Africa", "code": "RSA", "confederation": "CAF", "fifa_rank": 55},
+      {"name": "Czech Republic", "code": "CZE", "confederation": "UEFA", "fifa_rank": 41}
+    ],
+    "B": [
+      {"name": "Canada", "code": "CAN", "confederation": "CONCACAF", "fifa_rank": 30},
+      {"name": "Switzerland", "code": "SUI", "confederation": "UEFA", "fifa_rank": 19},
+      {"name": "Qatar", "code": "QAT", "confederation": "AFC", "fifa_rank": 58},
+      {"name": "Bosnia & Herzegovina", "code": "BIH", "confederation": "UEFA", "fifa_rank": 56}
+    ],
+    "C": [
+      {"name": "Brazil", "code": "BRA", "confederation": "CONMEBOL", "fifa_rank": 6},
+      {"name": "Morocco", "code": "MAR", "confederation": "CAF", "fifa_rank": 8},
+      {"name": "Scotland", "code": "SCO", "confederation": "UEFA", "fifa_rank": 43},
+      {"name": "Haiti", "code": "HAI", "confederation": "CONCACAF", "fifa_rank": 87}
+    ],
+    "D": [
+      {"name": "United States", "code": "USA", "confederation": "CONCACAF", "fifa_rank": 16},
+      {"name": "Paraguay", "code": "PAR", "confederation": "CONMEBOL", "fifa_rank": 40},
+      {"name": "Australia", "code": "AUS", "confederation": "AFC", "fifa_rank": 27},
+      {"name": "Turkey", "code": "TUR", "confederation": "UEFA", "fifa_rank": 22}
+    ],
+    "E": [
+      {"name": "Germany", "code": "GER", "confederation": "UEFA", "fifa_rank": 10},
+      {"name": "Ecuador", "code": "ECU", "confederation": "CONMEBOL", "fifa_rank": 23},
+      {"name": "Ivory Coast", "code": "CIV", "confederation": "CAF", "fifa_rank": 34},
+      {"name": "Cura\u00e7ao", "code": "CUW", "confederation": "CONCACAF", "fifa_rank": 91}
+    ],
+    "F": [
+      {"name": "Netherlands", "code": "NED", "confederation": "UEFA", "fifa_rank": 7},
+      {"name": "Japan", "code": "JPN", "confederation": "AFC", "fifa_rank": 18},
+      {"name": "Sweden", "code": "SWE", "confederation": "UEFA", "fifa_rank": 38},
+      {"name": "Tunisia", "code": "TUN", "confederation": "CAF", "fifa_rank": 44}
+    ],
+    "G": [
+      {"name": "Belgium", "code": "BEL", "confederation": "UEFA", "fifa_rank": 9},
+      {"name": "Iran", "code": "IRN", "confederation": "AFC", "fifa_rank": 21},
+      {"name": "Egypt", "code": "EGY", "confederation": "CAF", "fifa_rank": 29},
+      {"name": "New Zealand", "code": "NZL", "confederation": "OFC", "fifa_rank": 105}
+    ],
+    "H": [
+      {"name": "Spain", "code": "ESP", "confederation": "UEFA", "fifa_rank": 2},
+      {"name": "Uruguay", "code": "URU", "confederation": "CONMEBOL", "fifa_rank": 17},
+      {"name": "Saudi Arabia", "code": "KSA", "confederation": "AFC", "fifa_rank": 53},
+      {"name": "Cape Verde", "code": "CPV", "confederation": "CAF", "fifa_rank": 72}
+    ],
+    "I": [
+      {"name": "France", "code": "FRA", "confederation": "UEFA", "fifa_rank": 1},
+      {"name": "Senegal", "code": "SEN", "confederation": "CAF", "fifa_rank": 14},
+      {"name": "Norway", "code": "NOR", "confederation": "UEFA", "fifa_rank": 31},
+      {"name": "Iraq", "code": "IRQ", "confederation": "AFC", "fifa_rank": 68}
+    ],
+    "J": [
+      {"name": "Argentina", "code": "ARG", "confederation": "CONMEBOL", "fifa_rank": 3},
+      {"name": "Algeria", "code": "ALG", "confederation": "CAF", "fifa_rank": 28},
+      {"name": "Austria", "code": "AUT", "confederation": "UEFA", "fifa_rank": 24},
+      {"name": "Jordan", "code": "JOR", "confederation": "AFC", "fifa_rank": 64}
+    ],
+    "K": [
+      {"name": "Portugal", "code": "POR", "confederation": "UEFA", "fifa_rank": 5},
+      {"name": "Colombia", "code": "COL", "confederation": "CONMEBOL", "fifa_rank": 13},
+      {"name": "Uzbekistan", "code": "UZB", "confederation": "AFC", "fifa_rank": 50},
+      {"name": "DR Congo", "code": "COD", "confederation": "CAF", "fifa_rank": 46}
+    ],
+    "L": [
+      {"name": "England", "code": "ENG", "confederation": "UEFA", "fifa_rank": 4},
+      {"name": "Croatia", "code": "CRO", "confederation": "UEFA", "fifa_rank": 11},
+      {"name": "Ghana", "code": "GHA", "confederation": "CAF", "fifa_rank": 60},
+      {"name": "Panama", "code": "PAN", "confederation": "CONCACAF", "fifa_rank": 33}
+    ]
+  }
+}

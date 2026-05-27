@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="refresh" content="3600">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 世界杯预测报告 | 蒙特卡洛模拟</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #0a0e27;
+    color: #e8e8ec;
+    line-height: 1.7;
+    min-height: 100vh;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+/* ---- Header ---- */
+.header {
+    text-align: center;
+    padding: 64px 24px 48px;
+    background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%);
+    border-radius: 16px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+}
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+    animation: rotate 20s linear infinite;
+}
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.header h1 {
+    font-size: 2.5em;
+    font-weight: 900;
+    background: linear-gradient(90deg, #FFD700, #FFA726, #FFD700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    z-index: 1;
+}
+.header .subtitle {
+    color: #90caf9;
+    font-size: 1.05em;
+    margin-top: 12px;
+    position: relative;
+    z-index: 1;
+}
+.header .meta {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.82em;
+    margin-top: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ---- Cards ---- */
+.card {
+    background: #111640;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.card h2 {
+    font-size: 1.25em;
+    margin-bottom: 16px;
+    color: #4fc3f7;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ---- 摘要卡片 ---- */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.summary-card {
+    background: #111640;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.summary-card .value {
+    font-size: 2em;
+    font-weight: 800;
+    background: linear-gradient(135deg, #FFD700, #FFA726);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.summary-card .label {
+    color: #8890b5;
+    font-size: 0.82em;
+    margin-top: 4px;
+}
+
+/* ---- 夺冠柱状图 ---- */
+.champion-list { display: flex; flex-direction: column; gap: 5px; }
+.champion-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+}
+.champion-rank {
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.85em;
+    flex-shrink: 0;
+}
+.champion-rank.top1 { background: #FFD700; color: #1a1a2e; }
+.champion-rank.top2 { background: #C0C0C0; color: #1a1a2e; }
+.champion-rank.top3 { background: #CD7F32; color: #1a1a2e; }
+.champion-name {
+    width: 130px;
+    font-weight: 600;
+    font-size: 0.9em;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.champion-bar-bg {
+    flex: 1;
+    height: 24px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.champion-bar-fill {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.3s ease;
+}
+.champion-pct {
+    width: 58px;
+    text-align: right;
+    font-weight: 700;
+    font-size: 0.92em;
+    flex-shrink: 0;
+}
+.champion-elo {
+    width: 60px;
+    text-align: right;
+    color: #8890b5;
+    font-size: 0.75em;
+    flex-shrink: 0;
+}
+
+/* ---- 数据表 ---- */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84em;
+}
+.data-table th {
+    text-align: left;
+    padding: 10px 12px;
+    background: rgba(79, 195, 247, 0.08);
+    color: #4fc3f7;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(79, 195, 247, 0.2);
+    font-size: 0.82em;
+    white-space: nowrap;
+}
+.data-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.data-table tr:hover { background: rgba(255,255,255,0.03); }
+.data-table .highlight { background: rgba(255, 215, 0, 0.06); }
+.data-table .right { text-align: right; }
+
+.table-scroll {
+    max-height: 72vh;
+    overflow-y: auto;
+    border-radius: 8px;
+}
+.table-scroll thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* ---- 小组难度 ---- */
+.group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 10px;
+}
+.group-item {
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    padding: 14px 16px;
+    border-left: 3px solid #555;
+}
+.group-item.death { border-left-color: #ef5350; }
+.group-item.wide  { border-left-color: #66bb6a; }
+.group-label {
+    font-weight: 700;
+    font-size: 1.05em;
+    margin-bottom: 4px;
+}
+.group-teams { color: #8890b5; font-size: 0.82em; }
+.group-elo   { color: #8890b5; font-size: 0.76em; margin-top: 2px; }
+
+/* ---- 黑马 ---- */
+.dark-horse { color: #ff7043; font-weight: 600; }
+.tag-est { color: #ff9800; font-size: 0.7em; font-weight: 700; }
+
+/* ---- 双栏 ---- */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+@media (max-width: 800px) {
+    .two-col { grid-template-columns: 1fr; }
+    .header h1 { font-size: 1.7em; }
+}
+
+/* ---- Footer ---- */
+.footer {
+    text-align: center;
+    padding: 30px;
+    color: #8890b5;
+    font-size: 0.78em;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 30px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<!-- ====== 标题 ====== -->
+<div class="header">
+    <h1>&#x26BD; 2026 年 FIFA 世界杯 &trade; 预测报告</h1>
+    <div class="subtitle">
+        蒙特卡洛模拟 &middot; 10,000 次迭代 &middot; ELO 评分 + 泊松分布模型
+    </div>
+    <div class="meta">
+        数据来源：FIFA 官方抽签（2025 年 12 月）&middot;
+        ELO: 实时同步 &middot; 赛果: 0 场真实比分 &middot;
+        生成时间：2026-05-27 21:18
+    </div>
+</div>
+
+<!-- ====== 摘要卡片 ====== -->
+<div class="summary-grid">
+    <div class="summary-card">
+        <div class="value">10,000</div>
+        <div class="label">模拟次数</div>
+    </div>
+    <div class="summary-card">
+        <div class="value">48</div>
+        <div class="label">参赛球队</div>
+    </div>
+    <div class="summary-card">
+        <div class="value">104</div>
+        <div class="label">总比赛场次</div>
+    </div>
+    <div class="summary-card">
+        <div class="value">法国</div>
+        <div class="label">最大夺冠热门</div>
+    </div>
+</div>
+
+<!-- ====== 夺冠概率 Top 20 ====== -->
+<div class="card">
+    <h2>&#x1F3C6; 夺冠概率 — 前 20 名</h2>
+    <div class="champion-list">
+        <div class="champion-row">
+            <div class="champion-rank top1">1</div>
+            <div class="champion-name">法国</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:77.0%; background:#FFD700;"></div>
+            </div>
+            <div class="champion-pct" style="color:#FFD700">19.2%</div>
+            <div class="champion-elo">ELO 1877</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank top2">2</div>
+            <div class="champion-name">西班牙</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:67.56%; background:#FFA726;"></div>
+            </div>
+            <div class="champion-pct" style="color:#FFA726">16.9%</div>
+            <div class="champion-elo">ELO 1876</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank top3">3</div>
+            <div class="champion-name">阿根廷</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:65.64%; background:#ef5350;"></div>
+            </div>
+            <div class="champion-pct" style="color:#ef5350">16.4%</div>
+            <div class="champion-elo">ELO 1875</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">4</div>
+            <div class="champion-name">英格兰</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:35.0%; background:#ab47bc;"></div>
+            </div>
+            <div class="champion-pct" style="color:#ab47bc">8.8%</div>
+            <div class="champion-elo">ELO 1826</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">5</div>
+            <div class="champion-name">巴西</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:25.16%; background:#42a5f5;"></div>
+            </div>
+            <div class="champion-pct" style="color:#42a5f5">6.3%</div>
+            <div class="champion-elo">ELO 1761</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">6</div>
+            <div class="champion-name">摩洛哥</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:23.96%; background:#26c6da;"></div>
+            </div>
+            <div class="champion-pct" style="color:#26c6da">6.0%</div>
+            <div class="champion-elo">ELO 1756</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">7</div>
+            <div class="champion-name">荷兰</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:20.599999999999998%; background:#9ccc65;"></div>
+            </div>
+            <div class="champion-pct" style="color:#9ccc65">5.1%</div>
+            <div class="champion-elo">ELO 1758</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">8</div>
+            <div class="champion-name">德国</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:15.4%; background:#ff7043;"></div>
+            </div>
+            <div class="champion-pct" style="color:#ff7043">3.9%</div>
+            <div class="champion-elo">ELO 1730</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">9</div>
+            <div class="champion-name">比利时</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:15.120000000000001%; background:#78909c;"></div>
+            </div>
+            <div class="champion-pct" style="color:#78909c">3.8%</div>
+            <div class="champion-elo">ELO 1735</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">10</div>
+            <div class="champion-name">葡萄牙</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:11.24%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">2.8%</div>
+            <div class="champion-elo">ELO 1764</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">11</div>
+            <div class="champion-name">墨西哥</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:8.36%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">2.1%</div>
+            <div class="champion-elo">ELO 1682</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">12</div>
+            <div class="champion-name">克罗地亚</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:6.279999999999999%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">1.6%</div>
+            <div class="champion-elo">ELO 1717</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">13</div>
+            <div class="champion-name">美国</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:4.8%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">1.2%</div>
+            <div class="champion-elo">ELO 1673</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">14</div>
+            <div class="champion-name">日本</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:4.5600000000000005%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">1.1%</div>
+            <div class="champion-elo">ELO 1660</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">15</div>
+            <div class="champion-name">哥伦比亚</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:3.36%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.8%</div>
+            <div class="champion-elo">ELO 1693</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">16</div>
+            <div class="champion-name">塞内加尔</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:3.2800000000000002%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.8%</div>
+            <div class="champion-elo">ELO 1689</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">17</div>
+            <div class="champion-name">乌拉圭</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:3.2399999999999998%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.8%</div>
+            <div class="champion-elo">ELO 1673</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">18</div>
+            <div class="champion-name">瑞士</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:2.64%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.7%</div>
+            <div class="champion-elo">ELO 1649</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">19</div>
+            <div class="champion-name">伊朗</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:1.5599999999999998%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.4%</div>
+            <div class="champion-elo">ELO 1615</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">20</div>
+            <div class="champion-name">厄瓜多尔</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:1.3599999999999999%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.3%</div>
+            <div class="champion-elo">ELO 1595</div>
+        </div>
+    </div>
+</div>
+
+<!-- ====== 全部 48 队晋级概率矩阵 ====== -->
+<div class="card">
+    <h2>&#x1F4CA; 全部 48 队晋级概率矩阵</h2>
+    <div class="table-scroll">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>球队</th>
+                <th>小组</th>
+                <th>ELO</th>
+                <th>夺冠</th>
+                <th>决赛</th>
+                <th>四强</th>
+                <th>八强</th>
+                <th>十六强</th>
+                <th>三十二强</th>
+                <th>小组出局</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="highlight">
+                <td>1</td>
+                <td><strong>法国</strong></td>
+                <td>I 组</td>
+                <td class="right">1877</td>
+                <td class="right" style="color:#FFD700">19.2%</td>
+                <td class="right" style="color:#FFD700">26.5%</td>
+                <td class="right">44.0%</td>
+                <td class="right">68.7%</td>
+                <td class="right">85.7%</td>
+                <td class="right">98.7%</td>
+                <td class="right" style="color:#8890b5">1.3%</td>
+            </tr>
+            <tr class="highlight">
+                <td>2</td>
+                <td><strong>西班牙</strong></td>
+                <td>H 组</td>
+                <td class="right">1876</td>
+                <td class="right" style="color:#FFD700">16.9%</td>
+                <td class="right" style="color:#FFD700">23.5%</td>
+                <td class="right">38.9%</td>
+                <td class="right">66.2%</td>
+                <td class="right">80.8%</td>
+                <td class="right">99.1%</td>
+                <td class="right" style="color:#8890b5">0.9%</td>
+            </tr>
+            <tr class="highlight">
+                <td>3</td>
+                <td><strong>阿根廷</strong></td>
+                <td>J 组</td>
+                <td class="right">1875</td>
+                <td class="right" style="color:#FFD700">16.4%</td>
+                <td class="right" style="color:#FFD700">23.0%</td>
+                <td class="right">39.4%</td>
+                <td class="right">59.6%</td>
+                <td class="right">86.2%</td>
+                <td class="right">99.0%</td>
+                <td class="right" style="color:#8890b5">1.0%</td>
+            </tr>
+            <tr class="">
+                <td>4</td>
+                <td><strong>英格兰</strong></td>
+                <td>L 组</td>
+                <td class="right">1826</td>
+                <td class="right" style="color:#FFA726">8.8%</td>
+                <td class="right" style="color:#FFA726">14.1%</td>
+                <td class="right">28.3%</td>
+                <td class="right">49.6%</td>
+                <td class="right">77.5%</td>
+                <td class="right">97.3%</td>
+                <td class="right" style="color:#8890b5">2.7%</td>
+            </tr>
+            <tr class="">
+                <td>5</td>
+                <td><strong>巴西</strong></td>
+                <td>C 组</td>
+                <td class="right">1761</td>
+                <td class="right" style="color:#ef5350">6.3%</td>
+                <td class="right" style="color:#FFD700">16.3%</td>
+                <td class="right">28.4%</td>
+                <td class="right">44.2%</td>
+                <td class="right">66.7%</td>
+                <td class="right">97.0%</td>
+                <td class="right" style="color:#8890b5">3.0%</td>
+            </tr>
+            <tr class="">
+                <td>6</td>
+                <td><strong>摩洛哥</strong></td>
+                <td>C 组</td>
+                <td class="right">1756</td>
+                <td class="right" style="color:#ef5350">6.0%</td>
+                <td class="right" style="color:#FFD700">15.5%</td>
+                <td class="right">27.4%</td>
+                <td class="right">43.4%</td>
+                <td class="right">64.8%</td>
+                <td class="right">96.4%</td>
+                <td class="right" style="color:#8890b5">3.6%</td>
+            </tr>
+            <tr class="">
+                <td>7</td>
+                <td><strong>荷兰</strong></td>
+                <td>F 组</td>
+                <td class="right">1758</td>
+                <td class="right" style="color:#ef5350">5.1%</td>
+                <td class="right" style="color:#FFA726">13.6%</td>
+                <td class="right">23.8%</td>
+                <td class="right">37.0%</td>
+                <td class="right">58.6%</td>
+                <td class="right">94.3%</td>
+                <td class="right" style="color:#8890b5">5.7%</td>
+            </tr>
+            <tr class="">
+                <td>8</td>
+                <td><strong>德国</strong></td>
+                <td>E 组</td>
+                <td class="right">1730</td>
+                <td class="right" style="color:#ef5350">3.9%</td>
+                <td class="right" style="color:#FFA726">11.2%</td>
+                <td class="right">20.8%</td>
+                <td class="right">33.3%</td>
+                <td class="right">66.4%</td>
+                <td class="right">97.0%</td>
+                <td class="right" style="color:#8890b5">3.0%</td>
+            </tr>
+            <tr class="">
+                <td>9</td>
+                <td><strong>比利时</strong></td>
+                <td>G 组</td>
+                <td class="right">1735</td>
+                <td class="right" style="color:#ef5350">3.8%</td>
+                <td class="right" style="color:#FFA726">10.4%</td>
+                <td class="right">19.9%</td>
+                <td class="right">39.1%</td>
+                <td class="right">60.2%</td>
+                <td class="right">96.8%</td>
+                <td class="right" style="color:#8890b5">3.2%</td>
+            </tr>
+            <tr class="">
+                <td>10</td>
+                <td><strong>葡萄牙</strong></td>
+                <td>K 组</td>
+                <td class="right">1764</td>
+                <td class="right" style="color:#ab47bc">2.8%</td>
+                <td class="right" style="color:#ef5350">5.6%</td>
+                <td class="right">13.8%</td>
+                <td class="right">29.2%</td>
+                <td class="right">59.0%</td>
+                <td class="right">95.5%</td>
+                <td class="right" style="color:#8890b5">4.5%</td>
+            </tr>
+            <tr class="">
+                <td>11</td>
+                <td><strong>墨西哥</strong></td>
+                <td>A 组</td>
+                <td class="right">1682</td>
+                <td class="right" style="color:#ab47bc">2.1%</td>
+                <td class="right" style="color:#ef5350">7.6%</td>
+                <td class="right">16.8%</td>
+                <td class="right">38.7%</td>
+                <td class="right">58.4%</td>
+                <td class="right">91.9%</td>
+                <td class="right" style="color:#8890b5">8.1%</td>
+            </tr>
+            <tr class="">
+                <td>12</td>
+                <td><strong>克罗地亚</strong></td>
+                <td>L 组</td>
+                <td class="right">1717</td>
+                <td class="right" style="color:#ab47bc">1.6%</td>
+                <td class="right" style="color:#ef5350">3.8%</td>
+                <td class="right">10.1%</td>
+                <td class="right">24.8%</td>
+                <td class="right">53.4%</td>
+                <td class="right">89.4%</td>
+                <td class="right" style="color:#8890b5">10.6%</td>
+            </tr>
+            <tr class="">
+                <td>13</td>
+                <td><strong>美国</strong></td>
+                <td>D 组</td>
+                <td class="right">1673</td>
+                <td class="right" style="color:#ab47bc">1.2%</td>
+                <td class="right" style="color:#ef5350">4.9%</td>
+                <td class="right">11.0%</td>
+                <td class="right">22.4%</td>
+                <td class="right">48.4%</td>
+                <td class="right">85.6%</td>
+                <td class="right" style="color:#8890b5">14.4%</td>
+            </tr>
+            <tr class="">
+                <td>14</td>
+                <td><strong>日本</strong></td>
+                <td>F 组</td>
+                <td class="right">1660</td>
+                <td class="right" style="color:#ab47bc">1.1%</td>
+                <td class="right" style="color:#ef5350">4.3%</td>
+                <td class="right">10.1%</td>
+                <td class="right">21.2%</td>
+                <td class="right">42.2%</td>
+                <td class="right">83.6%</td>
+                <td class="right" style="color:#8890b5">16.4%</td>
+            </tr>
+            <tr class="">
+                <td>15</td>
+                <td><strong>哥伦比亚</strong></td>
+                <td>K 组</td>
+                <td class="right">1693</td>
+                <td class="right" style="color:#78909c">0.8%</td>
+                <td class="right" style="color:#ab47bc">2.0%</td>
+                <td class="right">7.0%</td>
+                <td class="right">18.9%</td>
+                <td class="right">46.6%</td>
+                <td class="right">88.8%</td>
+                <td class="right" style="color:#8890b5">11.2%</td>
+            </tr>
+            <tr class="">
+                <td>16</td>
+                <td><strong>塞内加尔</strong></td>
+                <td>I 组</td>
+                <td class="right">1689</td>
+                <td class="right" style="color:#78909c">0.8%</td>
+                <td class="right" style="color:#ab47bc">2.3%</td>
+                <td class="right">6.7%</td>
+                <td class="right">16.9%</td>
+                <td class="right">53.1%</td>
+                <td class="right">87.8%</td>
+                <td class="right" style="color:#8890b5">12.2%</td>
+            </tr>
+            <tr class="">
+                <td>17</td>
+                <td><strong>乌拉圭</strong></td>
+                <td>H 组</td>
+                <td class="right">1673</td>
+                <td class="right" style="color:#78909c">0.8%</td>
+                <td class="right" style="color:#ab47bc">2.0%</td>
+                <td class="right">7.0%</td>
+                <td class="right">21.1%</td>
+                <td class="right">46.4%</td>
+                <td class="right">89.8%</td>
+                <td class="right" style="color:#8890b5">10.2%</td>
+            </tr>
+            <tr class="">
+                <td>18</td>
+                <td><strong>瑞士</strong></td>
+                <td>B 组</td>
+                <td class="right">1649</td>
+                <td class="right" style="color:#78909c">0.7%</td>
+                <td class="right" style="color:#ab47bc">2.4%</td>
+                <td class="right">7.1%</td>
+                <td class="right">21.2%</td>
+                <td class="right">55.7%</td>
+                <td class="right">91.9%</td>
+                <td class="right" style="color:#8890b5">8.1%</td>
+            </tr>
+            <tr class="">
+                <td>19</td>
+                <td><strong>伊朗</strong></td>
+                <td>G 组</td>
+                <td class="right">1615</td>
+                <td class="right" style="color:#78909c">0.4%</td>
+                <td class="right" style="color:#ab47bc">1.6%</td>
+                <td class="right">4.9%</td>
+                <td class="right">15.4%</td>
+                <td class="right">32.8%</td>
+                <td class="right">87.8%</td>
+                <td class="right" style="color:#8890b5">12.2%</td>
+            </tr>
+            <tr class="">
+                <td>20</td>
+                <td><strong>厄瓜多尔</strong></td>
+                <td>E 组</td>
+                <td class="right">1595</td>
+                <td class="right" style="color:#78909c">0.3%</td>
+                <td class="right" style="color:#ab47bc">1.7%</td>
+                <td class="right">5.0%</td>
+                <td class="right">12.4%</td>
+                <td class="right">38.6%</td>
+                <td class="right">85.2%</td>
+                <td class="right" style="color:#8890b5">14.8%</td>
+            </tr>
+            <tr class="">
+                <td>21</td>
+                <td><strong>韩国</strong></td>
+                <td>A 组</td>
+                <td class="right">1589</td>
+                <td class="right" style="color:#78909c">0.3%</td>
+                <td class="right" style="color:#ab47bc">1.5%</td>
+                <td class="right">4.9%</td>
+                <td class="right">16.8%</td>
+                <td class="right">39.6%</td>
+                <td class="right">78.8%</td>
+                <td class="right" style="color:#8890b5">21.1%</td>
+            </tr>
+            <tr class="">
+                <td>22</td>
+                <td><strong>土耳其</strong></td>
+                <td>D 组</td>
+                <td class="right">1599</td>
+                <td class="right" style="color:#78909c">0.2%</td>
+                <td class="right" style="color:#ab47bc">1.5%</td>
+                <td class="right">4.3%</td>
+                <td class="right">11.9%</td>
+                <td class="right">31.7%</td>
+                <td class="right">72.7%</td>
+                <td class="right" style="color:#8890b5">27.3%</td>
+            </tr>
+            <tr class="">
+                <td>23</td>
+                <td><strong>奥地利</strong></td>
+                <td>J 组</td>
+                <td class="right">1593</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right" style="color:#78909c">0.5%</td>
+                <td class="right">2.0%</td>
+                <td class="right">7.8%</td>
+                <td class="right">29.0%</td>
+                <td class="right">73.0%</td>
+                <td class="right" style="color:#8890b5">27.0%</td>
+            </tr>
+            <tr class="">
+                <td>24</td>
+                <td><strong>加拿大</strong></td>
+                <td>B 组</td>
+                <td class="right">1556</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right" style="color:#78909c">0.6%</td>
+                <td class="right">2.3%</td>
+                <td class="right">10.1%</td>
+                <td class="right">35.1%</td>
+                <td class="right">79.3%</td>
+                <td class="right" style="color:#8890b5">20.7%</td>
+            </tr>
+            <tr class="">
+                <td>25</td>
+                <td><strong>澳大利亚</strong></td>
+                <td>D 组</td>
+                <td class="right">1581</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right" style="color:#78909c">1.0%</td>
+                <td class="right">3.1%</td>
+                <td class="right">9.2%</td>
+                <td class="right">27.4%</td>
+                <td class="right">67.9%</td>
+                <td class="right" style="color:#8890b5">32.1%</td>
+            </tr>
+            <tr class="">
+                <td>26</td>
+                <td><strong>埃及</strong></td>
+                <td>G 组</td>
+                <td class="right">1563</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right" style="color:#78909c">0.6%</td>
+                <td class="right">2.4%</td>
+                <td class="right">8.6%</td>
+                <td class="right">22.9%</td>
+                <td class="right">78.8%</td>
+                <td class="right" style="color:#8890b5">21.2%</td>
+            </tr>
+            <tr class="">
+                <td>27</td>
+                <td><strong>科特迪瓦</strong></td>
+                <td>E 组</td>
+                <td class="right">1533</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right" style="color:#78909c">0.4%</td>
+                <td class="right">1.6%</td>
+                <td class="right">6.2%</td>
+                <td class="right">25.1%</td>
+                <td class="right">73.1%</td>
+                <td class="right" style="color:#8890b5">26.9%</td>
+            </tr>
+            <tr class="">
+                <td>28</td>
+                <td><strong>捷克</strong></td>
+                <td>A 组</td>
+                <td class="right">1501</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.2%</td>
+                <td class="right">1.1%</td>
+                <td class="right">5.5%</td>
+                <td class="right">19.3%</td>
+                <td class="right">57.6%</td>
+                <td class="right" style="color:#8890b5">42.4%</td>
+            </tr>
+            <tr class="">
+                <td>29</td>
+                <td><strong>巴拉圭</strong></td>
+                <td>D 组</td>
+                <td class="right">1504</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.2%</td>
+                <td class="right">0.8%</td>
+                <td class="right">3.4%</td>
+                <td class="right">13.7%</td>
+                <td class="right">48.2%</td>
+                <td class="right" style="color:#8890b5">51.8%</td>
+            </tr>
+            <tr class="">
+                <td>30</td>
+                <td><strong>瑞典</strong></td>
+                <td>F 组</td>
+                <td class="right">1515</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.2%</td>
+                <td class="right">0.9%</td>
+                <td class="right">4.2%</td>
+                <td class="right">14.5%</td>
+                <td class="right">49.5%</td>
+                <td class="right" style="color:#8890b5">50.4%</td>
+            </tr>
+            <tr class="">
+                <td>31</td>
+                <td><strong>挪威</strong></td>
+                <td>I 组</td>
+                <td class="right">1551</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.2%</td>
+                <td class="right">1.0%</td>
+                <td class="right">4.2%</td>
+                <td class="right">19.9%</td>
+                <td class="right">57.2%</td>
+                <td class="right" style="color:#8890b5">42.8%</td>
+            </tr>
+            <tr class="">
+                <td>32</td>
+                <td><strong>阿尔及利亚</strong></td>
+                <td>J 组</td>
+                <td class="right">1564</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.3%</td>
+                <td class="right">1.3%</td>
+                <td class="right">5.2%</td>
+                <td class="right">22.0%</td>
+                <td class="right">65.3%</td>
+                <td class="right" style="color:#8890b5">34.7%</td>
+            </tr>
+            <tr class="">
+                <td>33</td>
+                <td><strong>刚果(金)</strong></td>
+                <td>K 组</td>
+                <td class="right">1478</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.2%</td>
+                <td class="right">1.5%</td>
+                <td class="right">9.1%</td>
+                <td class="right">41.7%</td>
+                <td class="right" style="color:#8890b5">58.3%</td>
+            </tr>
+            <tr class="">
+                <td>34</td>
+                <td><strong>南非</strong> &#x26A0;</td>
+                <td>A 组</td>
+                <td class="right">1450</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.4%</td>
+                <td class="right">2.8%</td>
+                <td class="right">12.0%</td>
+                <td class="right">44.2%</td>
+                <td class="right" style="color:#8890b5">55.8%</td>
+            </tr>
+            <tr class="">
+                <td>35</td>
+                <td><strong>卡塔尔</strong> &#x26A0;</td>
+                <td>B 组</td>
+                <td class="right">1430</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right">0.3%</td>
+                <td class="right">2.2%</td>
+                <td class="right">11.9%</td>
+                <td class="right">48.6%</td>
+                <td class="right" style="color:#8890b5">51.4%</td>
+            </tr>
+            <tr class="">
+                <td>36</td>
+                <td><strong>波黑</strong> &#x26A0;</td>
+                <td>B 组</td>
+                <td class="right">1445</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right">0.4%</td>
+                <td class="right">2.7%</td>
+                <td class="right">13.8%</td>
+                <td class="right">52.4%</td>
+                <td class="right" style="color:#8890b5">47.6%</td>
+            </tr>
+            <tr class="">
+                <td>37</td>
+                <td><strong>苏格兰</strong></td>
+                <td>C 组</td>
+                <td class="right">1498</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right">0.8%</td>
+                <td class="right">3.5%</td>
+                <td class="right">13.6%</td>
+                <td class="right">55.9%</td>
+                <td class="right" style="color:#8890b5">44.1%</td>
+            </tr>
+            <tr class="">
+                <td>38</td>
+                <td><strong>海地</strong> &#x26A0;</td>
+                <td>C 组</td>
+                <td class="right">1320</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.1%</td>
+                <td class="right">1.1%</td>
+                <td class="right">13.7%</td>
+                <td class="right" style="color:#8890b5">86.3%</td>
+            </tr>
+            <tr class="">
+                <td>39</td>
+                <td><strong>Curaçao</strong> &#x26A0;</td>
+                <td>E 组</td>
+                <td class="right">1305</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.1%</td>
+                <td class="right">1.4%</td>
+                <td class="right">15.0%</td>
+                <td class="right" style="color:#8890b5">85.0%</td>
+            </tr>
+            <tr class="">
+                <td>40</td>
+                <td><strong>突尼斯</strong></td>
+                <td>F 组</td>
+                <td class="right">1483</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right">0.5%</td>
+                <td class="right">2.4%</td>
+                <td class="right">10.0%</td>
+                <td class="right">40.8%</td>
+                <td class="right" style="color:#8890b5">59.2%</td>
+            </tr>
+            <tr class="">
+                <td>41</td>
+                <td><strong>新西兰</strong></td>
+                <td>G 组</td>
+                <td class="right">1282</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.1%</td>
+                <td class="right">0.7%</td>
+                <td class="right">10.8%</td>
+                <td class="right" style="color:#8890b5">89.2%</td>
+            </tr>
+            <tr class="">
+                <td>42</td>
+                <td><strong>沙特阿拉伯</strong> &#x26A0;</td>
+                <td>H 组</td>
+                <td class="right">1460</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.2%</td>
+                <td class="right">1.6%</td>
+                <td class="right">8.9%</td>
+                <td class="right">43.7%</td>
+                <td class="right" style="color:#8890b5">56.3%</td>
+            </tr>
+            <tr class="">
+                <td>43</td>
+                <td><strong>佛得角</strong> &#x26A0;</td>
+                <td>H 组</td>
+                <td class="right">1370</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.4%</td>
+                <td class="right">2.8%</td>
+                <td class="right">22.8%</td>
+                <td class="right" style="color:#8890b5">77.2%</td>
+            </tr>
+            <tr class="">
+                <td>44</td>
+                <td><strong>伊拉克</strong> &#x26A0;</td>
+                <td>I 组</td>
+                <td class="right">1385</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.2%</td>
+                <td class="right">2.8%</td>
+                <td class="right">18.0%</td>
+                <td class="right" style="color:#8890b5">82.0%</td>
+            </tr>
+            <tr class="">
+                <td>45</td>
+                <td><strong>约旦</strong> &#x26A0;</td>
+                <td>J 组</td>
+                <td class="right">1400</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.1%</td>
+                <td class="right">0.4%</td>
+                <td class="right">3.5%</td>
+                <td class="right">22.9%</td>
+                <td class="right" style="color:#8890b5">77.1%</td>
+            </tr>
+            <tr class="">
+                <td>46</td>
+                <td><strong>乌兹别克斯坦</strong></td>
+                <td>K 组</td>
+                <td class="right">1465</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.2%</td>
+                <td class="right">1.4%</td>
+                <td class="right">8.1%</td>
+                <td class="right">38.1%</td>
+                <td class="right" style="color:#8890b5">61.9%</td>
+            </tr>
+            <tr class="">
+                <td>47</td>
+                <td><strong>加纳</strong> &#x26A0;</td>
+                <td>L 组</td>
+                <td class="right">1435</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.5%</td>
+                <td class="right">3.6%</td>
+                <td class="right">23.5%</td>
+                <td class="right" style="color:#8890b5">76.5%</td>
+            </tr>
+            <tr class="">
+                <td>48</td>
+                <td><strong>巴拿马</strong></td>
+                <td>L 组</td>
+                <td class="right">1541</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right">0.7%</td>
+                <td class="right">4.0%</td>
+                <td class="right">15.1%</td>
+                <td class="right">53.4%</td>
+                <td class="right" style="color:#8890b5">46.6%</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+<div class="two-col">
+
+<!-- ---- 小组难度排名 ---- -->
+<div class="card">
+    <h2>&#x1F4A5; 小组难度排名</h2>
+    <div class="group-item ">
+        <div class="group-label">L 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1630</span>
+        </div>
+        <div class="group-teams">英格兰 &middot; 克罗地亚 &middot; 加纳 &middot; 巴拿马</div>
+        <div class="group-elo">
+            最高 1826 &middot;
+            最低 1435 &middot;
+            极差 391
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">I 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1626</span>
+        </div>
+        <div class="group-teams">法国 &middot; 塞内加尔 &middot; 挪威 &middot; 伊拉克</div>
+        <div class="group-elo">
+            最高 1877 &middot;
+            最低 1385 &middot;
+            极差 492
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">J 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1608</span>
+        </div>
+        <div class="group-teams">阿根廷 &middot; 阿尔及利亚 &middot; 奥地利 &middot; 约旦</div>
+        <div class="group-elo">
+            最高 1875 &middot;
+            最低 1400 &middot;
+            极差 475
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">F 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1604</span>
+        </div>
+        <div class="group-teams">荷兰 &middot; 日本 &middot; 瑞典 &middot; 突尼斯</div>
+        <div class="group-elo">
+            最高 1758 &middot;
+            最低 1483 &middot;
+            极差 275
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">K 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1600</span>
+        </div>
+        <div class="group-teams">葡萄牙 &middot; 哥伦比亚 &middot; 乌兹别克斯坦 &middot; 刚果(金)</div>
+        <div class="group-elo">
+            最高 1764 &middot;
+            最低 1465 &middot;
+            极差 298
+        </div>
+    </div>
+    <div class="group-item wide">
+        <div class="group-label">H 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1595</span>
+        </div>
+        <div class="group-teams">西班牙 &middot; 乌拉圭 &middot; 沙特阿拉伯 &middot; 佛得角</div>
+        <div class="group-elo">
+            最高 1876 &middot;
+            最低 1370 &middot;
+            极差 506
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">D 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1589</span>
+        </div>
+        <div class="group-teams">美国 &middot; 巴拉圭 &middot; 澳大利亚 &middot; 土耳其</div>
+        <div class="group-elo">
+            最高 1673 &middot;
+            最低 1504 &middot;
+            极差 170
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">C 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1584</span>
+        </div>
+        <div class="group-teams">巴西 &middot; 摩洛哥 &middot; 苏格兰 &middot; 海地</div>
+        <div class="group-elo">
+            最高 1761 &middot;
+            最低 1320 &middot;
+            极差 441
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">A 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1556</span>
+        </div>
+        <div class="group-teams">墨西哥 &middot; 韩国 &middot; 南非 &middot; 捷克</div>
+        <div class="group-elo">
+            最高 1682 &middot;
+            最低 1450 &middot;
+            极差 232
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">G 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1549</span>
+        </div>
+        <div class="group-teams">比利时 &middot; 伊朗 &middot; 埃及 &middot; 新西兰</div>
+        <div class="group-elo">
+            最高 1735 &middot;
+            最低 1282 &middot;
+            极差 453
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">E 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1541</span>
+        </div>
+        <div class="group-teams">德国 &middot; 厄瓜多尔 &middot; 科特迪瓦 &middot; Curaçao</div>
+        <div class="group-elo">
+            最高 1730 &middot;
+            最低 1305 &middot;
+            极差 425
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">B 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1520</span>
+        </div>
+        <div class="group-teams">加拿大 &middot; 瑞士 &middot; 卡塔尔 &middot; 波黑</div>
+        <div class="group-elo">
+            最高 1649 &middot;
+            最低 1430 &middot;
+            极差 219
+        </div>
+    </div>
+</div>
+
+<!-- ---- 黑马预警 ---- -->
+<div class="card">
+    <h2>&#x1F40E; 黑马预警</h2>
+    <p style="color:#8890b5;font-size:0.84em;margin-bottom:12px;">
+        ELO 排名靠后但小组出线概率较高的球队（ELO &lt; 1590 且十六强率 &gt; 40%）
+    </p>
+    <table class="data-table">
+        <thead><tr><th>球队</th><th>小组</th><th>ELO</th><th>十六强</th><th>八强</th></tr></thead>
+        <tbody>
+        <tr><td colspan="5" style="text-align:center;color:#8890b5;">无符合条件的黑马球队</td></tr>        </tbody>
+    </table>
+</div>
+
+</div>
+<div class="card">
+    <h2>&#x2699; 模型说明</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:0.84em;color:#8890b5;">
+        <div>
+            <strong style="color:#4fc3f7;">第一步：ELO 评分 → 胜率</strong>
+            <p style="margin-top:4px;">P(A 胜) = 1 / (1 + 10<sup>(ELO<sub>B</sub> - ELO<sub>A</sub>) / 400</sup>)</p>
+        </div>
+        <div>
+            <strong style="color:#4fc3f7;">第二步：胜率 → 预期进球数</strong>
+            <p style="margin-top:4px;">200 ELO 分差 ≈ 1 球优势；世界杯场均进球约 2.6 球</p>
+        </div>
+        <div>
+            <strong style="color:#4fc3f7;">第三步：泊松分布模拟比分</strong>
+            <p style="margin-top:4px;">P(k) = &lambda;<sup>k</sup> &middot; e<sup>-&lambda;</sup> / k! — 双方独立采样</p>
+        </div>
+        <div>
+            <strong style="color:#4fc3f7;">第四步：蒙特卡洛模拟</strong>
+            <p style="margin-top:4px;">10,000 次完整锦标赛 = 每次 72 场小组赛 + 32 场淘汰赛</p>
+        </div>
+    </div>
+    <p style="margin-top:14px;font-size:0.74em;color:#666;line-height:1.7;">
+        &#x26A0; <strong>免责声明</strong>：本预测仅基于公开 ELO 评分和历史统计模型，不构成任何博彩或投资建议。
+        足球比赛结果受伤病、红黄牌、天气、临场状态等大量不可预测因素影响。
+        约 11 支低排名球队的 ELO 评分基于 FIFA 排名线性回归估算（标记为"估算"）。
+        数据来源：worldfootballrankings.com / FIFA / roadtowc.com / OneFootball。
+    </p>
+</div>
+
+<div class="footer">
+    <p>2026 年 FIFA 世界杯预测引擎 &middot; Python 构建 &middot; ELO + 泊松分布模型</p>
+    <p>数据截止 2026 年 5 月 &middot; 蒙特卡洛模拟（10,000 次迭代）</p>
+</div>
+
+</div>
+</body>
+</html>

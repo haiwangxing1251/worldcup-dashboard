@@ -1,0 +1,81 @@
+# ============================================================
+# 2026 世界杯预测仪表盘 — 自动更新工作流
+# ============================================================
+# 每小时：
+#   1. 从 openfootball/worldcup.json 获取最新赛程/比分
+#   2. 更新 ELO 评分（根据真实赛果）
+#   3. 运行 10,000 次蒙特卡洛模拟
+#   4. 生成自包含 HTML 仪表盘 → docs/index.html
+#   5. 部署到 GitHub Pages
+#
+# 无需任何 API Key，全部免费。
+# ============================================================
+
+name: 世界杯预测自动更新
+
+on:
+  schedule:
+    # 每小时执行一次（UTC 时间）
+    - cron: '0 * * * *'
+  push:
+    branches: [main]
+  # 允许手动触发
+  workflow_dispatch:
+
+# 确保同一时间只有一个实例在运行
+concurrency:
+  group: "worldcup-update"
+  cancel-in-progress: true
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+
+    # GitHub Pages 所需权限
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 运行预测引擎
+        run: |
+          echo "🔮 2026 世界杯预测引擎启动"
+          python generate_dashboard.py
+
+      - name: 提交生成的仪表盘
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          # 如果有更新则提交
+          if [ -n "$(git status docs/index.html --porcelain)" ]; then
+            git add docs/index.html
+            git commit -m "🔄 自动更新预测数据 — $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+          else
+            echo "数据无变化，跳过提交"
+          fi
+
+      - name: 配置 GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: 上传页面制品
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'docs'
+
+      - name: 部署到 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
