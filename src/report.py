@@ -11,7 +11,7 @@
 
 import json
 import os
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from typing import List, Dict
 
 
@@ -129,7 +129,9 @@ def _pct_color(pct: float) -> str:
 
 
 def _today() -> str:
-    return datetime.now().strftime('%Y-%m-%d %H:%M')
+    """返回北京时间 (UTC+8) 格式化时间，HTML 中用 JS 动态显示"X分钟前"。"""
+    beijing_tz = timezone(timedelta(hours=8))
+    return datetime.now(beijing_tz).strftime('%Y-%m-%d %H:%M')
 
 
 # ============================================================
@@ -155,6 +157,9 @@ def generate_html_report(results: List[Dict],
         data_source_note = f"ELO: 实时同步 &middot; 赛果: {sync_info.get('matches_found', 0)} 场真实比分"
     else:
         data_source_note = f"ELO 评分截止 {elo_source_date}"
+
+    # 生成时间（北京时间 + UTC 用于 JS 动态显示）
+    gen_timestamp_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
     html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -402,212 +407,38 @@ body {{
 </head>
 <body>
 
-<div class="container">
-
-<!-- ====== 标题 ====== -->
-<div class="header">
-    <h1>&#x26BD; 2026 年 FIFA 世界杯 &trade; 预测报告</h1>
-    <div class="subtitle">
-        蒙特卡洛模拟 &middot; 10,000 次迭代 &middot; ELO 评分 + 泊松分布模型
-    </div>
-    <div class="meta">
-        数据来源：FIFA 官方抽签（2025 年 12 月）&middot;
-        {data_source_note} &middot;
-        生成时间：{_today()}
-    </div>
-</div>
-
-<!-- ====== 摘要卡片 ====== -->
-<div class="summary-grid">
-    <div class="summary-card">
-        <div class="value">{num_sims:,}</div>
-        <div class="label">模拟次数</div>
-    </div>
-    <div class="summary-card">
-        <div class="value">48</div>
-        <div class="label">参赛球队</div>
-    </div>
-    <div class="summary-card">
-        <div class="value">104</div>
-        <div class="label">总比赛场次</div>
-    </div>
-    <div class="summary-card">
-        <div class="value">{fav_name}</div>
-        <div class="label">最大夺冠热门</div>
-    </div>
-</div>
-
-<!-- ====== 夺冠概率 Top 20 ====== -->
-<div class="card">
-    <h2>&#x1F3C6; 夺冠概率 — 前 20 名</h2>
-    <div class="champion-list">
-"""
-    # ---- 柱状图行 ----
-    for i, (name, pct, code, elo, estimated) in enumerate(champion_probs[:20]):
-        color = COLORS['bar_gradient'][min(i, len(COLORS['bar_gradient']) - 1)]
-        rank_class = ''
-        if i == 0:
-            rank_class = 'top1'
-        elif i == 1:
-            rank_class = 'top2'
-        elif i == 2:
-            rank_class = 'top3'
-        est_tag = ' <span class="tag-est">估算</span>' if estimated else ''
-        html += f"""        <div class="champion-row">
-            <div class="champion-rank {rank_class}">{i + 1}</div>
-            <div class="champion-name">{cn(name)}{est_tag}</div>
-            <div class="champion-bar-bg">
-                <div class="champion-bar-fill" style="width:{min(pct * 4, 100)}%; background:{color};"></div>
-            </div>
-            <div class="champion-pct" style="color:{color}">{pct:.1f}%</div>
-            <div class="champion-elo">ELO {elo:.0f}</div>
-        </div>
-"""
-
-    html += """    </div>
-</div>
-
-<!-- ====== 全部 48 队晋级概率矩阵 ====== -->
-<div class="card">
-    <h2>&#x1F4CA; 全部 48 队晋级概率矩阵</h2>
-    <div class="table-scroll">
-    <table class="data-table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>球队</th>
-                <th>小组</th>
-                <th>ELO</th>
-                <th>夺冠</th>
-                <th>决赛</th>
-                <th>四强</th>
-                <th>八强</th>
-                <th>十六强</th>
-                <th>三十二强</th>
-                <th>小组出局</th>
-            </tr>
-        </thead>
-        <tbody>
-"""
-    # ---- 表格行 ----
-    for i, r in enumerate(results):
-        est_mark = ' &#x26A0;' if r['elo_estimated'] else ''
-        group_class = 'highlight' if i < 3 else ''
-        html += f"""            <tr class="{group_class}">
-                <td>{i + 1}</td>
-                <td><strong>{cn(r['name'])}</strong>{est_mark}</td>
-                <td>{gcn(r['group'])}</td>
-                <td class="right">{r['elo']:.0f}</td>
-                <td class="right" style="color:{_pct_color(r['champion_pct'])}">{r['champion_pct']:.1f}%</td>
-                <td class="right" style="color:{_pct_color(r['final_pct'])}">{r['final_pct']:.1f}%</td>
-                <td class="right">{r['sf_pct']:.1f}%</td>
-                <td class="right">{r['qf_pct']:.1f}%</td>
-                <td class="right">{r['r16_pct']:.1f}%</td>
-                <td class="right">{r['r32_pct']:.1f}%</td>
-                <td class="right" style="color:{COLORS['text_secondary']}">{r['group_exit_pct']:.1f}%</td>
-            </tr>
-"""
-
-    html += """        </tbody>
-    </table>
-    </div>
-</div>
-"""
-
-    # ===== 双栏：小组难度 + 黑马预警 =====
-    html += """<div class="two-col">
-
-<!-- ---- 小组难度排名 ---- -->
-<div class="card">
-    <h2>&#x1F4A5; 小组难度排名</h2>
-"""
-    for d in difficulties:
-        death_class = 'death' if d['avg_elo'] > 1650 else ('wide' if d['spread'] > 500 else '')
-        teams_str = ' &middot; '.join(cn(t) for t in d['teams'])
-        html += f"""    <div class="group-item {death_class}">
-        <div class="group-label">{gcn(d['group'])}
-            <span style="font-size:0.7em;opacity:0.7">平均 ELO {d['avg_elo']:.0f}</span>
-        </div>
-        <div class="group-teams">{teams_str}</div>
-        <div class="group-elo">
-            最高 {d['max_elo']:.0f} &middot;
-            最低 {d['min_elo']:.0f} &middot;
-            极差 {d['spread']:.0f}
-        </div>
-    </div>
-"""
-
-    html += """</div>
-
-<!-- ---- 黑马预警 ---- -->
-<div class="card">
-    <h2>&#x1F40E; 黑马预警</h2>
-    <p style="color:#8890b5;font-size:0.84em;margin-bottom:12px;">
-        ELO 排名靠后但小组出线概率较高的球队（ELO &lt; 1590 且十六强率 &gt; 40%）
-    </p>
-    <table class="data-table">
-        <thead><tr><th>球队</th><th>小组</th><th>ELO</th><th>十六强</th><th>八强</th></tr></thead>
-        <tbody>
-"""
-    dark_horses = [r for r in results if r['elo'] < 1590 and r['r16_pct'] > 40]
-    dark_horses.sort(key=lambda x: x['r16_pct'], reverse=True)
-    for dh in dark_horses[:10]:
-        html += f"""        <tr>
-            <td><strong class="dark-horse">{cn(dh['name'])}</strong></td>
-            <td>{gcn(dh['group'])}</td>
-            <td class="right">{dh['elo']:.0f}</td>
-            <td class="right" style="color:{_pct_color(dh['r16_pct'])}">{dh['r16_pct']:.1f}%</td>
-            <td class="right" style="color:{_pct_color(dh['qf_pct'])}">{dh['qf_pct']:.1f}%</td>
-        </tr>
-"""
-    if not dark_horses:
-        html += """        <tr><td colspan="5" style="text-align:center;color:#8890b5;">无符合条件的黑马球队</td></tr>"""
-
-    html += """        </tbody>
-    </table>
-</div>
-
-</div>"""
-
-    # ===== 模型说明 =====
-    html += f"""
-<div class="card">
-    <h2>&#x2699; 模型说明</h2>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:0.84em;color:{COLORS['text_secondary']};">
-        <div>
-            <strong style="color:{COLORS['accent']};">第一步：ELO 评分 → 胜率</strong>
-            <p style="margin-top:4px;">P(A 胜) = 1 / (1 + 10<sup>(ELO<sub>B</sub> - ELO<sub>A</sub>) / 400</sup>)</p>
-        </div>
-        <div>
-            <strong style="color:{COLORS['accent']};">第二步：胜率 → 预期进球数</strong>
-            <p style="margin-top:4px;">200 ELO 分差 ≈ 1 球优势；世界杯场均进球约 2.6 球</p>
-        </div>
-        <div>
-            <strong style="color:{COLORS['accent']};">第三步：泊松分布模拟比分</strong>
-            <p style="margin-top:4px;">P(k) = &lambda;<sup>k</sup> &middot; e<sup>-&lambda;</sup> / k! — 双方独立采样</p>
-        </div>
-        <div>
-            <strong style="color:{COLORS['accent']};">第四步：蒙特卡洛模拟</strong>
-            <p style="margin-top:4px;">{num_sims:,} 次完整锦标赛 = 每次 72 场小组赛 + 32 场淘汰赛</p>
-        </div>
-    </div>
-    <p style="margin-top:14px;font-size:0.74em;color:#666;line-height:1.7;">
-        &#x26A0; <strong>免责声明</strong>：本预测仅基于公开 ELO 评分和历史统计模型，不构成任何博彩或投资建议。
-        足球比赛结果受伤病、红黄牌、天气、临场状态等大量不可预测因素影响。
-        约 11 支低排名球队的 ELO 评分基于 FIFA 排名线性回归估算（标记为"估算"）。
-        数据来源：worldfootballrankings.com / FIFA / roadtowc.com / OneFootball。
-    </p>
-</div>
-"""
-
-    # ===== 页脚 =====
-    html += f"""
-<div class="footer">
-    <p>2026 年 FIFA 世界杯预测引擎 &middot; Python 构建 &middot; ELO + 泊松分布模型</p>
-    <p>数据截止 2026 年 5 月 &middot; 蒙特卡洛模拟（{num_sims:,} 次迭代）</p>
-</div>
-
-</div>
+<script>
+// ====== 密码门 ======
+(function(){{
+  var PWD_HASH = '7c4a8d09ca3762af61e59520943dc26494f8941b';
+  var PWD_VERSION = 'v1';
+  var overlay = document.getElementById('pwd-overlay');
+  var content = document.getElementById('protected-content');
+  if (localStorage.getItem('wc_pwd') === '1' && localStorage.getItem('wc_pwd_ver') === PWD_VERSION) {{
+    overlay.style.display = 'none';
+    content.style.display = '';
+  }}
+  window.wcCheckPwd = function() {{
+    var input = document.getElementById('pwd-input').value.trim();
+    var err = document.getElementById('pwd-err');
+    if (!input) {{ err.style.display = ''; return; }}
+    crypto.subtle.digest('SHA-1', new TextEncoder().encode(input)).then(function(buf) {{
+      var hash = Array.from(new Uint8Array(buf)).map(function(b){{ return ('0'+(b&0xFF).toString(16)).slice(-2); }}).join('');
+      if (hash === PWD_HASH) {{
+        err.style.display = 'none';
+        localStorage.setItem('wc_pwd','1');
+        localStorage.setItem('wc_pwd_ver', PWD_VERSION);
+        overlay.style.display = 'none';
+        content.style.display = '';
+      }} else {{
+        err.style.display = '';
+        document.getElementById('pwd-input').value = '';
+      }}
+    }});
+  }} }};
+  document.getElementById('pwd-input').addEventListener('keydown', function(e){{ if (e.key === 'Enter') window.wcCheckPwd(); }});
+}})();
+</script>
 </body>
 </html>"""
 
