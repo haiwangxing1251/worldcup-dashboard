@@ -11,7 +11,7 @@
 
 import json
 import os
-from datetime import datetime, timedelta, timezone
+from datetime import datetime
 from typing import List, Dict
 
 
@@ -129,9 +129,7 @@ def _pct_color(pct: float) -> str:
 
 
 def _today() -> str:
-    """返回北京时间 (UTC+8) 格式化时间，HTML 中用 JS 动态显示"X分钟前"。"""
-    beijing_tz = timezone(timedelta(hours=8))
-    return datetime.now(beijing_tz).strftime('%Y-%m-%d %H:%M')
+    return datetime.now().strftime('%Y-%m-%d %H:%M')
 
 
 # ============================================================
@@ -157,9 +155,6 @@ def generate_html_report(results: List[Dict],
         data_source_note = f"ELO: 实时同步 &middot; 赛果: {sync_info.get('matches_found', 0)} 场真实比分"
     else:
         data_source_note = f"ELO 评分截止 {elo_source_date}"
-
-    # 生成时间（北京时间 + UTC 用于 JS 动态显示）
-    gen_timestamp_utc = datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
 
     html = f"""<!DOCTYPE html>
 <html lang="zh-CN">
@@ -407,19 +402,6 @@ body {{
 </head>
 <body>
 
-<!-- ====== 密码门遮罩 ====== -->
-<div id="pwd-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0e27;z-index:9999;display:flex;align-items:center;justify-content:center;">
-  <div style="text-align:center;max-width:360px;padding:20px;">
-    <h2 style="color:#FFD700;font-size:1.6em;margin-bottom:6px;">&#x26BD; 2026 世界杯预测</h2>
-    <p style="color:#8890b5;margin-bottom:20px;font-size:0.88em;">请输入访问密码</p>
-    <input id="pwd-input" type="password" placeholder="输入密码..." autofocus style="width:100%;padding:12px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:#111640;color:#e8e8ec;font-size:1em;outline:none;box-sizing:border-box;"/>
-    <p id="pwd-err" style="color:#ef5350;font-size:0.82em;margin-top:8px;display:none;">密码错误，请重试</p>
-    <button onclick="wcCheckPwd()" style="width:100%;margin-top:16px;padding:12px;border-radius:8px;border:none;background:linear-gradient(135deg,#FFD700,#FFA726);color:#1a1a2e;font-size:1em;font-weight:700;cursor:pointer;">确认进入</button>
-  </div>
-</div>
-
-<div id="protected-content" style="display:none;">
-
 <div class="container">
 
 <!-- ====== 标题 ====== -->
@@ -431,7 +413,7 @@ body {{
     <div class="meta">
         数据来源：FIFA 官方抽签（2025 年 12 月）&middot;
         {data_source_note} &middot;
-        生成时间：<span data-utc="{gen_timestamp_utc}">{_today()} 北京时间</span>
+        生成时间：{_today()}
     </div>
 </div>
 
@@ -624,64 +606,8 @@ body {{
     <p>2026 年 FIFA 世界杯预测引擎 &middot; Python 构建 &middot; ELO + 泊松分布模型</p>
     <p>数据截止 2026 年 5 月 &middot; 蒙特卡洛模拟（{num_sims:,} 次迭代）</p>
 </div>
-"""
 
-    html += """</div><!-- /.container -->
-</div><!-- /#protected-content -->
-
-<!-- ====== 密码门 JS ====== -->
-<script>
-(function(){
-  var PWD_HASH = '35d44a6de2bbd084ea8cd4fbd0dea51b9a675cf9';
-  var PWD_VERSION = 'v2';
-  var overlay = document.getElementById('pwd-overlay');
-  var content = document.getElementById('protected-content');
-  if (localStorage.getItem('wc_pwd') === '1' && localStorage.getItem('wc_pwd_ver') === PWD_VERSION) {
-    overlay.style.display = 'none';
-    content.style.display = '';
-  }
-  window.wcCheckPwd = function() {
-    var input = document.getElementById('pwd-input').value.trim();
-    var err = document.getElementById('pwd-err');
-    if (!input) { err.style.display = ''; return; }
-    crypto.subtle.digest('SHA-1', new TextEncoder().encode(input)).then(function(buf) {
-      var hash = Array.from(new Uint8Array(buf)).map(function(b){ return ('0'+(b&0xFF).toString(16)).slice(-2); }).join('');
-      if (hash === PWD_HASH) {
-        err.style.display = 'none';
-        localStorage.setItem('wc_pwd','1');
-        localStorage.setItem('wc_pwd_ver', PWD_VERSION);
-        overlay.style.display = 'none';
-        content.style.display = '';
-      } else {
-        err.style.display = '';
-        document.getElementById('pwd-input').value = '';
-      }
-    });
-  };
-  document.getElementById('pwd-input').addEventListener('keydown', function(e){ if (e.key === 'Enter') window.wcCheckPwd(); });
-})();
-</script>
-
-<!-- ====== 动态时间 JS ====== -->
-<script>
-(function(){
-  var el = document.querySelector('.header .meta span[data-utc]');
-  if (!el) return;
-  var utc = new Date(el.getAttribute('data-utc'));
-  function update() {
-    var diff = Math.floor((new Date() - utc) / 1000);
-    var text;
-    if (diff < 60) text = '刚刚';
-    else if (diff < 3600) text = Math.floor(diff/60) + ' 分钟前';
-    else if (diff < 86400) text = Math.floor(diff/3600) + ' 小时前';
-    else text = Math.floor(diff/86400) + ' 天前';
-    el.textContent = text + ' 北京时间';
-  }
-  update();
-  setInterval(update, 60000);
-}})();
-</script>
-
+</div>
 </body>
 </html>"""
 

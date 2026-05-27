@@ -15,7 +15,7 @@ import json
 import os
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 # 确保 src/ 在导入路径中
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -87,15 +87,16 @@ def update_elo_from_match_results(elo_path: str, results: list) -> dict:
         teams[a]["elo"] = round(elo_a + K * (actual_a - expected_a), 2)
         teams[b]["elo"] = round(elo_b + K * (actual_b - expected_b), 2)
 
-        # 标记更新时间
-        teams[a]["last_updated"] = datetime.now().strftime("%Y-%m-%d")
-        teams[b]["last_updated"] = datetime.now().strftime("%Y-%m-%d")
+        # 标记更新时间（北京时间）
+        beijing_now = datetime.now(timezone(timedelta(hours=8)))
+        teams[a]["last_updated"] = beijing_now.strftime("%Y-%m-%d")
+        teams[b]["last_updated"] = beijing_now.strftime("%Y-%m-%d")
 
         updated_count += 1
 
     # 写回文件
     data["teams"] = teams
-    data["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M UTC")
+    data["last_updated"] = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d %H:%M 北京时间")
     with open(elo_path, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
@@ -110,7 +111,7 @@ def update_elo_from_match_results(elo_path: str, results: list) -> dict:
 def compute_today_predictions(schedule_matches: list, elo_data: dict) -> dict:
     """Compute win/draw/loss predictions for today's matches."""
     model = EloPoissonModel()
-    today_str = datetime.now().strftime("%Y-%m-%d")
+    today_str = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
 
     # Build teams_lookup: English name → code
     teams_lookup = {}
@@ -768,7 +769,7 @@ function refreshNow() {{
 def main():
     print("=" * 60)
     print("🔮 2026 世界杯预测引擎 — 自动仪表盘生成")
-    print(f"   时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+    print(f"   时间: {datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M:%S')} 北京时间")
     print("=" * 60)
 
     # ---- 第 1 步：获取实时比赛数据 ----
