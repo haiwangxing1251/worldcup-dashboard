@@ -243,6 +243,64 @@ body {
     margin-top: 30px;
 }
 
+/* ---- 可排序表头 ---- */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+.sortable:hover { color: #FFD700; }
+.sortable.sort-asc::after { content: ' ▲'; font-size:0.75em; color:#FFD700; }
+.sortable.sort-desc::after { content: ' ▼'; font-size:0.75em; color:#FFD700; }
+
+/* ---- 球队详情弹窗 ---- */
+#team-modal {
+    display:none;
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.7);z-index:8888;
+    align-items:center;justify-content:center;
+}
+#team-modal.open { display:flex; }
+#team-modal-body {
+    background:#111640;border-radius:16px;padding:24px;
+    max-width:480px;width:90%;max-height:85vh;overflow-y:auto;
+    border:1px solid rgba(255,255,255,0.1);position:relative;
+}
+#team-modal-close {
+    position:absolute;top:12px;right:14px;
+    background:none;border:none;color:#8890b5;font-size:1.4em;cursor:pointer;
+}
+
+/* ---- 竞猜弹窗 ---- */
+#guess-modal {
+    display:none;
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.75);z-index:8888;
+    align-items:flex-start;justify-content:center;overflow-y:auto;
+    padding:20px 0;
+}
+#guess-modal.open { display:flex; }
+#guess-modal-body {
+    background:#111640;border-radius:16px;padding:24px;
+    max-width:560px;width:92%;
+    border:1px solid rgba(255,255,255,0.1);position:relative;
+    margin:auto;
+}
+
+/* ---- 淘汰赛图 ---- */
+.bracket-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.bracket-svg text { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif; }
+
+/* ---- 通知按钮 ---- */
+#notify-btn {
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 16px;border-radius:8px;border:1px solid rgba(255,215,0,0.4);
+    background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.84em;cursor:pointer;
+    transition:background 0.2s;
+}
+#notify-btn:hover { background:rgba(255,215,0,0.15); }
+#notify-btn.active { background:rgba(102,187,106,0.15);color:#66bb6a;border-color:rgba(102,187,106,0.4); }
+
 /* ====== 移动端全页优化 ====== */
 @media (max-width: 768px) {
     body { font-size: 14px; line-height: 1.55; }
@@ -291,6 +349,13 @@ body {
     /* Footer */
     .footer { padding: 18px; font-size: 0.72em; margin-top: 16px; }
 }
+
+@media (max-width: 768px) {
+    #team-modal-body, #guess-modal-body { padding: 16px; margin: 10px; border-radius: 12px; }
+    #matrix-search, #matrix-group-filter { font-size: 0.82em; padding: 7px 10px; }
+    .bracket-wrap svg { min-width: 600px; }
+}
+
 </style>
 </head>
 <body>
@@ -319,7 +384,7 @@ body {
     <div class="meta">
         数据来源：FIFA 官方抽签（2025 年 12 月）&middot;
         ELO: 实时同步 &middot; 赛果: 0 场真实比分 &middot;
-        生成时间：<span data-utc="2026-05-29T05:21:16Z">2026-05-29 13:21 北京时间</span>
+        生成时间：<span data-utc="2026-05-29T05:33:19Z">2026-05-29 13:33 北京时间</span>
     </div>
 </div>
 
@@ -1100,28 +1165,225 @@ function refreshNow() {
 </script>
 <!-- ====== End 今日比赛预测模块 ====== -->
 
-<!-- ====== 全部 48 队晋级概率矩阵 ====== -->
+
+<!-- ====== 淘汰赛对阵图 ====== -->
 <div class="card">
-    <h2>&#x1F4CA; 全部 48 队晋级概率矩阵</h2>
+    <h2>&#x1F3C6; 淘汰赛对阵预测图
+        <span style="font-size:0.7em;color:#8890b5;font-weight:400;margin-left:8px;">基于夺冠概率模拟预测</span>
+    </h2>
+    <div class="bracket-wrap">
+<svg viewBox="0 0 900 520" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:900px;height:auto;display:block;">
+<rect width="900" height="520" fill="#0d1135" rx="12"/>
+<text x="70" y="18" text-anchor="middle" fill="#8890b5" font-size="11" font-family="PingFang SC,Microsoft YaHei,sans-serif">16强</text>
+<text x="210" y="18" text-anchor="middle" fill="#8890b5" font-size="11" font-family="PingFang SC,Microsoft YaHei,sans-serif">八强</text>
+<text x="370" y="18" text-anchor="middle" fill="#8890b5" font-size="11" font-family="PingFang SC,Microsoft YaHei,sans-serif">四强</text>
+<text x="510" y="18" text-anchor="middle" fill="#8890b5" font-size="11" font-family="PingFang SC,Microsoft YaHei,sans-serif">半决赛</text>
+<text x="650" y="18" text-anchor="middle" fill="#8890b5" font-size="11" font-family="PingFang SC,Microsoft YaHei,sans-serif">决赛</text>
+<text x="790" y="18" text-anchor="middle" fill="#8890b5" font-size="11" font-family="PingFang SC,Microsoft YaHei,sans-serif">冠军</text>
+<rect x="20" y="30" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFD700" stroke-width="1.2"/>
+<text x="24" y="41" fill="#FFD700" font-size="9" font-family="PingFang SC,sans-serif">#1</text>
+<text x="38" y="41" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">法国</text>
+<text x="116" y="52" text-anchor="end" fill="#FFD700" font-size="9" font-family="sans-serif">19.2%</text>
+<rect x="20" y="66" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFA726" stroke-width="1.2"/>
+<text x="24" y="77" fill="#FFA726" font-size="9" font-family="PingFang SC,sans-serif">#2</text>
+<text x="38" y="77" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">西班牙</text>
+<text x="116" y="88" text-anchor="end" fill="#FFA726" font-size="9" font-family="sans-serif">16.9%</text>
+<rect x="20" y="122" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#ef5350" stroke-width="1.2"/>
+<text x="24" y="133" fill="#ef5350" font-size="9" font-family="PingFang SC,sans-serif">#3</text>
+<text x="38" y="133" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">阿根廷</text>
+<text x="116" y="144" text-anchor="end" fill="#ef5350" font-size="9" font-family="sans-serif">16.4%</text>
+<rect x="20" y="158" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#ab47bc" stroke-width="1.2"/>
+<text x="24" y="169" fill="#ab47bc" font-size="9" font-family="PingFang SC,sans-serif">#4</text>
+<text x="38" y="169" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">英格兰</text>
+<text x="116" y="180" text-anchor="end" fill="#ab47bc" font-size="9" font-family="sans-serif">8.8%</text>
+<rect x="20" y="214" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#42a5f5" stroke-width="1.2"/>
+<text x="24" y="225" fill="#42a5f5" font-size="9" font-family="PingFang SC,sans-serif">#5</text>
+<text x="38" y="225" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">巴西</text>
+<text x="116" y="236" text-anchor="end" fill="#42a5f5" font-size="9" font-family="sans-serif">6.3%</text>
+<rect x="20" y="250" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#26c6da" stroke-width="1.2"/>
+<text x="24" y="261" fill="#26c6da" font-size="9" font-family="PingFang SC,sans-serif">#6</text>
+<text x="38" y="261" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">摩洛哥</text>
+<text x="116" y="272" text-anchor="end" fill="#26c6da" font-size="9" font-family="sans-serif">6.0%</text>
+<rect x="20" y="306" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#9ccc65" stroke-width="1.2"/>
+<text x="24" y="317" fill="#9ccc65" font-size="9" font-family="PingFang SC,sans-serif">#7</text>
+<text x="38" y="317" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">荷兰</text>
+<text x="116" y="328" text-anchor="end" fill="#9ccc65" font-size="9" font-family="sans-serif">5.1%</text>
+<rect x="20" y="342" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#ff7043" stroke-width="1.2"/>
+<text x="24" y="353" fill="#ff7043" font-size="9" font-family="PingFang SC,sans-serif">#8</text>
+<text x="38" y="353" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">德国</text>
+<text x="116" y="364" text-anchor="end" fill="#ff7043" font-size="9" font-family="sans-serif">3.9%</text>
+<rect x="20" y="270" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFD700" stroke-width="1.2"/>
+<text x="24" y="281" fill="#FFD700" font-size="9" font-family="PingFang SC,sans-serif">#9</text>
+<text x="38" y="281" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">比利时</text>
+<text x="116" y="292" text-anchor="end" fill="#FFD700" font-size="9" font-family="sans-serif">3.8%</text>
+<rect x="20" y="306" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFA726" stroke-width="1.2"/>
+<text x="24" y="317" fill="#FFA726" font-size="9" font-family="PingFang SC,sans-serif">#10</text>
+<text x="38" y="317" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">葡萄牙</text>
+<text x="116" y="328" text-anchor="end" fill="#FFA726" font-size="9" font-family="sans-serif">2.8%</text>
+<rect x="20" y="362" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#ef5350" stroke-width="1.2"/>
+<text x="24" y="373" fill="#ef5350" font-size="9" font-family="PingFang SC,sans-serif">#11</text>
+<text x="38" y="373" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">墨西哥</text>
+<text x="116" y="384" text-anchor="end" fill="#ef5350" font-size="9" font-family="sans-serif">2.1%</text>
+<rect x="20" y="398" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#ab47bc" stroke-width="1.2"/>
+<text x="24" y="409" fill="#ab47bc" font-size="9" font-family="PingFang SC,sans-serif">#12</text>
+<text x="38" y="409" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">克罗地亚</text>
+<text x="116" y="420" text-anchor="end" fill="#ab47bc" font-size="9" font-family="sans-serif">1.6%</text>
+<rect x="20" y="454" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#42a5f5" stroke-width="1.2"/>
+<text x="24" y="465" fill="#42a5f5" font-size="9" font-family="PingFang SC,sans-serif">#13</text>
+<text x="38" y="465" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">美国</text>
+<text x="116" y="476" text-anchor="end" fill="#42a5f5" font-size="9" font-family="sans-serif">1.2%</text>
+<rect x="20" y="490" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#26c6da" stroke-width="1.2"/>
+<text x="24" y="501" fill="#26c6da" font-size="9" font-family="PingFang SC,sans-serif">#14</text>
+<text x="38" y="501" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">日本</text>
+<text x="116" y="512" text-anchor="end" fill="#26c6da" font-size="9" font-family="sans-serif">1.1%</text>
+<rect x="20" y="546" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#9ccc65" stroke-width="1.2"/>
+<text x="24" y="557" fill="#9ccc65" font-size="9" font-family="PingFang SC,sans-serif">#15</text>
+<text x="38" y="557" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">哥伦比亚</text>
+<text x="116" y="568" text-anchor="end" fill="#9ccc65" font-size="9" font-family="sans-serif">0.8%</text>
+<rect x="20" y="582" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#ff7043" stroke-width="1.2"/>
+<text x="24" y="593" fill="#ff7043" font-size="9" font-family="PingFang SC,sans-serif">#16</text>
+<text x="38" y="593" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">塞内加尔</text>
+<text x="116" y="604" text-anchor="end" fill="#ff7043" font-size="9" font-family="sans-serif">0.8%</text>
+<rect x="160" y="48" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFD700" stroke-width="1.2"/>
+<text x="164" y="59" fill="#FFD700" font-size="9" font-family="PingFang SC,sans-serif">#1</text>
+<text x="178" y="59" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">法国</text>
+<text x="256" y="70" text-anchor="end" fill="#FFD700" font-size="9" font-family="sans-serif">19.2%</text>
+<path d="M120,44 C140,44 140,62 160,62" stroke="#FFD700" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M120,80 C140,80 140,62 160,62" stroke="#FFD700" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="160" y="140" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFA726" stroke-width="1.2"/>
+<text x="164" y="151" fill="#FFA726" font-size="9" font-family="PingFang SC,sans-serif">#3</text>
+<text x="178" y="151" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">阿根廷</text>
+<text x="256" y="162" text-anchor="end" fill="#FFA726" font-size="9" font-family="sans-serif">16.4%</text>
+<path d="M120,136 C140,136 140,154 160,154" stroke="#FFA726" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M120,172 C140,172 140,154 160,154" stroke="#FFA726" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="160" y="232" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#ef5350" stroke-width="1.2"/>
+<text x="164" y="243" fill="#ef5350" font-size="9" font-family="PingFang SC,sans-serif">#5</text>
+<text x="178" y="243" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">巴西</text>
+<text x="256" y="254" text-anchor="end" fill="#ef5350" font-size="9" font-family="sans-serif">6.3%</text>
+<path d="M120,228 C140,228 140,246 160,246" stroke="#ef5350" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M120,264 C140,264 140,246 160,246" stroke="#ef5350" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="160" y="324" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#ab47bc" stroke-width="1.2"/>
+<text x="164" y="335" fill="#ab47bc" font-size="9" font-family="PingFang SC,sans-serif">#7</text>
+<text x="178" y="335" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">荷兰</text>
+<text x="256" y="346" text-anchor="end" fill="#ab47bc" font-size="9" font-family="sans-serif">5.1%</text>
+<path d="M120,320 C140,320 140,338 160,338" stroke="#ab47bc" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M120,356 C140,356 140,338 160,338" stroke="#ab47bc" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="160" y="288" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#42a5f5" stroke-width="1.2"/>
+<text x="164" y="299" fill="#42a5f5" font-size="9" font-family="PingFang SC,sans-serif">#9</text>
+<text x="178" y="299" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">比利时</text>
+<text x="256" y="310" text-anchor="end" fill="#42a5f5" font-size="9" font-family="sans-serif">3.8%</text>
+<path d="M120,284 C140,284 140,302 160,302" stroke="#42a5f5" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M120,320 C140,320 140,302 160,302" stroke="#42a5f5" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="160" y="380" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#26c6da" stroke-width="1.2"/>
+<text x="164" y="391" fill="#26c6da" font-size="9" font-family="PingFang SC,sans-serif">#11</text>
+<text x="178" y="391" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">墨西哥</text>
+<text x="256" y="402" text-anchor="end" fill="#26c6da" font-size="9" font-family="sans-serif">2.1%</text>
+<path d="M120,376 C140,376 140,394 160,394" stroke="#26c6da" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M120,412 C140,412 140,394 160,394" stroke="#26c6da" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="160" y="472" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#9ccc65" stroke-width="1.2"/>
+<text x="164" y="483" fill="#9ccc65" font-size="9" font-family="PingFang SC,sans-serif">#13</text>
+<text x="178" y="483" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">美国</text>
+<text x="256" y="494" text-anchor="end" fill="#9ccc65" font-size="9" font-family="sans-serif">1.2%</text>
+<path d="M120,468 C140,468 140,486 160,486" stroke="#9ccc65" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M120,504 C140,504 140,486 160,486" stroke="#9ccc65" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="160" y="564" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#ff7043" stroke-width="1.2"/>
+<text x="164" y="575" fill="#ff7043" font-size="9" font-family="PingFang SC,sans-serif">#15</text>
+<text x="178" y="575" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">哥伦比亚</text>
+<text x="256" y="586" text-anchor="end" fill="#ff7043" font-size="9" font-family="sans-serif">0.8%</text>
+<path d="M120,560 C140,560 140,578 160,578" stroke="#ff7043" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M120,596 C140,596 140,578 160,578" stroke="#ff7043" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="320" y="94" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFD700" stroke-width="1.2"/>
+<text x="324" y="105" fill="#FFD700" font-size="9" font-family="PingFang SC,sans-serif">#1</text>
+<text x="338" y="105" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">法国</text>
+<text x="416" y="116" text-anchor="end" fill="#FFD700" font-size="9" font-family="sans-serif">19.2%</text>
+<path d="M260,62 C290,62 290,108 320,108" stroke="#FFD700" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M260,154 C290,154 290,108 320,108" stroke="#FFD700" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="320" y="278" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFA726" stroke-width="1.2"/>
+<text x="324" y="289" fill="#FFA726" font-size="9" font-family="PingFang SC,sans-serif">#5</text>
+<text x="338" y="289" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">巴西</text>
+<text x="416" y="300" text-anchor="end" fill="#FFA726" font-size="9" font-family="sans-serif">6.3%</text>
+<path d="M260,246 C290,246 290,292 320,292" stroke="#FFA726" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M260,338 C290,338 290,292 320,292" stroke="#FFA726" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="320" y="334" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#42a5f5" stroke-width="1.2"/>
+<text x="324" y="345" fill="#42a5f5" font-size="9" font-family="PingFang SC,sans-serif">#9</text>
+<text x="338" y="345" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">比利时</text>
+<text x="416" y="356" text-anchor="end" fill="#42a5f5" font-size="9" font-family="sans-serif">3.8%</text>
+<path d="M260,302 C290,302 290,348 320,348" stroke="#42a5f5" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M260,394 C290,394 290,348 320,348" stroke="#42a5f5" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="320" y="518" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#26c6da" stroke-width="1.2"/>
+<text x="324" y="529" fill="#26c6da" font-size="9" font-family="PingFang SC,sans-serif">#13</text>
+<text x="338" y="529" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">美国</text>
+<text x="416" y="540" text-anchor="end" fill="#26c6da" font-size="9" font-family="sans-serif">1.2%</text>
+<path d="M260,486 C290,486 290,532 320,532" stroke="#26c6da" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M260,578 C290,578 290,532 320,532" stroke="#26c6da" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="460" y="186" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFD700" stroke-width="1.2"/>
+<text x="464" y="197" fill="#FFD700" font-size="9" font-family="PingFang SC,sans-serif">#1</text>
+<text x="478" y="197" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">法国</text>
+<text x="556" y="208" text-anchor="end" fill="#FFD700" font-size="9" font-family="sans-serif">19.2%</text>
+<path d="M420,108 C440,108 440,200 460,200" stroke="#FFD700" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M420,292 C440,292 440,200 460,200" stroke="#FFD700" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="460" y="426" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFA726" stroke-width="1.2"/>
+<text x="464" y="437" fill="#FFA726" font-size="9" font-family="PingFang SC,sans-serif">#9</text>
+<text x="478" y="437" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">比利时</text>
+<text x="556" y="448" text-anchor="end" fill="#FFA726" font-size="9" font-family="sans-serif">3.8%</text>
+<path d="M420,348 C440,348 440,440 460,440" stroke="#FFA726" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M420,532 C440,532 440,440 460,440" stroke="#FFA726" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="600" y="186" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFD700" stroke-width="1.2"/>
+<text x="604" y="197" fill="#FFD700" font-size="9" font-family="PingFang SC,sans-serif">#1</text>
+<text x="618" y="197" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">法国</text>
+<text x="696" y="208" text-anchor="end" fill="#FFD700" font-size="9" font-family="sans-serif">19.2%</text>
+<rect x="600" y="426" width="100" height="28" rx="5" fill="rgba(255,255,255,0.05)" stroke="#FFA726" stroke-width="1.2"/>
+<text x="604" y="437" fill="#FFA726" font-size="9" font-family="PingFang SC,sans-serif">#9</text>
+<text x="618" y="437" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">比利时</text>
+<text x="696" y="448" text-anchor="end" fill="#FFA726" font-size="9" font-family="sans-serif">3.8%</text>
+<path d="M560,200 C580,200 580,200 600,200" stroke="#FFD700" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M560,440 C580,440 580,440 600,440" stroke="#FFA726" stroke-width="1" fill="none" opacity="0.5"/>
+<rect x="740" y="306" width="100" height="28" rx="6" fill="rgba(255,215,0,0.18)" stroke="#FFD700" stroke-width="2.5"/>
+<text x="790" y="325" text-anchor="middle" fill="#FFD700" font-size="13" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">法国</text>
+<text x="790" y="348" text-anchor="middle" fill="#FFD700" font-size="10" font-family="sans-serif">冠军预测 19.2%</text>
+<path d="M700,200 C720,200 720,320 740,320" stroke="#FFD700" stroke-width="1" fill="none" opacity="0.5"/>
+<path d="M700,440 C720,440 720,320 740,320" stroke="#FFA726" stroke-width="1" fill="none" opacity="0.5"/>
+</svg>
+    </div>
+    <p style="color:#8890b5;font-size:0.74em;margin-top:10px;">&#x26A0; 此图为模型预测，非官方赛程。高亮球队为该对阵中胜率更高的一方。</p>
+</div>
+
+
+<!-- ====== 全部 48 队晋级概率矩阵 ====== -->
+<div class="card" id="matrix-card">
+    <h2>&#x1F4CA; 全部 48 队晋级概率矩阵
+        <button onclick="wcShareCard()" style="margin-left:auto;padding:6px 14px;border-radius:8px;border:none;background:linear-gradient(135deg,#FFD700,#FFA726);color:#1a1a2e;font-size:0.75em;font-weight:700;cursor:pointer;">&#x1F4F1; 分享</button>
+    </h2>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+        <input id="matrix-search" type="text" placeholder="&#x1F50D; 搜索球队..." oninput="wcFilterMatrix()" style="flex:1;min-width:140px;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:#0a0e27;color:#e8e8ec;font-size:0.88em;outline:none;"/>
+        <select id="matrix-group-filter" onchange="wcFilterMatrix()" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:#0a0e27;color:#e8e8ec;font-size:0.85em;outline:none;">
+            <option value="">全部小组</option>
+            <option value="A">A 组</option><option value="B">B 组</option><option value="C">C 组</option>
+            <option value="D">D 组</option><option value="E">E 组</option><option value="F">F 组</option>
+            <option value="G">G 组</option><option value="H">H 组</option><option value="I">I 组</option>
+            <option value="J">J 组</option><option value="K">K 组</option><option value="L">L 组</option>
+        </select>
+        <span id="matrix-count" style="color:#8890b5;font-size:0.78em;white-space:nowrap;">48 支球队</span>
+    </div>
     <div class="table-scroll">
-    <table class="data-table">
+    <table class="data-table" id="matrix-table">
         <thead>
             <tr>
-                <th>#</th>
-                <th>球队</th>
-                <th>小组</th>
-                <th>ELO</th>
-                <th>夺冠</th>
-                <th>决赛</th>
-                <th>四强</th>
-                <th>八强</th>
-                <th>十六强</th>
-                <th>三十二强</th>
-                <th>小组出局</th>
+                <th onclick="wcSortMatrix(0)" class="sortable" data-col="0">#</th>
+                <th onclick="wcSortMatrix(1)" class="sortable" data-col="1">球队</th>
+                <th onclick="wcSortMatrix(2)" class="sortable" data-col="2">小组</th>
+                <th onclick="wcSortMatrix(3)" class="sortable" data-col="3">ELO &#x25BD;</th>
+                <th onclick="wcSortMatrix(4)" class="sortable" data-col="4">夺冠</th>
+                <th onclick="wcSortMatrix(5)" class="sortable" data-col="5">决赛</th>
+                <th onclick="wcSortMatrix(6)" class="sortable" data-col="6">四强</th>
+                <th onclick="wcSortMatrix(7)" class="sortable" data-col="7">八强</th>
+                <th onclick="wcSortMatrix(8)" class="sortable" data-col="8">十六强</th>
+                <th onclick="wcSortMatrix(9)" class="sortable" data-col="9">三十二强</th>
+                <th onclick="wcSortMatrix(10)" class="sortable" data-col="10">小组出局</th>
             </tr>
         </thead>
-        <tbody>
-            <tr class="highlight">
+        <tbody id="matrix-tbody">
+            <tr class="highlight" data-name="法国" data-en="France" data-group="I" data-elo="1877" data-rank="1" onclick="wcShowTeamDetail('France',1877,'I',19.2,26.5,44.0,68.7,85.7,98.7,1.3)" style="cursor:pointer;">
                 <td>1</td>
                 <td><strong>法国</strong></td>
                 <td>I 组</td>
@@ -1134,7 +1396,7 @@ function refreshNow() {
                 <td class="right">98.7%</td>
                 <td class="right" style="color:#8890b5">1.3%</td>
             </tr>
-            <tr class="highlight">
+            <tr class="highlight" data-name="西班牙" data-en="Spain" data-group="H" data-elo="1876" data-rank="2" onclick="wcShowTeamDetail('Spain',1876,'H',16.9,23.5,38.9,66.2,80.8,99.1,0.9)" style="cursor:pointer;">
                 <td>2</td>
                 <td><strong>西班牙</strong></td>
                 <td>H 组</td>
@@ -1147,7 +1409,7 @@ function refreshNow() {
                 <td class="right">99.1%</td>
                 <td class="right" style="color:#8890b5">0.9%</td>
             </tr>
-            <tr class="highlight">
+            <tr class="highlight" data-name="阿根廷" data-en="Argentina" data-group="J" data-elo="1875" data-rank="3" onclick="wcShowTeamDetail('Argentina',1875,'J',16.4,23.0,39.4,59.6,86.2,99.0,1.0)" style="cursor:pointer;">
                 <td>3</td>
                 <td><strong>阿根廷</strong></td>
                 <td>J 组</td>
@@ -1160,7 +1422,7 @@ function refreshNow() {
                 <td class="right">99.0%</td>
                 <td class="right" style="color:#8890b5">1.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="英格兰" data-en="England" data-group="L" data-elo="1826" data-rank="4" onclick="wcShowTeamDetail('England',1826,'L',8.8,14.1,28.3,49.6,77.5,97.3,2.7)" style="cursor:pointer;">
                 <td>4</td>
                 <td><strong>英格兰</strong></td>
                 <td>L 组</td>
@@ -1173,7 +1435,7 @@ function refreshNow() {
                 <td class="right">97.3%</td>
                 <td class="right" style="color:#8890b5">2.7%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="巴西" data-en="Brazil" data-group="C" data-elo="1761" data-rank="5" onclick="wcShowTeamDetail('Brazil',1761,'C',6.3,16.3,28.4,44.2,66.7,97.0,3.0)" style="cursor:pointer;">
                 <td>5</td>
                 <td><strong>巴西</strong></td>
                 <td>C 组</td>
@@ -1186,7 +1448,7 @@ function refreshNow() {
                 <td class="right">97.0%</td>
                 <td class="right" style="color:#8890b5">3.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="摩洛哥" data-en="Morocco" data-group="C" data-elo="1756" data-rank="6" onclick="wcShowTeamDetail('Morocco',1756,'C',6.0,15.5,27.4,43.4,64.8,96.4,3.6)" style="cursor:pointer;">
                 <td>6</td>
                 <td><strong>摩洛哥</strong></td>
                 <td>C 组</td>
@@ -1199,7 +1461,7 @@ function refreshNow() {
                 <td class="right">96.4%</td>
                 <td class="right" style="color:#8890b5">3.6%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="荷兰" data-en="Netherlands" data-group="F" data-elo="1758" data-rank="7" onclick="wcShowTeamDetail('Netherlands',1758,'F',5.1,13.6,23.8,37.0,58.6,94.3,5.7)" style="cursor:pointer;">
                 <td>7</td>
                 <td><strong>荷兰</strong></td>
                 <td>F 组</td>
@@ -1212,7 +1474,7 @@ function refreshNow() {
                 <td class="right">94.3%</td>
                 <td class="right" style="color:#8890b5">5.7%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="德国" data-en="Germany" data-group="E" data-elo="1730" data-rank="8" onclick="wcShowTeamDetail('Germany',1730,'E',3.9,11.2,20.8,33.3,66.4,97.0,3.0)" style="cursor:pointer;">
                 <td>8</td>
                 <td><strong>德国</strong></td>
                 <td>E 组</td>
@@ -1225,7 +1487,7 @@ function refreshNow() {
                 <td class="right">97.0%</td>
                 <td class="right" style="color:#8890b5">3.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="比利时" data-en="Belgium" data-group="G" data-elo="1735" data-rank="9" onclick="wcShowTeamDetail('Belgium',1735,'G',3.8,10.4,19.9,39.1,60.2,96.8,3.2)" style="cursor:pointer;">
                 <td>9</td>
                 <td><strong>比利时</strong></td>
                 <td>G 组</td>
@@ -1238,7 +1500,7 @@ function refreshNow() {
                 <td class="right">96.8%</td>
                 <td class="right" style="color:#8890b5">3.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="葡萄牙" data-en="Portugal" data-group="K" data-elo="1764" data-rank="10" onclick="wcShowTeamDetail('Portugal',1764,'K',2.8,5.6,13.8,29.2,59.0,95.5,4.5)" style="cursor:pointer;">
                 <td>10</td>
                 <td><strong>葡萄牙</strong></td>
                 <td>K 组</td>
@@ -1251,7 +1513,7 @@ function refreshNow() {
                 <td class="right">95.5%</td>
                 <td class="right" style="color:#8890b5">4.5%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="墨西哥" data-en="Mexico" data-group="A" data-elo="1682" data-rank="11" onclick="wcShowTeamDetail('Mexico',1682,'A',2.1,7.6,16.8,38.7,58.4,91.9,8.1)" style="cursor:pointer;">
                 <td>11</td>
                 <td><strong>墨西哥</strong></td>
                 <td>A 组</td>
@@ -1264,7 +1526,7 @@ function refreshNow() {
                 <td class="right">91.9%</td>
                 <td class="right" style="color:#8890b5">8.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="克罗地亚" data-en="Croatia" data-group="L" data-elo="1717" data-rank="12" onclick="wcShowTeamDetail('Croatia',1717,'L',1.6,3.8,10.1,24.8,53.4,89.4,10.6)" style="cursor:pointer;">
                 <td>12</td>
                 <td><strong>克罗地亚</strong></td>
                 <td>L 组</td>
@@ -1277,7 +1539,7 @@ function refreshNow() {
                 <td class="right">89.4%</td>
                 <td class="right" style="color:#8890b5">10.6%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="美国" data-en="United States" data-group="D" data-elo="1673" data-rank="13" onclick="wcShowTeamDetail('United States',1673,'D',1.2,4.9,11.0,22.4,48.4,85.6,14.4)" style="cursor:pointer;">
                 <td>13</td>
                 <td><strong>美国</strong></td>
                 <td>D 组</td>
@@ -1290,7 +1552,7 @@ function refreshNow() {
                 <td class="right">85.6%</td>
                 <td class="right" style="color:#8890b5">14.4%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="日本" data-en="Japan" data-group="F" data-elo="1660" data-rank="14" onclick="wcShowTeamDetail('Japan',1660,'F',1.1,4.3,10.1,21.2,42.2,83.6,16.4)" style="cursor:pointer;">
                 <td>14</td>
                 <td><strong>日本</strong></td>
                 <td>F 组</td>
@@ -1303,7 +1565,7 @@ function refreshNow() {
                 <td class="right">83.6%</td>
                 <td class="right" style="color:#8890b5">16.4%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="哥伦比亚" data-en="Colombia" data-group="K" data-elo="1693" data-rank="15" onclick="wcShowTeamDetail('Colombia',1693,'K',0.8,2.0,7.0,18.9,46.6,88.8,11.2)" style="cursor:pointer;">
                 <td>15</td>
                 <td><strong>哥伦比亚</strong></td>
                 <td>K 组</td>
@@ -1316,7 +1578,7 @@ function refreshNow() {
                 <td class="right">88.8%</td>
                 <td class="right" style="color:#8890b5">11.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="塞内加尔" data-en="Senegal" data-group="I" data-elo="1689" data-rank="16" onclick="wcShowTeamDetail('Senegal',1689,'I',0.8,2.3,6.7,16.9,53.1,87.8,12.2)" style="cursor:pointer;">
                 <td>16</td>
                 <td><strong>塞内加尔</strong></td>
                 <td>I 组</td>
@@ -1329,7 +1591,7 @@ function refreshNow() {
                 <td class="right">87.8%</td>
                 <td class="right" style="color:#8890b5">12.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="乌拉圭" data-en="Uruguay" data-group="H" data-elo="1673" data-rank="17" onclick="wcShowTeamDetail('Uruguay',1673,'H',0.8,2.0,7.0,21.1,46.4,89.8,10.2)" style="cursor:pointer;">
                 <td>17</td>
                 <td><strong>乌拉圭</strong></td>
                 <td>H 组</td>
@@ -1342,7 +1604,7 @@ function refreshNow() {
                 <td class="right">89.8%</td>
                 <td class="right" style="color:#8890b5">10.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="瑞士" data-en="Switzerland" data-group="B" data-elo="1649" data-rank="18" onclick="wcShowTeamDetail('Switzerland',1649,'B',0.7,2.4,7.1,21.2,55.7,91.9,8.1)" style="cursor:pointer;">
                 <td>18</td>
                 <td><strong>瑞士</strong></td>
                 <td>B 组</td>
@@ -1355,7 +1617,7 @@ function refreshNow() {
                 <td class="right">91.9%</td>
                 <td class="right" style="color:#8890b5">8.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="伊朗" data-en="Iran" data-group="G" data-elo="1615" data-rank="19" onclick="wcShowTeamDetail('Iran',1615,'G',0.4,1.6,4.9,15.4,32.8,87.8,12.2)" style="cursor:pointer;">
                 <td>19</td>
                 <td><strong>伊朗</strong></td>
                 <td>G 组</td>
@@ -1368,7 +1630,7 @@ function refreshNow() {
                 <td class="right">87.8%</td>
                 <td class="right" style="color:#8890b5">12.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="厄瓜多尔" data-en="Ecuador" data-group="E" data-elo="1595" data-rank="20" onclick="wcShowTeamDetail('Ecuador',1595,'E',0.3,1.7,5.0,12.4,38.6,85.2,14.8)" style="cursor:pointer;">
                 <td>20</td>
                 <td><strong>厄瓜多尔</strong></td>
                 <td>E 组</td>
@@ -1381,7 +1643,7 @@ function refreshNow() {
                 <td class="right">85.2%</td>
                 <td class="right" style="color:#8890b5">14.8%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="韩国" data-en="South Korea" data-group="A" data-elo="1589" data-rank="21" onclick="wcShowTeamDetail('South Korea',1589,'A',0.3,1.5,4.9,16.8,39.6,78.8,21.1)" style="cursor:pointer;">
                 <td>21</td>
                 <td><strong>韩国</strong></td>
                 <td>A 组</td>
@@ -1394,7 +1656,7 @@ function refreshNow() {
                 <td class="right">78.8%</td>
                 <td class="right" style="color:#8890b5">21.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="土耳其" data-en="Turkey" data-group="D" data-elo="1599" data-rank="22" onclick="wcShowTeamDetail('Turkey',1599,'D',0.2,1.5,4.3,11.9,31.7,72.7,27.3)" style="cursor:pointer;">
                 <td>22</td>
                 <td><strong>土耳其</strong></td>
                 <td>D 组</td>
@@ -1407,7 +1669,7 @@ function refreshNow() {
                 <td class="right">72.7%</td>
                 <td class="right" style="color:#8890b5">27.3%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="奥地利" data-en="Austria" data-group="J" data-elo="1593" data-rank="23" onclick="wcShowTeamDetail('Austria',1593,'J',0.1,0.5,2.0,7.8,29.0,73.0,27.0)" style="cursor:pointer;">
                 <td>23</td>
                 <td><strong>奥地利</strong></td>
                 <td>J 组</td>
@@ -1420,7 +1682,7 @@ function refreshNow() {
                 <td class="right">73.0%</td>
                 <td class="right" style="color:#8890b5">27.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="加拿大" data-en="Canada" data-group="B" data-elo="1556" data-rank="24" onclick="wcShowTeamDetail('Canada',1556,'B',0.1,0.6,2.3,10.1,35.1,79.3,20.7)" style="cursor:pointer;">
                 <td>24</td>
                 <td><strong>加拿大</strong></td>
                 <td>B 组</td>
@@ -1433,7 +1695,7 @@ function refreshNow() {
                 <td class="right">79.3%</td>
                 <td class="right" style="color:#8890b5">20.7%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="澳大利亚" data-en="Australia" data-group="D" data-elo="1581" data-rank="25" onclick="wcShowTeamDetail('Australia',1581,'D',0.1,1.0,3.1,9.2,27.4,67.9,32.1)" style="cursor:pointer;">
                 <td>25</td>
                 <td><strong>澳大利亚</strong></td>
                 <td>D 组</td>
@@ -1446,7 +1708,7 @@ function refreshNow() {
                 <td class="right">67.9%</td>
                 <td class="right" style="color:#8890b5">32.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="埃及" data-en="Egypt" data-group="G" data-elo="1563" data-rank="26" onclick="wcShowTeamDetail('Egypt',1563,'G',0.1,0.6,2.4,8.6,22.9,78.8,21.2)" style="cursor:pointer;">
                 <td>26</td>
                 <td><strong>埃及</strong></td>
                 <td>G 组</td>
@@ -1459,7 +1721,7 @@ function refreshNow() {
                 <td class="right">78.8%</td>
                 <td class="right" style="color:#8890b5">21.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="科特迪瓦" data-en="Ivory Coast" data-group="E" data-elo="1533" data-rank="27" onclick="wcShowTeamDetail('Ivory Coast',1533,'E',0.1,0.4,1.6,6.2,25.1,73.1,26.9)" style="cursor:pointer;">
                 <td>27</td>
                 <td><strong>科特迪瓦</strong></td>
                 <td>E 组</td>
@@ -1472,7 +1734,7 @@ function refreshNow() {
                 <td class="right">73.1%</td>
                 <td class="right" style="color:#8890b5">26.9%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="捷克" data-en="Czech Republic" data-group="A" data-elo="1501" data-rank="28" onclick="wcShowTeamDetail('Czech Republic',1501,'A',0.0,0.2,1.1,5.5,19.3,57.6,42.4)" style="cursor:pointer;">
                 <td>28</td>
                 <td><strong>捷克</strong></td>
                 <td>A 组</td>
@@ -1485,7 +1747,7 @@ function refreshNow() {
                 <td class="right">57.6%</td>
                 <td class="right" style="color:#8890b5">42.4%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="巴拉圭" data-en="Paraguay" data-group="D" data-elo="1504" data-rank="29" onclick="wcShowTeamDetail('Paraguay',1504,'D',0.0,0.2,0.8,3.4,13.7,48.2,51.8)" style="cursor:pointer;">
                 <td>29</td>
                 <td><strong>巴拉圭</strong></td>
                 <td>D 组</td>
@@ -1498,7 +1760,7 @@ function refreshNow() {
                 <td class="right">48.2%</td>
                 <td class="right" style="color:#8890b5">51.8%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="瑞典" data-en="Sweden" data-group="F" data-elo="1515" data-rank="30" onclick="wcShowTeamDetail('Sweden',1515,'F',0.0,0.2,0.9,4.2,14.5,49.5,50.4)" style="cursor:pointer;">
                 <td>30</td>
                 <td><strong>瑞典</strong></td>
                 <td>F 组</td>
@@ -1511,7 +1773,7 @@ function refreshNow() {
                 <td class="right">49.5%</td>
                 <td class="right" style="color:#8890b5">50.4%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="挪威" data-en="Norway" data-group="I" data-elo="1551" data-rank="31" onclick="wcShowTeamDetail('Norway',1551,'I',0.0,0.2,1.0,4.2,19.9,57.2,42.8)" style="cursor:pointer;">
                 <td>31</td>
                 <td><strong>挪威</strong></td>
                 <td>I 组</td>
@@ -1524,7 +1786,7 @@ function refreshNow() {
                 <td class="right">57.2%</td>
                 <td class="right" style="color:#8890b5">42.8%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="阿尔及利亚" data-en="Algeria" data-group="J" data-elo="1564" data-rank="32" onclick="wcShowTeamDetail('Algeria',1564,'J',0.0,0.3,1.3,5.2,22.0,65.3,34.7)" style="cursor:pointer;">
                 <td>32</td>
                 <td><strong>阿尔及利亚</strong></td>
                 <td>J 组</td>
@@ -1537,7 +1799,7 @@ function refreshNow() {
                 <td class="right">65.3%</td>
                 <td class="right" style="color:#8890b5">34.7%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="刚果(金)" data-en="DR Congo" data-group="K" data-elo="1478" data-rank="33" onclick="wcShowTeamDetail('DR Congo',1478,'K',0.0,0.0,0.2,1.5,9.1,41.7,58.3)" style="cursor:pointer;">
                 <td>33</td>
                 <td><strong>刚果(金)</strong></td>
                 <td>K 组</td>
@@ -1550,7 +1812,7 @@ function refreshNow() {
                 <td class="right">41.7%</td>
                 <td class="right" style="color:#8890b5">58.3%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="南非" data-en="South Africa" data-group="A" data-elo="1450" data-rank="34" onclick="wcShowTeamDetail('South Africa',1450,'A',0.0,0.0,0.4,2.8,12.0,44.2,55.8)" style="cursor:pointer;">
                 <td>34</td>
                 <td><strong>南非</strong> &#x26A0;</td>
                 <td>A 组</td>
@@ -1563,7 +1825,7 @@ function refreshNow() {
                 <td class="right">44.2%</td>
                 <td class="right" style="color:#8890b5">55.8%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="卡塔尔" data-en="Qatar" data-group="B" data-elo="1430" data-rank="35" onclick="wcShowTeamDetail('Qatar',1430,'B',0.0,0.1,0.3,2.2,11.9,48.6,51.4)" style="cursor:pointer;">
                 <td>35</td>
                 <td><strong>卡塔尔</strong> &#x26A0;</td>
                 <td>B 组</td>
@@ -1576,7 +1838,7 @@ function refreshNow() {
                 <td class="right">48.6%</td>
                 <td class="right" style="color:#8890b5">51.4%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="波黑" data-en="Bosnia & Herzegovina" data-group="B" data-elo="1445" data-rank="36" onclick="wcShowTeamDetail('Bosnia & Herzegovina',1445,'B',0.0,0.1,0.4,2.7,13.8,52.4,47.6)" style="cursor:pointer;">
                 <td>36</td>
                 <td><strong>波黑</strong> &#x26A0;</td>
                 <td>B 组</td>
@@ -1589,7 +1851,7 @@ function refreshNow() {
                 <td class="right">52.4%</td>
                 <td class="right" style="color:#8890b5">47.6%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="苏格兰" data-en="Scotland" data-group="C" data-elo="1498" data-rank="37" onclick="wcShowTeamDetail('Scotland',1498,'C',0.0,0.1,0.8,3.5,13.6,55.9,44.1)" style="cursor:pointer;">
                 <td>37</td>
                 <td><strong>苏格兰</strong></td>
                 <td>C 组</td>
@@ -1602,7 +1864,7 @@ function refreshNow() {
                 <td class="right">55.9%</td>
                 <td class="right" style="color:#8890b5">44.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="海地" data-en="Haiti" data-group="C" data-elo="1320" data-rank="38" onclick="wcShowTeamDetail('Haiti',1320,'C',0.0,0.0,0.0,0.1,1.1,13.7,86.3)" style="cursor:pointer;">
                 <td>38</td>
                 <td><strong>海地</strong> &#x26A0;</td>
                 <td>C 组</td>
@@ -1615,7 +1877,7 @@ function refreshNow() {
                 <td class="right">13.7%</td>
                 <td class="right" style="color:#8890b5">86.3%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="Curaçao" data-en="Curaçao" data-group="E" data-elo="1305" data-rank="39" onclick="wcShowTeamDetail('Curaçao',1305,'E',0.0,0.0,0.0,0.1,1.4,15.0,85.0)" style="cursor:pointer;">
                 <td>39</td>
                 <td><strong>Curaçao</strong> &#x26A0;</td>
                 <td>E 组</td>
@@ -1628,7 +1890,7 @@ function refreshNow() {
                 <td class="right">15.0%</td>
                 <td class="right" style="color:#8890b5">85.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="突尼斯" data-en="Tunisia" data-group="F" data-elo="1483" data-rank="40" onclick="wcShowTeamDetail('Tunisia',1483,'F',0.0,0.1,0.5,2.4,10.0,40.8,59.2)" style="cursor:pointer;">
                 <td>40</td>
                 <td><strong>突尼斯</strong></td>
                 <td>F 组</td>
@@ -1641,7 +1903,7 @@ function refreshNow() {
                 <td class="right">40.8%</td>
                 <td class="right" style="color:#8890b5">59.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="新西兰" data-en="New Zealand" data-group="G" data-elo="1282" data-rank="41" onclick="wcShowTeamDetail('New Zealand',1282,'G',0.0,0.0,0.0,0.1,0.7,10.8,89.2)" style="cursor:pointer;">
                 <td>41</td>
                 <td><strong>新西兰</strong></td>
                 <td>G 组</td>
@@ -1654,7 +1916,7 @@ function refreshNow() {
                 <td class="right">10.8%</td>
                 <td class="right" style="color:#8890b5">89.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="沙特阿拉伯" data-en="Saudi Arabia" data-group="H" data-elo="1460" data-rank="42" onclick="wcShowTeamDetail('Saudi Arabia',1460,'H',0.0,0.0,0.2,1.6,8.9,43.7,56.3)" style="cursor:pointer;">
                 <td>42</td>
                 <td><strong>沙特阿拉伯</strong> &#x26A0;</td>
                 <td>H 组</td>
@@ -1667,7 +1929,7 @@ function refreshNow() {
                 <td class="right">43.7%</td>
                 <td class="right" style="color:#8890b5">56.3%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="佛得角" data-en="Cape Verde" data-group="H" data-elo="1370" data-rank="43" onclick="wcShowTeamDetail('Cape Verde',1370,'H',0.0,0.0,0.0,0.4,2.8,22.8,77.2)" style="cursor:pointer;">
                 <td>43</td>
                 <td><strong>佛得角</strong> &#x26A0;</td>
                 <td>H 组</td>
@@ -1680,7 +1942,7 @@ function refreshNow() {
                 <td class="right">22.8%</td>
                 <td class="right" style="color:#8890b5">77.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="伊拉克" data-en="Iraq" data-group="I" data-elo="1385" data-rank="44" onclick="wcShowTeamDetail('Iraq',1385,'I',0.0,0.0,0.0,0.2,2.8,18.0,82.0)" style="cursor:pointer;">
                 <td>44</td>
                 <td><strong>伊拉克</strong> &#x26A0;</td>
                 <td>I 组</td>
@@ -1693,7 +1955,7 @@ function refreshNow() {
                 <td class="right">18.0%</td>
                 <td class="right" style="color:#8890b5">82.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="约旦" data-en="Jordan" data-group="J" data-elo="1400" data-rank="45" onclick="wcShowTeamDetail('Jordan',1400,'J',0.0,0.0,0.1,0.4,3.5,22.9,77.1)" style="cursor:pointer;">
                 <td>45</td>
                 <td><strong>约旦</strong> &#x26A0;</td>
                 <td>J 组</td>
@@ -1706,7 +1968,7 @@ function refreshNow() {
                 <td class="right">22.9%</td>
                 <td class="right" style="color:#8890b5">77.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="乌兹别克斯坦" data-en="Uzbekistan" data-group="K" data-elo="1465" data-rank="46" onclick="wcShowTeamDetail('Uzbekistan',1465,'K',0.0,0.0,0.2,1.4,8.1,38.1,61.9)" style="cursor:pointer;">
                 <td>46</td>
                 <td><strong>乌兹别克斯坦</strong></td>
                 <td>K 组</td>
@@ -1719,7 +1981,7 @@ function refreshNow() {
                 <td class="right">38.1%</td>
                 <td class="right" style="color:#8890b5">61.9%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="加纳" data-en="Ghana" data-group="L" data-elo="1435" data-rank="47" onclick="wcShowTeamDetail('Ghana',1435,'L',0.0,0.0,0.0,0.5,3.6,23.5,76.5)" style="cursor:pointer;">
                 <td>47</td>
                 <td><strong>加纳</strong> &#x26A0;</td>
                 <td>L 组</td>
@@ -1732,7 +1994,7 @@ function refreshNow() {
                 <td class="right">23.5%</td>
                 <td class="right" style="color:#8890b5">76.5%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="巴拿马" data-en="Panama" data-group="L" data-elo="1541" data-rank="48" onclick="wcShowTeamDetail('Panama',1541,'L',0.0,0.1,0.7,4.0,15.1,53.4,46.6)" style="cursor:pointer;">
                 <td>48</td>
                 <td><strong>巴拿马</strong></td>
                 <td>L 组</td>
@@ -1930,12 +2192,35 @@ function refreshNow() {
     </p>
 </div>
 
+
+<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:20px 0;">
+  <button onclick="wcOpenGuess()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(255,215,0,0.4);background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F3B2; 我的竞猜</button>
+  <button id="notify-btn" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(255,215,0,0.4);background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F514; 开启比赛提醒</button>
+  <button onclick="wcShareCard()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(79,195,247,0.4);background:rgba(79,195,247,0.08);color:#4fc3f7;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F517; 分享预测</button>
+</div>
 <div class="footer">
     <p>2026 年 FIFA 世界杯预测引擎 &middot; Python 构建 &middot; ELO + 泊松分布模型</p>
     <p>数据截止 2026 年 5 月 &middot; 蒙特卡洛模拟（10,000 次迭代）</p>
 </div>
 </div><!-- /.container -->
 </div><!-- /#protected-content -->
+
+<!-- ====== 球队详情弹窗 ====== -->
+<div id="team-modal">
+  <div id="team-modal-body">
+    <button id="team-modal-close" onclick="document.getElementById('team-modal').classList.remove('open')">&#x2715;</button>
+    <div id="team-modal-content"></div>
+  </div>
+</div>
+
+<!-- ====== 竞猜弹窗 ====== -->
+<div id="guess-modal">
+  <div id="guess-modal-body">
+    <button style="position:absolute;top:12px;right:14px;background:none;border:none;color:#8890b5;font-size:1.4em;cursor:pointer;" onclick="document.getElementById('guess-modal').classList.remove('open')">&#x2715;</button>
+    <h3 style="color:#FFD700;margin-bottom:16px;">&#x1F3B2; 我的竞猜</h3>
+    <div id="guess-content"></div>
+  </div>
+</div>
 
 <!-- ====== 密码门 JS ====== -->
 <script>
@@ -1987,6 +2272,297 @@ function refreshNow() {
   }
   update();
   setInterval(update, 60000);
+})();
+</script>
+
+<!-- ====== 可搜索/排序表格 JS ====== -->
+<script>
+(function(){
+  var sortCol = 3, sortAsc = false;
+
+  window.wcFilterMatrix = function() {
+    var q = (document.getElementById('matrix-search').value||'').toLowerCase();
+    var g = document.getElementById('matrix-group-filter').value;
+    var rows = document.querySelectorAll('#matrix-tbody tr');
+    var shown = 0;
+    rows.forEach(function(r){
+      var name = (r.getAttribute('data-name')||'').toLowerCase();
+      var en = (r.getAttribute('data-en')||'').toLowerCase();
+      var grp = r.getAttribute('data-group')||'';
+      var show = (!q || name.indexOf(q)>=0 || en.indexOf(q)>=0) && (!g || grp===g);
+      r.style.display = show ? '' : 'none';
+      if (show) shown++;
+    });
+    document.getElementById('matrix-count').textContent = shown + ' 支球队';
+  };
+
+  window.wcSortMatrix = function(col) {
+    if (sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = col < 2; }
+    var tbody = document.getElementById('matrix-tbody');
+    var rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort(function(a, b){
+      var va = getCellVal(a, col), vb = getCellVal(b, col);
+      if (!isNaN(va) && !isNaN(vb)) return sortAsc ? va-vb : vb-va;
+      return sortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+    });
+    rows.forEach(function(r){ tbody.appendChild(r); });
+    document.querySelectorAll('#matrix-table th').forEach(function(th, i){
+      th.classList.remove('sort-asc','sort-desc');
+      if (i===col) th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
+    });
+  };
+
+  function getCellVal(row, col) {
+    var cells = row.querySelectorAll('td');
+    if (!cells[col]) return '';
+    var t = cells[col].textContent.replace('%','').trim();
+    return isNaN(t) ? t : parseFloat(t);
+  }
+})();
+</script>
+
+<!-- ====== 球队详情弹窗 JS ====== -->
+<script>
+window.wcShowTeamDetail = function(name, elo, group, champ, fin, sf, qf, r16, r32, out) {
+  var cn_names = window._wcTeamCN || {};
+  var cnName = cn_names[name] || name;
+  var stages = [
+    {label:'夺冠',pct:champ,col:'#FFD700'},
+    {label:'决赛',pct:fin,col:'#FFA726'},
+    {label:'四强',pct:sf,col:'#ef5350'},
+    {label:'八强',pct:qf,col:'#ab47bc'},
+    {label:'十六强',pct:r16,col:'#42a5f5'},
+    {label:'三十二强',pct:r32,col:'#26c6da'},
+    {label:'小组出局',pct:out,col:'#78909c'},
+  ];
+  var bars = stages.map(function(s){
+    var w = Math.min(s.pct * 3, 100);
+    return '<div style="margin-bottom:10px;">' +
+      '<div style="display:flex;justify-content:space-between;font-size:0.84em;margin-bottom:3px;">' +
+        '<span style="color:#c8cce8;">' + s.label + '</span>' +
+        '<span style="font-weight:700;color:' + s.col + '">' + s.pct.toFixed(1) + '%</span>' +
+      '</div>' +
+      '<div style="height:10px;background:rgba(255,255,255,0.06);border-radius:5px;overflow:hidden;">' +
+        '<div style="height:100%;width:' + w + '%;background:' + s.col + ';border-radius:5px;transition:width 0.5s;"></div>' +
+      '</div></div>';
+  }).join('');
+
+  var guess = JSON.parse(localStorage.getItem('wc_champ_guess')||'{}');
+  var isGuessed = guess.team === name;
+  var guessBtn = '<button onclick="wcGuessChamp('' + name + '','' + cnName + '')" style="width:100%;margin-top:14px;padding:10px;border-radius:8px;border:none;background:' +
+    (isGuessed ? 'rgba(102,187,106,0.2);color:#66bb6a;border:1px solid #66bb6a' : 'rgba(255,215,0,0.15);color:#FFD700;border:1px solid rgba(255,215,0,0.4)') +
+    ';font-size:0.9em;font-weight:600;cursor:pointer;">' +
+    (isGuessed ? '✅ 已竞猜 ' + cnName + ' 夺冠' : '🎯 竞猜 ' + cnName + ' 夺冠') + '</button>';
+
+  document.getElementById('team-modal-content').innerHTML =
+    '<div style="text-align:center;margin-bottom:18px;">' +
+      '<div style="font-size:2em;font-weight:900;color:#FFD700;">' + cnName + '</div>' +
+      '<div style="color:#8890b5;font-size:0.84em;margin-top:4px;">' + group + ' 组 · ELO ' + elo + '</div>' +
+    '</div>' + bars + guessBtn;
+  document.getElementById('team-modal').classList.add('open');
+};
+
+window.wcGuessChamp = function(name, cnName) {
+  localStorage.setItem('wc_champ_guess', JSON.stringify({team:name,cnName:cnName,time:Date.now()}));
+  document.getElementById('team-modal').classList.remove('open');
+  wcOpenGuess();
+};
+</script>
+
+<!-- ====== 我的竞猜 JS ====== -->
+<script>
+window.wcOpenGuess = function() {
+  var champ = JSON.parse(localStorage.getItem('wc_champ_guess')||'null');
+  var html = '';
+
+  if (champ) {
+    var t = new Date(champ.time);
+    html += '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.3);border-radius:10px;padding:14px;margin-bottom:16px;">' +
+      '<div style="font-size:0.8em;color:#8890b5;margin-bottom:6px;">&#x1F3C6; 我的夺冠预测</div>' +
+      '<div style="font-size:1.4em;font-weight:800;color:#FFD700;">' + champ.cnName + '</div>' +
+      '<div style="font-size:0.76em;color:#8890b5;margin-top:4px;">下注于 ' + t.toLocaleString('zh-CN') + '</div>' +
+      '<button onclick="localStorage.removeItem('wc_champ_guess');wcOpenGuess();" style="margin-top:10px;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">取消竞猜</button>' +
+    '</div>';
+  } else {
+    html += '<div style="color:#8890b5;font-size:0.88em;margin-bottom:14px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;">' +
+      '点击下方表格中的任意球队行，即可竞猜该球队夺冠。' +
+    '</div>';
+  }
+
+  // 场次竞猜
+  var matchGuesses = JSON.parse(localStorage.getItem('wc_match_guesses')||'{}');
+  var guessCount = Object.keys(matchGuesses).length;
+  var correctCount = 0;
+  var settledCount = 0;
+
+  if (guessCount > 0) {
+    html += '<div style="font-size:0.88em;color:#8890b5;margin-bottom:8px;">&#x26BD; 比赛竞猜记录（' + guessCount + ' 场）</div>';
+    html += '<div style="max-height:300px;overflow-y:auto;">';
+    Object.values(matchGuesses).forEach(function(g){
+      var icon = '⏳', color = '#8890b5';
+      if (g.result) {
+        settledCount++;
+        if (g.guess === g.result) { icon='✅'; color='#66bb6a'; correctCount++; }
+        else { icon='❌'; color='#ef5350'; }
+      }
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-bottom:4px;background:rgba(255,255,255,0.03);border-radius:6px;">' +
+        '<span style="font-size:0.85em;">' + (g.homeCN||g.home) + ' vs ' + (g.awayCN||g.away) + '</span>' +
+        '<span style="font-size:0.8em;color:' + color + ';">' + icon + ' ' + wcGuessLabel(g.guess) + '</span>' +
+      '</div>';
+    });
+    html += '</div>';
+    if (settledCount > 0) {
+      var rate = (correctCount/settledCount*100).toFixed(0);
+      html += '<div style="text-align:center;margin-top:12px;padding:10px;background:rgba(79,195,247,0.08);border-radius:8px;">' +
+        '已结算 ' + settledCount + ' 场 · 猜中 <span style="color:#66bb6a;font-weight:700;">' + correctCount + '</span> 场 · 准确率 <span style="color:#FFD700;font-weight:800;">' + rate + '%</span>' +
+      '</div>';
+    }
+    html += '<button onclick="if(confirm('确定清空所有竞猜记录？')){localStorage.removeItem('wc_match_guesses');wcOpenGuess();}" style="margin-top:10px;width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">清空比赛竞猜记录</button>';
+  } else {
+    html += '<div style="color:#8890b5;font-size:0.82em;text-align:center;padding:12px;">在今日比赛模块中点击比赛卡片可进行竞猜</div>';
+  }
+
+  document.getElementById('guess-content').innerHTML = html;
+  document.getElementById('guess-modal').classList.add('open');
+};
+
+window.wcGuessLabel = function(g) {
+  return g==='home'?'主队胜':g==='draw'?'平局':'客队胜';
+};
+
+window.wcGuessMatch = function(home, homeCN, away, awayCN, guess) {
+  var key = home + '_' + away;
+  var all = JSON.parse(localStorage.getItem('wc_match_guesses')||'{}');
+  all[key] = {home:home, away:away, homeCN:homeCN, awayCN:awayCN, guess:guess, time:Date.now()};
+  localStorage.setItem('wc_match_guesses', JSON.stringify(all));
+  alert('✅ 已记录：' + homeCN + ' vs ' + awayCN + ' — ' + wcGuessLabel(guess));
+};
+
+
+</script>
+
+<!-- ====== 分享卡片 JS ====== -->
+<script>
+window.wcShareCard = function() {
+  var topTeams = [];
+  var rows = document.querySelectorAll('#matrix-tbody tr');
+  var shown = 0;
+  rows.forEach(function(r){
+    if (shown >= 5) return;
+    if (r.style.display === 'none') return;
+    var cells = r.querySelectorAll('td');
+    if (cells.length < 5) return;
+    topTeams.push({
+      rank: cells[0].textContent,
+      name: cells[1].textContent.replace('⚠','').trim(),
+      group: cells[2].textContent,
+      pct: cells[4].textContent
+    });
+    shown++;
+  });
+
+  var now = new Date().toLocaleDateString('zh-CN');
+  var html = '<div style="background:linear-gradient(135deg,#0a0e27,#1a237e);padding:20px;border-radius:12px;font-family:-apple-system,sans-serif;max-width:320px;">' +
+    '<div style="text-align:center;margin-bottom:14px;">' +
+      '<div style="font-size:1.5em;font-weight:900;background:linear-gradient(90deg,#FFD700,#FFA726);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">⚽ 2026 世界杯夺冠预测</div>' +
+      '<div style="color:#8890b5;font-size:0.72em;margin-top:4px;">' + now + ' · 蒙特卡洛模拟</div>' +
+    '</div>';
+
+  topTeams.forEach(function(t){
+    var icons = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+    var idx = parseInt(t.rank)-1;
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin-bottom:6px;background:rgba(255,255,255,0.06);border-radius:8px;">' +
+      '<span style="font-size:1.1em;">' + (icons[idx]||t.rank) + '</span>' +
+      '<span style="font-weight:700;color:#e8e8ec;flex:1;margin:0 10px;">' + t.name + '</span>' +
+      '<span style="font-weight:800;color:#FFD700;">' + t.pct + '</span>' +
+    '</div>';
+  });
+
+  html += '<div style="text-align:center;margin-top:12px;color:#8890b5;font-size:0.7em;">haiwangxing1251.github.io/worldcup-dashboard</div></div>';
+
+  var win = window.open('', '_blank', 'width=400,height=480');
+  if (!win) { alert('请允许弹窗以查看分享卡片'); return; }
+  win.document.write('<!DOCTYPE html><html><head>
+<meta http-equiv="refresh" content="3600">
+<meta charset="UTF-8"><title>分享</title></head><body style="margin:0;background:#0a0e27;display:flex;align-items:center;justify-content:center;min-height:100vh;">' + html + '<p style="text-align:center;color:#8890b5;font-size:12px;margin-top:10px;">长按图片保存</p><script>window._wcTeamCN = {"France": "法国", "Spain": "西班牙", "Argentina": "阿根廷", "England": "英格兰", "Portugal": "葡萄牙", "Brazil": "巴西", "Netherlands": "荷兰", "Morocco": "摩洛哥", "Belgium": "比利时", "Germany": "德国", "Croatia": "克罗地亚", "Colombia": "哥伦比亚", "Senegal": "塞内加尔", "Mexico": "墨西哥", "United States": "美国", "Uruguay": "乌拉圭", "Japan": "日本", "Switzerland": "瑞士", "Iran": "伊朗", "Turkey": "土耳其", "Ecuador": "厄瓜多尔", "Austria": "奥地利", "South Korea": "韩国", "Australia": "澳大利亚", "Algeria": "阿尔及利亚", "Egypt": "埃及", "Canada": "加拿大", "Norway": "挪威", "Panama": "巴拿马", "Ivory Coast": "科特迪瓦", "Sweden": "瑞典", "Paraguay": "巴拉圭", "Czech Republic": "捷克", "Scotland": "苏格兰", "Tunisia": "突尼斯", "DR Congo": "刚果(金)", "Uzbekistan": "乌兹别克斯坦", "Saudi Arabia": "沙特阿拉伯", "South Africa": "南非", "Bosnia & Herzegovina": "波黑", "Qatar": "卡塔尔", "Ghana": "加纳", "Jordan": "约旦", "Iraq": "伊拉克", "Cape Verde": "佛得角", "Haiti": "海地", "Curacao": "库拉索", "New Zealand": "新西兰"};</script>
+</body></html>');
+  win.document.close();
+};
+</script>
+
+<!-- ====== 比赛日推送提醒 JS ====== -->
+<script>
+(function(){
+  var btn = document.getElementById('notify-btn');
+  if (!btn) return;
+
+  function updateBtn() {
+    var on = localStorage.getItem('wc_notify') === '1';
+    btn.className = 'active' ? (on ? 'active' : '') : '';
+    if (on) {
+      btn.className = 'active';
+      btn.innerHTML = '🔔 提醒已开启';
+    } else {
+      btn.className = '';
+      btn.innerHTML = '🔔 开启比赛提醒';
+    }
+  }
+
+  btn.addEventListener('click', function(){
+    var on = localStorage.getItem('wc_notify') === '1';
+    if (on) {
+      localStorage.removeItem('wc_notify');
+      updateBtn();
+      return;
+    }
+    if (!('Notification' in window)) {
+      alert('您的浏览器不支持桌面通知');
+      return;
+    }
+    Notification.requestPermission().then(function(p){
+      if (p === 'granted') {
+        localStorage.setItem('wc_notify', '1');
+        updateBtn();
+        new Notification('⚽ 世界杯预测', {
+          body: '提醒已开启！比赛前 30 分钟将收到通知',
+          icon: 'https://haiwangxing1251.github.io/worldcup-dashboard/favicon.ico'
+        });
+        scheduleNotifications();
+      } else {
+        alert('请在浏览器设置中允许通知权限');
+      }
+    });
+  });
+
+  function scheduleNotifications() {
+    if (!window.TODAY_SCHEDULE) return;
+    var now = Date.now();
+    TODAY_SCHEDULE.forEach(function(m){
+      if (m.finished || !m.date || !m.time) return;
+      try {
+        var mt = new Date(m.date + 'T' + m.time + ':00+08:00').getTime();
+        var remind = mt - 30*60*1000;
+        var delay = remind - now;
+        if (delay > 0 && delay < 24*60*60*1000) {
+          setTimeout(function(){
+            if (localStorage.getItem('wc_notify') !== '1') return;
+            new Notification('⚽ 比赛即将开始', {
+              body: (m.home||'') + ' vs ' + (m.away||'') + ' · 30分钟后开球',
+              icon: 'https://haiwangxing1251.github.io/worldcup-dashboard/favicon.ico'
+            });
+          }, delay);
+        }
+      } catch(e){}
+    });
+  }
+
+  updateBtn();
+  if (localStorage.getItem('wc_notify') === '1') {
+    Notification.requestPermission().then(function(p){
+      if (p === 'granted') scheduleNotifications();
+    });
+  }
 })();
 </script>
 
