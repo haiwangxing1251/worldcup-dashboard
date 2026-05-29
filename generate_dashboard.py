@@ -1136,9 +1136,9 @@ def main():
         sync_info=sync_info,
     )
 
-    # 在 HTML 头部插入自动刷新元标签
+    # 在 HTML 头部插入自动刷新元标签（仅替换第一个 <head>）
     refresh_meta = '<meta http-equiv="refresh" content="3600">\n'
-    html = html.replace("<head>", "<head>\n" + refresh_meta)
+    html = html.replace("<head>", "<head>\n" + refresh_meta, 1)
 
     # ---- 注入移动端全页优化 CSS（插入到 </style> 前）----
     mobile_css = """
@@ -1206,12 +1206,12 @@ def main():
     else:
         print("\n[5/5] ⏭️ 跳过今日预测（无数据）")
 
-    # ---- 注入中文名映射到 JS ----
-    from report import TEAM_NAMES_CN
-    import json as _json
-    cn_map_js = "<script>window._wcTeamCN = " + _json.dumps(TEAM_NAMES_CN, ensure_ascii=False) + ";</script>\n"
+    # 注入中文名映射到 JS（用唯一标记避免匹配到 JS 字符串内的 </body>）
+    cn_map_js = "<script>window._wcTeamCN = " + json.dumps(TEAM_NAMES_CN, ensure_ascii=False) + ";</script>\n"
+    # 移除占位声明
     html = html.replace("window._wcTeamCN = {};", "")
-    html = html.replace("</body>", cn_map_js + "</body>", 1)
+    # 注入到文件末尾真实的 </body> 之前
+    html = html.replace("\n</body>\n</html>", "\n" + cn_map_js + "</body>\n</html>", 1)
 
     # ---- 注入淘汰赛预测图 ----
     print("\n[+] 🏆 注入淘汰赛对阵图...")
