@@ -384,7 +384,7 @@ body {
     <div class="meta">
         数据来源：FIFA 官方抽签（2025 年 12 月）&middot;
         ELO: 实时同步 &middot; 赛果: 0 场真实比分 &middot;
-        生成时间：<span data-utc="2026-05-29T05:33:19Z">2026-05-29 13:33 北京时间</span>
+        生成时间：<span data-utc="2026-05-29T06:00:16Z">2026-05-29 14:00 北京时间</span>
     </div>
 </div>
 
@@ -2382,7 +2382,7 @@ window.wcOpenGuess = function() {
       '<div style="font-size:0.8em;color:#8890b5;margin-bottom:6px;">&#x1F3C6; 我的夺冠预测</div>' +
       '<div style="font-size:1.4em;font-weight:800;color:#FFD700;">' + champ.cnName + '</div>' +
       '<div style="font-size:0.76em;color:#8890b5;margin-top:4px;">下注于 ' + t.toLocaleString('zh-CN') + '</div>' +
-      '<button onclick="localStorage.removeItem('wc_champ_guess');wcOpenGuess();" style="margin-top:10px;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">取消竞猜</button>' +
+      '<button onclick="localStorage.removeItem(&quot;wc_champ_guess&quot;);wcOpenGuess();" style="margin-top:10px;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">取消竞猜</button>' +
     '</div>';
   } else {
     html += '<div style="color:#8890b5;font-size:0.88em;margin-bottom:14px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;">' +
@@ -2418,7 +2418,7 @@ window.wcOpenGuess = function() {
         '已结算 ' + settledCount + ' 场 · 猜中 <span style="color:#66bb6a;font-weight:700;">' + correctCount + '</span> 场 · 准确率 <span style="color:#FFD700;font-weight:800;">' + rate + '%</span>' +
       '</div>';
     }
-    html += '<button onclick="if(confirm('确定清空所有竞猜记录？')){localStorage.removeItem('wc_match_guesses');wcOpenGuess();}" style="margin-top:10px;width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">清空比赛竞猜记录</button>';
+    html += '<button onclick="if(confirm(&quot;确定清空所有竞猜记录？&quot;)){localStorage.removeItem(&quot;wc_match_guesses&quot;);wcOpenGuess();}" style="margin-top:10px;width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">清空比赛竞猜记录</button>';
   } else {
     html += '<div style="color:#8890b5;font-size:0.82em;text-align:center;padding:12px;">在今日比赛模块中点击比赛卡片可进行竞猜</div>';
   }
@@ -2483,10 +2483,7 @@ window.wcShareCard = function() {
 
   var win = window.open('', '_blank', 'width=400,height=480');
   if (!win) { alert('请允许弹窗以查看分享卡片'); return; }
-  win.document.write('<!DOCTYPE html><html><head>
-<meta http-equiv="refresh" content="3600">
-<meta charset="UTF-8"><title>分享</title></head><body style="margin:0;background:#0a0e27;display:flex;align-items:center;justify-content:center;min-height:100vh;">' + html + '<p style="text-align:center;color:#8890b5;font-size:12px;margin-top:10px;">长按图片保存</p><script>window._wcTeamCN = {"France": "法国", "Spain": "西班牙", "Argentina": "阿根廷", "England": "英格兰", "Portugal": "葡萄牙", "Brazil": "巴西", "Netherlands": "荷兰", "Morocco": "摩洛哥", "Belgium": "比利时", "Germany": "德国", "Croatia": "克罗地亚", "Colombia": "哥伦比亚", "Senegal": "塞内加尔", "Mexico": "墨西哥", "United States": "美国", "Uruguay": "乌拉圭", "Japan": "日本", "Switzerland": "瑞士", "Iran": "伊朗", "Turkey": "土耳其", "Ecuador": "厄瓜多尔", "Austria": "奥地利", "South Korea": "韩国", "Australia": "澳大利亚", "Algeria": "阿尔及利亚", "Egypt": "埃及", "Canada": "加拿大", "Norway": "挪威", "Panama": "巴拿马", "Ivory Coast": "科特迪瓦", "Sweden": "瑞典", "Paraguay": "巴拉圭", "Czech Republic": "捷克", "Scotland": "苏格兰", "Tunisia": "突尼斯", "DR Congo": "刚果(金)", "Uzbekistan": "乌兹别克斯坦", "Saudi Arabia": "沙特阿拉伯", "South Africa": "南非", "Bosnia & Herzegovina": "波黑", "Qatar": "卡塔尔", "Ghana": "加纳", "Jordan": "约旦", "Iraq": "伊拉克", "Cape Verde": "佛得角", "Haiti": "海地", "Curacao": "库拉索", "New Zealand": "新西兰"};</script>
-</body></html>');
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>分享</title></head><body style="margin:0;background:#0a0e27;display:flex;align-items:center;justify-content:center;min-height:100vh;">' + html + '<p style="text-align:center;color:#8890b5;font-size:12px;margin-top:10px;">长按图片保存</p></body></html>');
   win.document.close();
 };
 </script>
@@ -2566,5 +2563,6 @@ window.wcShareCard = function() {
 })();
 </script>
 
+<script>window._wcTeamCN = {"MEX": "墨西哥", "RSA": "南非", "KOR": "韩国", "CZE": "捷克", "CAN": "加拿大", "BIH": "波黑", "QAT": "卡塔尔", "SUI": "瑞士", "BRA": "巴西", "MAR": "摩洛哥", "HAI": "海地", "SCO": "苏格兰", "USA": "美国", "PAR": "巴拉圭", "AUS": "澳大利亚", "TUR": "土耳其", "GER": "德国", "CUW": "库拉索", "CIV": "科特迪瓦", "ECU": "厄瓜多尔", "NED": "荷兰", "JPN": "日本", "SWE": "瑞典", "TUN": "突尼斯", "BEL": "比利时", "EGY": "埃及", "IRN": "伊朗", "NZL": "新西兰", "ESP": "西班牙", "CPV": "佛得角", "KSA": "沙特", "URU": "乌拉圭", "FRA": "法国", "SEN": "塞内加尔", "IRQ": "伊拉克", "NOR": "挪威", "ARG": "阿根廷", "ALG": "阿尔及利亚", "AUT": "奥地利", "JOR": "约旦", "POR": "葡萄牙", "COD": "刚果(金)", "UZB": "乌兹别克斯坦", "COL": "哥伦比亚", "ENG": "英格兰", "CRO": "克罗地亚", "GHA": "加纳", "PAN": "巴拿马"};</script>
 </body>
 </html>
