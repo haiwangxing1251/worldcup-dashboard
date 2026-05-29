@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta http-equiv="refresh" content="3600">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 世界杯预测报告 | 蒙特卡洛模拟</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: #0a0e27;
+    color: #e8e8ec;
+    line-height: 1.7;
+    min-height: 100vh;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+
+/* ---- Header ---- */
+.header {
+    text-align: center;
+    padding: 64px 24px 48px;
+    background: linear-gradient(135deg, #1a237e 0%, #0d47a1 50%, #01579b 100%);
+    border-radius: 16px;
+    margin-bottom: 30px;
+    position: relative;
+    overflow: hidden;
+}
+.header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -50%;
+    width: 200%; height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+    animation: rotate 20s linear infinite;
+}
+@keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+.header h1 {
+    font-size: 2.5em;
+    font-weight: 900;
+    background: linear-gradient(90deg, #FFD700, #FFA726, #FFD700);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+    z-index: 1;
+}
+.header .subtitle {
+    color: #90caf9;
+    font-size: 1.05em;
+    margin-top: 12px;
+    position: relative;
+    z-index: 1;
+}
+.header .meta {
+    color: rgba(255,255,255,0.45);
+    font-size: 0.82em;
+    margin-top: 16px;
+    position: relative;
+    z-index: 1;
+}
+
+/* ---- Cards ---- */
+.card {
+    background: #111640;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.card h2 {
+    font-size: 1.25em;
+    margin-bottom: 16px;
+    color: #4fc3f7;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ---- 摘要卡片 ---- */
+.summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.summary-card {
+    background: #111640;
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+.summary-card .value {
+    font-size: 2em;
+    font-weight: 800;
+    background: linear-gradient(135deg, #FFD700, #FFA726);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.summary-card .label {
+    color: #8890b5;
+    font-size: 0.82em;
+    margin-top: 4px;
+}
+
+/* ---- 夺冠柱状图 ---- */
+.champion-list { display: flex; flex-direction: column; gap: 5px; }
+.champion-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+}
+.champion-rank {
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 0.85em;
+    flex-shrink: 0;
+}
+.champion-rank.top1 { background: #FFD700; color: #1a1a2e; }
+.champion-rank.top2 { background: #C0C0C0; color: #1a1a2e; }
+.champion-rank.top3 { background: #CD7F32; color: #1a1a2e; }
+.champion-name {
+    width: 130px;
+    font-weight: 600;
+    font-size: 0.9em;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.champion-bar-bg {
+    flex: 1;
+    height: 24px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.champion-bar-fill {
+    height: 100%;
+    border-radius: 12px;
+    transition: width 0.3s ease;
+}
+.champion-pct {
+    width: 58px;
+    text-align: right;
+    font-weight: 700;
+    font-size: 0.92em;
+    flex-shrink: 0;
+}
+.champion-elo {
+    width: 60px;
+    text-align: right;
+    color: #8890b5;
+    font-size: 0.75em;
+    flex-shrink: 0;
+}
+
+/* ---- 数据表 ---- */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.84em;
+}
+.data-table th {
+    text-align: left;
+    padding: 10px 12px;
+    background: rgba(79, 195, 247, 0.08);
+    color: #4fc3f7;
+    font-weight: 600;
+    border-bottom: 2px solid rgba(79, 195, 247, 0.2);
+    font-size: 0.82em;
+    white-space: nowrap;
+}
+.data-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+}
+.data-table tr:hover { background: rgba(255,255,255,0.03); }
+.data-table .highlight { background: rgba(255, 215, 0, 0.06); }
+.data-table .right { text-align: right; }
+
+.table-scroll {
+    max-height: 72vh;
+    overflow-y: auto;
+    border-radius: 8px;
+}
+.table-scroll thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+}
+
+/* ---- 小组难度 ---- */
+.group-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 10px;
+}
+.group-item {
+    background: rgba(255,255,255,0.03);
+    border-radius: 8px;
+    padding: 14px 16px;
+    border-left: 3px solid #555;
+}
+.group-item.death { border-left-color: #ef5350; }
+.group-item.wide  { border-left-color: #66bb6a; }
+.group-label {
+    font-weight: 700;
+    font-size: 1.05em;
+    margin-bottom: 4px;
+}
+.group-teams { color: #8890b5; font-size: 0.82em; }
+.group-elo   { color: #8890b5; font-size: 0.76em; margin-top: 2px; }
+
+/* ---- 黑马 ---- */
+.dark-horse { color: #ff7043; font-weight: 600; }
+.tag-est { color: #ff9800; font-size: 0.7em; font-weight: 700; }
+
+/* ---- 双栏 ---- */
+.two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+@media (max-width: 800px) {
+    .two-col { grid-template-columns: 1fr; }
+    .header h1 { font-size: 1.7em; }
+}
+
+/* ---- Footer ---- */
+.footer {
+    text-align: center;
+    padding: 30px;
+    color: #8890b5;
+    font-size: 0.78em;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    margin-top: 30px;
+}
+
+/* ====== 移动端全页优化 ====== */
+@media (max-width: 768px) {
+    body { font-size: 14px; line-height: 1.55; }
+    .container { padding: 8px; }
+
+    /* Header */
+    .header { padding: 28px 16px 24px; border-radius: 10px; margin-bottom: 12px; }
+    .header h1 { font-size: 1.25em; }
+    .header .subtitle { font-size: 0.82em; margin-top: 6px; }
+    .header .meta { font-size: 0.7em; margin-top: 8px; }
+
+    /* 摘要卡片: 2x2 */
+    .summary-grid { grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+    .summary-card { padding: 12px 8px; border-radius: 8px; }
+    .summary-card .value { font-size: 1.4em; }
+    .summary-card .label { font-size: 0.72em; }
+
+    /* 通用卡片 */
+    .card { padding: 14px 12px; margin-bottom: 12px; border-radius: 10px; }
+    .card h2 { font-size: 1.05em; margin-bottom: 10px; }
+
+    /* 夺冠 Top 20: 紧凑布局，隐藏 ELO */
+    .champion-list { gap: 3px; }
+    .champion-row { gap: 6px; padding: 3px 0; }
+    .champion-rank { width: 22px; height: 22px; font-size: 0.7em; }
+    .champion-name { width: 80px; font-size: 0.78em; }
+    .champion-bar-bg { height: 16px; border-radius: 8px; }
+    .champion-bar-fill { border-radius: 8px; }
+    .champion-pct { width: 44px; font-size: 0.78em; }
+    .champion-elo { display: none; }
+
+    /* 数据表: 水平滚动 */
+    .table-scroll { max-height: 50vh; -webkit-overflow-scrolling: touch; }
+    .data-table { font-size: 0.72em; }
+    .data-table th, .data-table td { padding: 6px 8px; }
+
+    /* 双栏 → 单栏 */
+    .two-col { grid-template-columns: 1fr; gap: 12px; }
+
+    /* 小组网格 */
+    .group-grid { grid-template-columns: 1fr; gap: 6px; }
+    .group-item { padding: 10px 12px; }
+    .group-label { font-size: 0.95em; }
+    .group-teams, .group-elo { font-size: 0.74em; }
+
+    /* Footer */
+    .footer { padding: 18px; font-size: 0.72em; margin-top: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ====== 密码门遮罩 ====== -->
+<div id="pwd-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0e27;z-index:9999;display:flex;align-items:center;justify-content:center;">
+  <div style="text-align:center;max-width:360px;padding:20px;">
+    <h2 style="color:#FFD700;font-size:1.6em;margin-bottom:6px;">&#x26BD; 2026 世界杯预测</h2>
+    <p style="color:#8890b5;margin-bottom:20px;font-size:0.88em;">请输入访问密码</p>
+    <input id="pwd-input" type="password" placeholder="输入密码..." autofocus style="width:100%;padding:12px 16px;border-radius:8px;border:1px solid rgba(255,255,255,0.15);background:#111640;color:#e8e8ec;font-size:1em;outline:none;box-sizing:border-box;"/>
+    <p id="pwd-err" style="color:#ef5350;font-size:0.82em;margin-top:8px;display:none;">密码错误，请重试</p>
+    <button onclick="wcCheckPwd()" style="width:100%;margin-top:16px;padding:12px;border-radius:8px;border:none;background:linear-gradient(135deg,#FFD700,#FFA726);color:#1a1a2e;font-size:1em;font-weight:700;cursor:pointer;">确认进入</button>
+  </div>
+</div>
+
+<div id="protected-content" style="display:none;">
+
+<div class="container">
+
+<!-- ====== 标题 ====== -->
+<div class="header">
+    <h1>&#x26BD; 2026 年 FIFA 世界杯 &trade; 预测报告</h1>
+    <div class="subtitle">
+        蒙特卡洛模拟 &middot; 10,000 次迭代 &middot; ELO 评分 + 泊松分布模型
+    </div>
+    <div class="meta">
+        数据来源：FIFA 官方抽签（2025 年 12 月）&middot;
+        ELO: 实时同步 &middot; 赛果: 0 场真实比分 &middot;
+        生成时间：<span data-utc="2026-05-29T05:21:16Z">2026-05-29 13:21 北京时间</span>
+    </div>
+</div>
+
+<!-- ====== 摘要卡片 ====== -->
+<div class="summary-grid">
+    <div class="summary-card">
+        <div class="value">10,000</div>
+        <div class="label">模拟次数</div>
+    </div>
+    <div class="summary-card">
+        <div class="value">48</div>
+        <div class="label">参赛球队</div>
+    </div>
+    <div class="summary-card">
+        <div class="value">104</div>
+        <div class="label">总比赛场次</div>
+    </div>
+    <div class="summary-card">
+        <div class="value">法国</div>
+        <div class="label">最大夺冠热门</div>
+    </div>
+</div>
+
+<!-- ====== 夺冠概率 Top 20 ====== -->
+<div class="card">
+    <h2>&#x1F3C6; 夺冠概率 — 前 20 名</h2>
+    <div class="champion-list">
+        <div class="champion-row">
+            <div class="champion-rank top1">1</div>
+            <div class="champion-name">法国</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:77.0%; background:#FFD700;"></div>
+            </div>
+            <div class="champion-pct" style="color:#FFD700">19.2%</div>
+            <div class="champion-elo">ELO 1877</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank top2">2</div>
+            <div class="champion-name">西班牙</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:67.56%; background:#FFA726;"></div>
+            </div>
+            <div class="champion-pct" style="color:#FFA726">16.9%</div>
+            <div class="champion-elo">ELO 1876</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank top3">3</div>
+            <div class="champion-name">阿根廷</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:65.64%; background:#ef5350;"></div>
+            </div>
+            <div class="champion-pct" style="color:#ef5350">16.4%</div>
+            <div class="champion-elo">ELO 1875</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">4</div>
+            <div class="champion-name">英格兰</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:35.0%; background:#ab47bc;"></div>
+            </div>
+            <div class="champion-pct" style="color:#ab47bc">8.8%</div>
+            <div class="champion-elo">ELO 1826</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">5</div>
+            <div class="champion-name">巴西</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:25.16%; background:#42a5f5;"></div>
+            </div>
+            <div class="champion-pct" style="color:#42a5f5">6.3%</div>
+            <div class="champion-elo">ELO 1761</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">6</div>
+            <div class="champion-name">摩洛哥</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:23.96%; background:#26c6da;"></div>
+            </div>
+            <div class="champion-pct" style="color:#26c6da">6.0%</div>
+            <div class="champion-elo">ELO 1756</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">7</div>
+            <div class="champion-name">荷兰</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:20.599999999999998%; background:#9ccc65;"></div>
+            </div>
+            <div class="champion-pct" style="color:#9ccc65">5.1%</div>
+            <div class="champion-elo">ELO 1758</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">8</div>
+            <div class="champion-name">德国</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:15.4%; background:#ff7043;"></div>
+            </div>
+            <div class="champion-pct" style="color:#ff7043">3.9%</div>
+            <div class="champion-elo">ELO 1730</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">9</div>
+            <div class="champion-name">比利时</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:15.120000000000001%; background:#78909c;"></div>
+            </div>
+            <div class="champion-pct" style="color:#78909c">3.8%</div>
+            <div class="champion-elo">ELO 1735</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">10</div>
+            <div class="champion-name">葡萄牙</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:11.24%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">2.8%</div>
+            <div class="champion-elo">ELO 1764</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">11</div>
+            <div class="champion-name">墨西哥</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:8.36%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">2.1%</div>
+            <div class="champion-elo">ELO 1682</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">12</div>
+            <div class="champion-name">克罗地亚</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:6.279999999999999%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">1.6%</div>
+            <div class="champion-elo">ELO 1717</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">13</div>
+            <div class="champion-name">美国</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:4.8%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">1.2%</div>
+            <div class="champion-elo">ELO 1673</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">14</div>
+            <div class="champion-name">日本</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:4.5600000000000005%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">1.1%</div>
+            <div class="champion-elo">ELO 1660</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">15</div>
+            <div class="champion-name">哥伦比亚</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:3.36%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.8%</div>
+            <div class="champion-elo">ELO 1693</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">16</div>
+            <div class="champion-name">塞内加尔</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:3.2800000000000002%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.8%</div>
+            <div class="champion-elo">ELO 1689</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">17</div>
+            <div class="champion-name">乌拉圭</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:3.2399999999999998%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.8%</div>
+            <div class="champion-elo">ELO 1673</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">18</div>
+            <div class="champion-name">瑞士</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:2.64%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.7%</div>
+            <div class="champion-elo">ELO 1649</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">19</div>
+            <div class="champion-name">伊朗</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:1.5599999999999998%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.4%</div>
+            <div class="champion-elo">ELO 1615</div>
+        </div>
+        <div class="champion-row">
+            <div class="champion-rank ">20</div>
+            <div class="champion-name">厄瓜多尔</div>
+            <div class="champion-bar-bg">
+                <div class="champion-bar-fill" style="width:1.3599999999999999%; background:#8d6e63;"></div>
+            </div>
+            <div class="champion-pct" style="color:#8d6e63">0.3%</div>
+            <div class="champion-elo">ELO 1595</div>
+        </div>
+    </div>
+</div>
+
+
+<!-- ====== 今日比赛预测模块 ====== -->
+<style>
+.today-match-card {
+  background: #111640; border-radius: 12px; padding: 20px;
+  border: 1px solid rgba(255,255,255,0.08); margin: 20px 0;
+}
+.today-match-card h2 {
+  font-size: 1.15em; color: #4fc3f7; margin-bottom: 14px;
+}
+.today-date-header {
+  display: inline-block; font-weight: 600; color: #FFD700;
+  font-size: 1em; margin-left: 8px;
+}
+.match-item {
+  background: rgba(255,255,255,0.03); border-radius: 10px;
+  padding: 14px 16px; margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.05);
+  transition: border-color 0.2s;
+}
+.match-item:hover { border-color: rgba(79,195,247,0.25); }
+.match-item.tbd { opacity: 0.5; border-style: dashed; }
+.match-item.finished { border-left: 3px solid #66bb6a; }
+.match-item.live { border-left: 3px solid #FF7043; animation: livePulse 1.5s infinite; }
+@keyframes livePulse { 0%,100% { border-left-color: #FF7043; } 50% { border-left-color: rgba(255,112,67,0.3); } }
+.match-header-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 10px; font-size: 0.72em; color: #8890b5;
+}
+.match-group-tag {
+  background: rgba(79,195,247,0.12); color: #4fc3f7;
+  padding: 2px 8px; border-radius: 4px; font-weight: 600;
+}
+.match-score-tag {
+  background: rgba(102,187,106,0.15); color: #66bb6a;
+  padding: 2px 8px; border-radius: 4px; font-weight: 700;
+  font-size: 0.95em;
+}
+.match-live-tag {
+  background: rgba(255,112,67,0.2); color: #FF7043;
+  padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.85em;
+  animation: livePulse 1s infinite;
+}
+.match-teams-row {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; margin-bottom: 12px;
+}
+.team-block { text-align: center; min-width: 100px; }
+.team-block .tname {
+  font-weight: 700; font-size: 1em;
+}
+.team-block .telo {
+  font-size: 0.7em; color: #8890b5;
+}
+.team-block .tscore {
+  font-size: 1.4em; font-weight: 900; color: #e8e8ec;
+  margin-top: 2px;
+}
+.team-vs {
+  font-size: 1.1em; font-weight: 900; color: rgba(255,255,255,0.15);
+}
+.prob-row {
+  display: flex; gap: 8px; margin-bottom: 8px;
+}
+.prob-col { flex: 1; text-align: center; }
+.prob-col .plabel {
+  font-size: 0.72em; margin-bottom: 3px; font-weight: 600;
+}
+.prob-col.home .plabel { color: #42a5f5; }
+.prob-col.draw .plabel { color: #9e9e9e; }
+.prob-col.away .plabel { color: #ef5350; }
+.prob-bar-wrap {
+  height: 8px; background: rgba(255,255,255,0.06);
+  border-radius: 4px; overflow: hidden;
+}
+.prob-bar {
+  height: 100%; border-radius: 4px; transition: width 0.5s ease;
+}
+.prob-bar.home { background: linear-gradient(90deg, #1565c0, #42a5f5); }
+.prob-bar.draw { background: linear-gradient(90deg, #616161, #9e9e9e); }
+.prob-bar.away { background: linear-gradient(90deg, #c62828, #ef5350); }
+.goals-row {
+  text-align: center; font-size: 0.78em; color: #8890b5;
+  padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.04);
+}
+.goals-row .gval { font-weight: 700; }
+.goals-row .ghome { color: #42a5f5; }
+.goals-row .gaway { color: #ef5350; }
+.today-empty {
+  text-align: center; padding: 30px; color: #8890b5; font-size: 0.9em;
+}
+.today-actions {
+  display: flex; align-items: center; justify-content: center;
+  gap: 16px; padding-top: 14px; margin-top: 10px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.btn-today-nav {
+  padding: 8px 20px; border: none; border-radius: 8px;
+  cursor: pointer; font-size: 0.85em; font-weight: 600;
+  background: linear-gradient(135deg, #1b5e20, #2e7d32);
+  color: white; border: 1px solid rgba(102,187,106,0.3);
+  transition: all 0.2s;
+}
+.btn-today-nav:hover { background: linear-gradient(135deg, #2e7d32, #388e3c); }
+.btn-today-nav:disabled { opacity: 0.4; cursor: not-allowed; }
+.today-progress-text {
+  font-size: 0.78em; color: #8890b5;
+}
+.today-progress-text span { color: #4fc3f7; font-weight: 700; }
+.tournament-timeline {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.72em; color: #8890b5; margin-bottom: 4px;
+}
+.tournament-timeline .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: rgba(255,255,255,0.15);
+}
+.tournament-timeline .dot.active { background: #4fc3f7; }
+.tournament-timeline .dot.done { background: #66bb6a; }
+.today-sync-info {
+  font-size: 0.72em; color: #8890b5; text-align: center;
+  padding-top: 10px;
+}
+.btn-today-refresh {
+  padding: 8px 18px; border: none; border-radius: 8px;
+  cursor: pointer; font-size: 0.85em; font-weight: 600;
+  background: linear-gradient(135deg, #0d47a1, #1565c0);
+  color: white; border: 1px solid rgba(66,165,245,0.3);
+  transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+}
+.btn-today-refresh:hover {
+  background: linear-gradient(135deg, #1565c0, #1e88e5);
+  border-color: rgba(66,165,245,0.5);
+}
+.btn-today-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-today-refresh .spin-icon {
+  display: inline-block; transition: transform 0.3s;
+}
+.btn-today-refresh.spinning .spin-icon {
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); } to { transform: rotate(360deg); }
+}
+@media (max-width: 768px) {
+  .match-item { padding: 10px 12px; margin-bottom: 8px; }
+  .match-teams-row { gap: 10px; }
+  .team-block { min-width: 70px; }
+  .team-block .tname { font-size: 0.85em; }
+  .team-block .telo { font-size: 0.62em; }
+  .team-block .tscore { font-size: 1.15em; }
+  .prob-row { gap: 4px; }
+  .prob-col .plabel { font-size: 0.65em; }
+  .goals-row { font-size: 0.72em; }
+  .today-actions { flex-direction: column; gap: 8px; }
+  .btn-today-nav { width: 100%; padding: 10px; font-size: 0.9em; }
+  .btn-today-refresh { width: 100%; padding: 10px; font-size: 0.9em; justify-content: center; }
+  .today-date-header { font-size: 0.85em; display: block; margin-left: 0; }
+}
+</style>
+
+<div class="today-match-card" id="today-match-card">
+  <h2>&#x1F4CA; 今日比赛预测
+    <span class="today-date-header" id="today-date-header"></span>
+  </h2>
+  <div class="tournament-timeline" id="today-timeline"></div>
+  <div id="today-matches">加载中…</div>
+  <div class="today-actions" id="today-actions" style="display:none;">
+    <button class="btn-today-nav" id="btn-prev-day" onclick="navigateDay(-1)">
+      &#x25C0; 前一天
+    </button>
+    <button class="btn-today-nav" id="btn-next-day" onclick="navigateDay(1)">
+      &#x25B6; 后一天
+    </button>
+    <button class="btn-today-refresh" id="btn-refresh" onclick="refreshNow()">
+      <span class="spin-icon">&#x21BB;</span> 立即更新
+    </button>
+    <span class="today-progress-text" id="today-progress-text"></span>
+  </div>
+  <div class="today-sync-info" id="today-sync-info"></div>
+</div>
+
+<script>
+// ====== Embedded Data ======
+var TODAY_ELO_DATA = {"source": "World Football ELO Ratings (worldfootballrankings.com)", "date": "2026-05-27", "description": "ELO ratings for all 48 FIFA World Cup 2026 teams. Ratings for teams outside top 50 are estimated based on FIFA rank regression.", "note_estimated": "Teams marked estimated=true have ELO extrapolated from FIFA ranking using linear regression on top-50 data. Exact ELO unavailable as they rank below top 50 globally.", "teams": {"FRA": {"elo": 1877.32, "rank": 1, "estimated": false, "name": "France"}, "ESP": {"elo": 1876.4, "rank": 2, "estimated": false, "name": "Spain"}, "ARG": {"elo": 1874.81, "rank": 3, "estimated": false, "name": "Argentina"}, "ENG": {"elo": 1825.97, "rank": 4, "estimated": false, "name": "England"}, "POR": {"elo": 1763.83, "rank": 5, "estimated": false, "name": "Portugal"}, "BRA": {"elo": 1761.16, "rank": 6, "estimated": false, "name": "Brazil"}, "NED": {"elo": 1757.87, "rank": 7, "estimated": false, "name": "Netherlands"}, "MAR": {"elo": 1756.21, "rank": 8, "estimated": false, "name": "Morocco"}, "BEL": {"elo": 1734.71, "rank": 9, "estimated": false, "name": "Belgium"}, "GER": {"elo": 1730.37, "rank": 10, "estimated": false, "name": "Germany"}, "CRO": {"elo": 1717.07, "rank": 11, "estimated": false, "name": "Croatia"}, "COL": {"elo": 1693.09, "rank": 13, "estimated": false, "name": "Colombia"}, "SEN": {"elo": 1688.99, "rank": 14, "estimated": false, "name": "Senegal"}, "MEX": {"elo": 1682.11, "rank": 15, "estimated": false, "name": "Mexico"}, "USA": {"elo": 1673.13, "rank": 16, "estimated": false, "name": "United States"}, "URU": {"elo": 1673.07, "rank": 17, "estimated": false, "name": "Uruguay"}, "JPN": {"elo": 1660.43, "rank": 18, "estimated": false, "name": "Japan"}, "SUI": {"elo": 1649.4, "rank": 19, "estimated": false, "name": "Switzerland"}, "IRN": {"elo": 1615.3, "rank": 21, "estimated": false, "name": "Iran"}, "TUR": {"elo": 1599.04, "rank": 22, "estimated": false, "name": "Turkey"}, "ECU": {"elo": 1594.78, "rank": 23, "estimated": false, "name": "Ecuador"}, "AUT": {"elo": 1593.45, "rank": 24, "estimated": false, "name": "Austria"}, "KOR": {"elo": 1588.66, "rank": 25, "estimated": false, "name": "South Korea"}, "AUS": {"elo": 1580.67, "rank": 27, "estimated": false, "name": "Australia"}, "ALG": {"elo": 1564.26, "rank": 28, "estimated": false, "name": "Algeria"}, "EGY": {"elo": 1563.24, "rank": 29, "estimated": false, "name": "Egypt"}, "CAN": {"elo": 1556.48, "rank": 30, "estimated": false, "name": "Canada"}, "NOR": {"elo": 1550.94, "rank": 31, "estimated": false, "name": "Norway"}, "PAN": {"elo": 1540.64, "rank": 33, "estimated": false, "name": "Panama"}, "CIV": {"elo": 1532.98, "rank": 34, "estimated": false, "name": "Ivory Coast"}, "SWE": {"elo": 1514.77, "rank": 38, "estimated": false, "name": "Sweden"}, "PAR": {"elo": 1503.5, "rank": 40, "estimated": false, "name": "Paraguay"}, "CZE": {"elo": 1501.38, "rank": 41, "estimated": false, "name": "Czech Republic"}, "SCO": {"elo": 1498.35, "rank": 43, "estimated": false, "name": "Scotland"}, "TUN": {"elo": 1483.05, "rank": 44, "estimated": false, "name": "Tunisia"}, "COD": {"elo": 1478.35, "rank": 46, "estimated": false, "name": "DR Congo"}, "UZB": {"elo": 1465.34, "rank": 50, "estimated": false, "name": "Uzbekistan"}, "KSA": {"elo": 1460.0, "rank": 53, "estimated": true, "name": "Saudi Arabia"}, "RSA": {"elo": 1450.0, "rank": 55, "estimated": true, "name": "South Africa"}, "BIH": {"elo": 1445.0, "rank": 56, "estimated": true, "name": "Bosnia & Herzegovina"}, "QAT": {"elo": 1430.0, "rank": 58, "estimated": true, "name": "Qatar"}, "GHA": {"elo": 1435.0, "rank": 60, "estimated": true, "name": "Ghana"}, "JOR": {"elo": 1400.0, "rank": 64, "estimated": true, "name": "Jordan"}, "IRQ": {"elo": 1385.0, "rank": 68, "estimated": true, "name": "Iraq"}, "CPV": {"elo": 1370.0, "rank": 72, "estimated": true, "name": "Cape Verde"}, "HAI": {"elo": 1320.0, "rank": 87, "estimated": true, "name": "Haiti"}, "CUW": {"elo": 1305.0, "rank": 91, "estimated": true, "name": "Curacao"}, "NZL": {"elo": 1281.6, "rank": 105, "estimated": false, "name": "New Zealand"}}};
+var TODAY_SCHEDULE = [{"match_id": "1", "date": "2026-06-11", "time_bj": "03:00", "time_raw": "13:00 UTC-6", "round": "Matchday 1", "stage": "小组赛第1轮", "stage_code": "group", "group": "A", "home": "Mexico", "away": "South Africa", "home_code": "MEX", "away_code": "RSA", "home_cn": "墨西哥", "away_cn": "南非", "venue": "Mexico City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "2", "date": "2026-06-11", "time_bj": "10:00", "time_raw": "20:00 UTC-6", "round": "Matchday 1", "stage": "小组赛第1轮", "stage_code": "group", "group": "A", "home": "South Korea", "away": "Czech Republic", "home_code": "KOR", "away_code": "CZE", "home_cn": "韩国", "away_cn": "捷克", "venue": "Guadalajara (Zapopan)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "3", "date": "2026-06-18", "time_bj": "00:00", "time_raw": "12:00 UTC-4", "round": "Matchday 8", "stage": "小组赛第2轮", "stage_code": "group", "group": "A", "home": "Czech Republic", "away": "South Africa", "home_code": "CZE", "away_code": "RSA", "home_cn": "捷克", "away_cn": "南非", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "4", "date": "2026-06-18", "time_bj": "09:00", "time_raw": "19:00 UTC-6", "round": "Matchday 8", "stage": "小组赛第2轮", "stage_code": "group", "group": "A", "home": "Mexico", "away": "South Korea", "home_code": "MEX", "away_code": "KOR", "home_cn": "墨西哥", "away_cn": "韩国", "venue": "Guadalajara (Zapopan)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "5", "date": "2026-06-24", "time_bj": "09:00", "time_raw": "19:00 UTC-6", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "A", "home": "Czech Republic", "away": "Mexico", "home_code": "CZE", "away_code": "MEX", "home_cn": "捷克", "away_cn": "墨西哥", "venue": "Mexico City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "6", "date": "2026-06-24", "time_bj": "09:00", "time_raw": "19:00 UTC-6", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "A", "home": "South Africa", "away": "South Korea", "home_code": "RSA", "away_code": "KOR", "home_cn": "南非", "away_cn": "韩国", "venue": "Monterrey (Guadalupe)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "7", "date": "2026-06-12", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Matchday 2", "stage": "小组赛第1轮", "stage_code": "group", "group": "B", "home": "Canada", "away": "Bosnia & Herzegovina", "home_code": "CAN", "away_code": "BIH", "home_cn": "加拿大", "away_cn": "波黑", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "8", "date": "2026-06-13", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 3", "stage": "小组赛第1轮", "stage_code": "group", "group": "B", "home": "Qatar", "away": "Switzerland", "home_code": "QAT", "away_code": "SUI", "home_cn": "卡塔尔", "away_cn": "瑞士", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "9", "date": "2026-06-18", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 8", "stage": "小组赛第2轮", "stage_code": "group", "group": "B", "home": "Switzerland", "away": "Bosnia & Herzegovina", "home_code": "SUI", "away_code": "BIH", "home_cn": "瑞士", "away_cn": "波黑", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "10", "date": "2026-06-18", "time_bj": "06:00", "time_raw": "15:00 UTC-7", "round": "Matchday 8", "stage": "小组赛第2轮", "stage_code": "group", "group": "B", "home": "Canada", "away": "Qatar", "home_code": "CAN", "away_code": "QAT", "home_cn": "加拿大", "away_cn": "卡塔尔", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "11", "date": "2026-06-24", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "B", "home": "Switzerland", "away": "Canada", "home_code": "SUI", "away_code": "CAN", "home_cn": "瑞士", "away_cn": "加拿大", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "12", "date": "2026-06-24", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "B", "home": "Bosnia & Herzegovina", "away": "Qatar", "home_code": "BIH", "away_code": "QAT", "home_cn": "波黑", "away_cn": "卡塔尔", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "13", "date": "2026-06-13", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 3", "stage": "小组赛第1轮", "stage_code": "group", "group": "C", "home": "Brazil", "away": "Morocco", "home_code": "BRA", "away_code": "MAR", "home_cn": "巴西", "away_cn": "摩洛哥", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "14", "date": "2026-06-13", "time_bj": "09:00", "time_raw": "21:00 UTC-4", "round": "Matchday 3", "stage": "小组赛第1轮", "stage_code": "group", "group": "C", "home": "Haiti", "away": "Scotland", "home_code": "HAI", "away_code": "SCO", "home_cn": "海地", "away_cn": "苏格兰", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "15", "date": "2026-06-19", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 9", "stage": "小组赛第2轮", "stage_code": "group", "group": "C", "home": "Scotland", "away": "Morocco", "home_code": "SCO", "away_code": "MAR", "home_cn": "苏格兰", "away_cn": "摩洛哥", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "16", "date": "2026-06-19", "time_bj": "08:30", "time_raw": "20:30 UTC-4", "round": "Matchday 9", "stage": "小组赛第2轮", "stage_code": "group", "group": "C", "home": "Brazil", "away": "Haiti", "home_code": "BRA", "away_code": "HAI", "home_cn": "巴西", "away_cn": "海地", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "17", "date": "2026-06-24", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "C", "home": "Scotland", "away": "Brazil", "home_code": "SCO", "away_code": "BRA", "home_cn": "苏格兰", "away_cn": "巴西", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "18", "date": "2026-06-24", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "C", "home": "Morocco", "away": "Haiti", "home_code": "MAR", "away_code": "HAI", "home_cn": "摩洛哥", "away_cn": "海地", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "19", "date": "2026-06-12", "time_bj": "09:00", "time_raw": "18:00 UTC-7", "round": "Matchday 2", "stage": "小组赛第1轮", "stage_code": "group", "group": "D", "home": "USA", "away": "Paraguay", "home_code": "USA", "away_code": "PAR", "home_cn": "美国", "away_cn": "巴拉圭", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "20", "date": "2026-06-13", "time_bj": "12:00", "time_raw": "21:00 UTC-7", "round": "Matchday 3", "stage": "小组赛第1轮", "stage_code": "group", "group": "D", "home": "Australia", "away": "Turkey", "home_code": "AUS", "away_code": "TUR", "home_cn": "澳大利亚", "away_cn": "土耳其", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "21", "date": "2026-06-19", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 9", "stage": "小组赛第2轮", "stage_code": "group", "group": "D", "home": "USA", "away": "Australia", "home_code": "USA", "away_code": "AUS", "home_cn": "美国", "away_cn": "澳大利亚", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "22", "date": "2026-06-19", "time_bj": "11:00", "time_raw": "20:00 UTC-7", "round": "Matchday 9", "stage": "小组赛第2轮", "stage_code": "group", "group": "D", "home": "Turkey", "away": "Paraguay", "home_code": "TUR", "away_code": "PAR", "home_cn": "土耳其", "away_cn": "巴拉圭", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "23", "date": "2026-06-25", "time_bj": "10:00", "time_raw": "19:00 UTC-7", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "D", "home": "Turkey", "away": "USA", "home_code": "TUR", "away_code": "USA", "home_cn": "土耳其", "away_cn": "美国", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "24", "date": "2026-06-25", "time_bj": "10:00", "time_raw": "19:00 UTC-7", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "D", "home": "Paraguay", "away": "Australia", "home_code": "PAR", "away_code": "AUS", "home_cn": "巴拉圭", "away_cn": "澳大利亚", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "25", "date": "2026-06-14", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Matchday 4", "stage": "小组赛第1轮", "stage_code": "group", "group": "E", "home": "Germany", "away": "Curaçao", "home_code": "GER", "away_code": "CUW", "home_cn": "德国", "away_cn": "库拉索", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "26", "date": "2026-06-14", "time_bj": "07:00", "time_raw": "19:00 UTC-4", "round": "Matchday 4", "stage": "小组赛第1轮", "stage_code": "group", "group": "E", "home": "Ivory Coast", "away": "Ecuador", "home_code": "CIV", "away_code": "ECU", "home_cn": "科特迪瓦", "away_cn": "厄瓜多尔", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "27", "date": "2026-06-20", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Matchday 10", "stage": "小组赛第2轮", "stage_code": "group", "group": "E", "home": "Germany", "away": "Ivory Coast", "home_code": "GER", "away_code": "CIV", "home_cn": "德国", "away_cn": "科特迪瓦", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "28", "date": "2026-06-20", "time_bj": "08:00", "time_raw": "19:00 UTC-5", "round": "Matchday 10", "stage": "小组赛第2轮", "stage_code": "group", "group": "E", "home": "Ecuador", "away": "Curaçao", "home_code": "ECU", "away_code": "CUW", "home_cn": "厄瓜多尔", "away_cn": "库拉索", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "29", "date": "2026-06-25", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "E", "home": "Curaçao", "away": "Ivory Coast", "home_code": "CUW", "away_code": "CIV", "home_cn": "库拉索", "away_cn": "科特迪瓦", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "30", "date": "2026-06-25", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "E", "home": "Ecuador", "away": "Germany", "home_code": "ECU", "away_code": "GER", "home_cn": "厄瓜多尔", "away_cn": "德国", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "31", "date": "2026-06-14", "time_bj": "04:00", "time_raw": "15:00 UTC-5", "round": "Matchday 4", "stage": "小组赛第1轮", "stage_code": "group", "group": "F", "home": "Netherlands", "away": "Japan", "home_code": "NED", "away_code": "JPN", "home_cn": "荷兰", "away_cn": "日本", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "32", "date": "2026-06-14", "time_bj": "10:00", "time_raw": "20:00 UTC-6", "round": "Matchday 4", "stage": "小组赛第1轮", "stage_code": "group", "group": "F", "home": "Sweden", "away": "Tunisia", "home_code": "SWE", "away_code": "TUN", "home_cn": "瑞典", "away_cn": "突尼斯", "venue": "Monterrey (Guadalupe)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "33", "date": "2026-06-20", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Matchday 10", "stage": "小组赛第2轮", "stage_code": "group", "group": "F", "home": "Netherlands", "away": "Sweden", "home_code": "NED", "away_code": "SWE", "home_cn": "荷兰", "away_cn": "瑞典", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "34", "date": "2026-06-20", "time_bj": "12:00", "time_raw": "22:00 UTC-6", "round": "Matchday 10", "stage": "小组赛第2轮", "stage_code": "group", "group": "F", "home": "Tunisia", "away": "Japan", "home_code": "TUN", "away_code": "JPN", "home_cn": "突尼斯", "away_cn": "日本", "venue": "Monterrey (Guadalupe)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "35", "date": "2026-06-25", "time_bj": "07:00", "time_raw": "18:00 UTC-5", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "F", "home": "Japan", "away": "Sweden", "home_code": "JPN", "away_code": "SWE", "home_cn": "日本", "away_cn": "瑞典", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "36", "date": "2026-06-25", "time_bj": "07:00", "time_raw": "18:00 UTC-5", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "F", "home": "Tunisia", "away": "Netherlands", "home_code": "TUN", "away_code": "NED", "home_cn": "突尼斯", "away_cn": "荷兰", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "37", "date": "2026-06-15", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 5", "stage": "小组赛第1轮", "stage_code": "group", "group": "G", "home": "Belgium", "away": "Egypt", "home_code": "BEL", "away_code": "EGY", "home_cn": "比利时", "away_cn": "埃及", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "38", "date": "2026-06-15", "time_bj": "09:00", "time_raw": "18:00 UTC-7", "round": "Matchday 5", "stage": "小组赛第1轮", "stage_code": "group", "group": "G", "home": "Iran", "away": "New Zealand", "home_code": "IRN", "away_code": "NZL", "home_cn": "伊朗", "away_cn": "新西兰", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "39", "date": "2026-06-21", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 11", "stage": "小组赛第2轮", "stage_code": "group", "group": "G", "home": "Belgium", "away": "Iran", "home_code": "BEL", "away_code": "IRN", "home_cn": "比利时", "away_cn": "伊朗", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "40", "date": "2026-06-21", "time_bj": "09:00", "time_raw": "18:00 UTC-7", "round": "Matchday 11", "stage": "小组赛第2轮", "stage_code": "group", "group": "G", "home": "New Zealand", "away": "Egypt", "home_code": "NZL", "away_code": "EGY", "home_cn": "新西兰", "away_cn": "埃及", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "41", "date": "2026-06-26", "time_bj": "11:00", "time_raw": "20:00 UTC-7", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "G", "home": "Egypt", "away": "Iran", "home_code": "EGY", "away_code": "IRN", "home_cn": "埃及", "away_cn": "伊朗", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "42", "date": "2026-06-26", "time_bj": "11:00", "time_raw": "20:00 UTC-7", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "G", "home": "New Zealand", "away": "Belgium", "home_code": "NZL", "away_code": "BEL", "home_cn": "新西兰", "away_cn": "比利时", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "43", "date": "2026-06-15", "time_bj": "00:00", "time_raw": "12:00 UTC-4", "round": "Matchday 5", "stage": "小组赛第1轮", "stage_code": "group", "group": "H", "home": "Spain", "away": "Cape Verde", "home_code": "ESP", "away_code": "CPV", "home_cn": "西班牙", "away_cn": "佛得角", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "44", "date": "2026-06-15", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 5", "stage": "小组赛第1轮", "stage_code": "group", "group": "H", "home": "Saudi Arabia", "away": "Uruguay", "home_code": "KSA", "away_code": "URU", "home_cn": "沙特", "away_cn": "乌拉圭", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "45", "date": "2026-06-21", "time_bj": "00:00", "time_raw": "12:00 UTC-4", "round": "Matchday 11", "stage": "小组赛第2轮", "stage_code": "group", "group": "H", "home": "Spain", "away": "Saudi Arabia", "home_code": "ESP", "away_code": "KSA", "home_cn": "西班牙", "away_cn": "沙特", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "46", "date": "2026-06-21", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 11", "stage": "小组赛第2轮", "stage_code": "group", "group": "H", "home": "Uruguay", "away": "Cape Verde", "home_code": "URU", "away_code": "CPV", "home_cn": "乌拉圭", "away_cn": "佛得角", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "47", "date": "2026-06-26", "time_bj": "08:00", "time_raw": "19:00 UTC-5", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "H", "home": "Cape Verde", "away": "Saudi Arabia", "home_code": "CPV", "away_code": "KSA", "home_cn": "佛得角", "away_cn": "沙特", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "48", "date": "2026-06-26", "time_bj": "08:00", "time_raw": "18:00 UTC-6", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "H", "home": "Uruguay", "away": "Spain", "home_code": "URU", "away_code": "ESP", "home_cn": "乌拉圭", "away_cn": "西班牙", "venue": "Guadalajara (Zapopan)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "49", "date": "2026-06-16", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Matchday 6", "stage": "小组赛第1轮", "stage_code": "group", "group": "I", "home": "France", "away": "Senegal", "home_code": "FRA", "away_code": "SEN", "home_cn": "法国", "away_cn": "塞内加尔", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "50", "date": "2026-06-16", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 6", "stage": "小组赛第1轮", "stage_code": "group", "group": "I", "home": "Iraq", "away": "Norway", "home_code": "IRQ", "away_code": "NOR", "home_cn": "伊拉克", "away_cn": "挪威", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "51", "date": "2026-06-22", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Matchday 12", "stage": "小组赛第2轮", "stage_code": "group", "group": "I", "home": "France", "away": "Iraq", "home_code": "FRA", "away_code": "IRQ", "home_cn": "法国", "away_cn": "伊拉克", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "52", "date": "2026-06-22", "time_bj": "08:00", "time_raw": "20:00 UTC-4", "round": "Matchday 12", "stage": "小组赛第2轮", "stage_code": "group", "group": "I", "home": "Norway", "away": "Senegal", "home_code": "NOR", "away_code": "SEN", "home_cn": "挪威", "away_cn": "塞内加尔", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "53", "date": "2026-06-26", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "I", "home": "Norway", "away": "France", "home_code": "NOR", "away_code": "FRA", "home_cn": "挪威", "away_cn": "法国", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "54", "date": "2026-06-26", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "I", "home": "Senegal", "away": "Iraq", "home_code": "SEN", "away_code": "IRQ", "home_cn": "塞内加尔", "away_cn": "伊拉克", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "55", "date": "2026-06-16", "time_bj": "09:00", "time_raw": "20:00 UTC-5", "round": "Matchday 6", "stage": "小组赛第1轮", "stage_code": "group", "group": "J", "home": "Argentina", "away": "Algeria", "home_code": "ARG", "away_code": "ALG", "home_cn": "阿根廷", "away_cn": "阿尔及利亚", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "56", "date": "2026-06-16", "time_bj": "12:00", "time_raw": "21:00 UTC-7", "round": "Matchday 6", "stage": "小组赛第1轮", "stage_code": "group", "group": "J", "home": "Austria", "away": "Jordan", "home_code": "AUT", "away_code": "JOR", "home_cn": "奥地利", "away_cn": "约旦", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "57", "date": "2026-06-22", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Matchday 12", "stage": "小组赛第2轮", "stage_code": "group", "group": "J", "home": "Argentina", "away": "Austria", "home_code": "ARG", "away_code": "AUT", "home_cn": "阿根廷", "away_cn": "奥地利", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "58", "date": "2026-06-22", "time_bj": "11:00", "time_raw": "20:00 UTC-7", "round": "Matchday 12", "stage": "小组赛第2轮", "stage_code": "group", "group": "J", "home": "Jordan", "away": "Algeria", "home_code": "JOR", "away_code": "ALG", "home_cn": "约旦", "away_cn": "阿尔及利亚", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "59", "date": "2026-06-27", "time_bj": "10:00", "time_raw": "21:00 UTC-5", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "J", "home": "Algeria", "away": "Austria", "home_code": "ALG", "away_code": "AUT", "home_cn": "阿尔及利亚", "away_cn": "奥地利", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "60", "date": "2026-06-27", "time_bj": "10:00", "time_raw": "21:00 UTC-5", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "J", "home": "Jordan", "away": "Argentina", "home_code": "JOR", "away_code": "ARG", "home_cn": "约旦", "away_cn": "阿根廷", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "61", "date": "2026-06-17", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Matchday 7", "stage": "小组赛第1轮", "stage_code": "group", "group": "K", "home": "Portugal", "away": "DR Congo", "home_code": "POR", "away_code": "COD", "home_cn": "葡萄牙", "away_cn": "刚果(金)", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "62", "date": "2026-06-17", "time_bj": "10:00", "time_raw": "20:00 UTC-6", "round": "Matchday 7", "stage": "小组赛第1轮", "stage_code": "group", "group": "K", "home": "Uzbekistan", "away": "Colombia", "home_code": "UZB", "away_code": "COL", "home_cn": "乌兹别克斯坦", "away_cn": "哥伦比亚", "venue": "Mexico City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "63", "date": "2026-06-23", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Matchday 13", "stage": "小组赛第2轮", "stage_code": "group", "group": "K", "home": "Portugal", "away": "Uzbekistan", "home_code": "POR", "away_code": "UZB", "home_cn": "葡萄牙", "away_cn": "乌兹别克斯坦", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "64", "date": "2026-06-23", "time_bj": "10:00", "time_raw": "20:00 UTC-6", "round": "Matchday 13", "stage": "小组赛第2轮", "stage_code": "group", "group": "K", "home": "Colombia", "away": "DR Congo", "home_code": "COL", "away_code": "COD", "home_cn": "哥伦比亚", "away_cn": "刚果(金)", "venue": "Guadalajara (Zapopan)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "65", "date": "2026-06-27", "time_bj": "07:30", "time_raw": "19:30 UTC-4", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "K", "home": "Colombia", "away": "Portugal", "home_code": "COL", "away_code": "POR", "home_cn": "哥伦比亚", "away_cn": "葡萄牙", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "66", "date": "2026-06-27", "time_bj": "07:30", "time_raw": "19:30 UTC-4", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "K", "home": "DR Congo", "away": "Uzbekistan", "home_code": "COD", "away_code": "UZB", "home_cn": "刚果(金)", "away_cn": "乌兹别克斯坦", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "67", "date": "2026-06-17", "time_bj": "04:00", "time_raw": "15:00 UTC-5", "round": "Matchday 7", "stage": "小组赛第1轮", "stage_code": "group", "group": "L", "home": "England", "away": "Croatia", "home_code": "ENG", "away_code": "CRO", "home_cn": "英格兰", "away_cn": "克罗地亚", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "68", "date": "2026-06-17", "time_bj": "07:00", "time_raw": "19:00 UTC-4", "round": "Matchday 7", "stage": "小组赛第1轮", "stage_code": "group", "group": "L", "home": "Ghana", "away": "Panama", "home_code": "GHA", "away_code": "PAN", "home_cn": "加纳", "away_cn": "巴拿马", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "69", "date": "2026-06-23", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Matchday 13", "stage": "小组赛第2轮", "stage_code": "group", "group": "L", "home": "England", "away": "Ghana", "home_code": "ENG", "away_code": "GHA", "home_cn": "英格兰", "away_cn": "加纳", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "70", "date": "2026-06-23", "time_bj": "07:00", "time_raw": "19:00 UTC-4", "round": "Matchday 13", "stage": "小组赛第2轮", "stage_code": "group", "group": "L", "home": "Panama", "away": "Croatia", "home_code": "PAN", "away_code": "CRO", "home_cn": "巴拿马", "away_cn": "克罗地亚", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "71", "date": "2026-06-27", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "L", "home": "Panama", "away": "England", "home_code": "PAN", "away_code": "ENG", "home_cn": "巴拿马", "away_cn": "英格兰", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "72", "date": "2026-06-27", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "L", "home": "Croatia", "away": "Ghana", "home_code": "CRO", "away_code": "GHA", "home_cn": "克罗地亚", "away_cn": "加纳", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "73", "date": "2026-06-28", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "2A", "away": "2B", "home_code": "2A", "away_code": "2B", "home_cn": "2A", "away_cn": "2B", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 73, "goals_home": [], "goals_away": []}, {"match_id": "74", "date": "2026-06-29", "time_bj": "04:30", "time_raw": "16:30 UTC-4", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1E", "away": "3A/B/C/D/F", "home_code": "1E", "away_code": "3A/B/C/D/F", "home_cn": "1E", "away_cn": "3A/B/C/D/F", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 74, "goals_home": [], "goals_away": []}, {"match_id": "75", "date": "2026-06-29", "time_bj": "09:00", "time_raw": "19:00 UTC-6", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1F", "away": "2C", "home_code": "1F", "away_code": "2C", "home_cn": "1F", "away_cn": "2C", "venue": "Monterrey (Guadalupe)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 75, "goals_home": [], "goals_away": []}, {"match_id": "76", "date": "2026-06-29", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1C", "away": "2F", "home_code": "1C", "away_code": "2F", "home_cn": "1C", "away_cn": "2F", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 76, "goals_home": [], "goals_away": []}, {"match_id": "77", "date": "2026-06-30", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1I", "away": "3C/D/F/G/H", "home_code": "1I", "away_code": "3C/D/F/G/H", "home_cn": "1I", "away_cn": "3C/D/F/G/H", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 77, "goals_home": [], "goals_away": []}, {"match_id": "78", "date": "2026-06-30", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "2E", "away": "2I", "home_code": "2E", "away_code": "2I", "home_cn": "2E", "away_cn": "2I", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 78, "goals_home": [], "goals_away": []}, {"match_id": "79", "date": "2026-06-30", "time_bj": "09:00", "time_raw": "19:00 UTC-6", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1A", "away": "3C/E/F/H/I", "home_code": "1A", "away_code": "3C/E/F/H/I", "home_cn": "1A", "away_cn": "3C/E/F/H/I", "venue": "Mexico City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 79, "goals_home": [], "goals_away": []}, {"match_id": "80", "date": "2026-07-01", "time_bj": "00:00", "time_raw": "12:00 UTC-4", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1L", "away": "3E/H/I/J/K", "home_code": "1L", "away_code": "3E/H/I/J/K", "home_cn": "1L", "away_cn": "3E/H/I/J/K", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 80, "goals_home": [], "goals_away": []}, {"match_id": "81", "date": "2026-07-01", "time_bj": "08:00", "time_raw": "17:00 UTC-7", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1D", "away": "3B/E/F/I/J", "home_code": "1D", "away_code": "3B/E/F/I/J", "home_cn": "1D", "away_cn": "3B/E/F/I/J", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 81, "goals_home": [], "goals_away": []}, {"match_id": "82", "date": "2026-07-01", "time_bj": "04:00", "time_raw": "13:00 UTC-7", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1G", "away": "3A/E/H/I/J", "home_code": "1G", "away_code": "3A/E/H/I/J", "home_cn": "1G", "away_cn": "3A/E/H/I/J", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 82, "goals_home": [], "goals_away": []}, {"match_id": "83", "date": "2026-07-02", "time_bj": "07:00", "time_raw": "19:00 UTC-4", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "2K", "away": "2L", "home_code": "2K", "away_code": "2L", "home_cn": "2K", "away_cn": "2L", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 83, "goals_home": [], "goals_away": []}, {"match_id": "84", "date": "2026-07-02", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1H", "away": "2J", "home_code": "1H", "away_code": "2J", "home_cn": "1H", "away_cn": "2J", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 84, "goals_home": [], "goals_away": []}, {"match_id": "85", "date": "2026-07-02", "time_bj": "11:00", "time_raw": "20:00 UTC-7", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1B", "away": "3E/F/G/I/J", "home_code": "1B", "away_code": "3E/F/G/I/J", "home_cn": "1B", "away_cn": "3E/F/G/I/J", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 85, "goals_home": [], "goals_away": []}, {"match_id": "86", "date": "2026-07-03", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1J", "away": "2H", "home_code": "1J", "away_code": "2H", "home_cn": "1J", "away_cn": "2H", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 86, "goals_home": [], "goals_away": []}, {"match_id": "87", "date": "2026-07-03", "time_bj": "09:30", "time_raw": "20:30 UTC-5", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1K", "away": "3D/E/I/J/L", "home_code": "1K", "away_code": "3D/E/I/J/L", "home_cn": "1K", "away_cn": "3D/E/I/J/L", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 87, "goals_home": [], "goals_away": []}, {"match_id": "88", "date": "2026-07-03", "time_bj": "02:00", "time_raw": "13:00 UTC-5", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "2D", "away": "2G", "home_code": "2D", "away_code": "2G", "home_cn": "2D", "away_cn": "2G", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 88, "goals_home": [], "goals_away": []}, {"match_id": "89", "date": "2026-07-04", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W74", "away": "W77", "home_code": "W74", "away_code": "W77", "home_cn": "W74", "away_cn": "W77", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 89, "goals_home": [], "goals_away": []}, {"match_id": "90", "date": "2026-07-04", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W73", "away": "W75", "home_code": "W73", "away_code": "W75", "home_cn": "W73", "away_cn": "W75", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 90, "goals_home": [], "goals_away": []}, {"match_id": "91", "date": "2026-07-05", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W76", "away": "W78", "home_code": "W76", "away_code": "W78", "home_cn": "W76", "away_cn": "W78", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 91, "goals_home": [], "goals_away": []}, {"match_id": "92", "date": "2026-07-05", "time_bj": "08:00", "time_raw": "18:00 UTC-6", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W79", "away": "W80", "home_code": "W79", "away_code": "W80", "home_cn": "W79", "away_cn": "W80", "venue": "Mexico City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 92, "goals_home": [], "goals_away": []}, {"match_id": "93", "date": "2026-07-06", "time_bj": "03:00", "time_raw": "14:00 UTC-5", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W83", "away": "W84", "home_code": "W83", "away_code": "W84", "home_cn": "W83", "away_cn": "W84", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 93, "goals_home": [], "goals_away": []}, {"match_id": "94", "date": "2026-07-06", "time_bj": "08:00", "time_raw": "17:00 UTC-7", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W81", "away": "W82", "home_code": "W81", "away_code": "W82", "home_cn": "W81", "away_cn": "W82", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 94, "goals_home": [], "goals_away": []}, {"match_id": "95", "date": "2026-07-07", "time_bj": "00:00", "time_raw": "12:00 UTC-4", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W86", "away": "W88", "home_code": "W86", "away_code": "W88", "home_cn": "W86", "away_cn": "W88", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 95, "goals_home": [], "goals_away": []}, {"match_id": "96", "date": "2026-07-07", "time_bj": "04:00", "time_raw": "13:00 UTC-7", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W85", "away": "W87", "home_code": "W85", "away_code": "W87", "home_cn": "W85", "away_cn": "W87", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 96, "goals_home": [], "goals_away": []}, {"match_id": "97", "date": "2026-07-09", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Quarter-final", "stage": "四分之一决赛", "stage_code": "qf", "group": null, "home": "W89", "away": "W90", "home_code": "W89", "away_code": "W90", "home_cn": "W89", "away_cn": "W90", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 97, "goals_home": [], "goals_away": []}, {"match_id": "98", "date": "2026-07-10", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Quarter-final", "stage": "四分之一决赛", "stage_code": "qf", "group": null, "home": "W93", "away": "W94", "home_code": "W93", "away_code": "W94", "home_cn": "W93", "away_cn": "W94", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 98, "goals_home": [], "goals_away": []}, {"match_id": "99", "date": "2026-07-11", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Quarter-final", "stage": "四分之一决赛", "stage_code": "qf", "group": null, "home": "W91", "away": "W92", "home_code": "W91", "away_code": "W92", "home_cn": "W91", "away_cn": "W92", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 99, "goals_home": [], "goals_away": []}, {"match_id": "100", "date": "2026-07-11", "time_bj": "09:00", "time_raw": "20:00 UTC-5", "round": "Quarter-final", "stage": "四分之一决赛", "stage_code": "qf", "group": null, "home": "W95", "away": "W96", "home_code": "W95", "away_code": "W96", "home_cn": "W95", "away_cn": "W96", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 100, "goals_home": [], "goals_away": []}, {"match_id": "101", "date": "2026-07-14", "time_bj": "03:00", "time_raw": "14:00 UTC-5", "round": "Semi-final", "stage": "半决赛", "stage_code": "sf", "group": null, "home": "W97", "away": "W98", "home_code": "W97", "away_code": "W98", "home_cn": "W97", "away_cn": "W98", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 101, "goals_home": [], "goals_away": []}, {"match_id": "102", "date": "2026-07-15", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Semi-final", "stage": "半决赛", "stage_code": "sf", "group": null, "home": "W99", "away": "W100", "home_code": "W99", "away_code": "W100", "home_cn": "W99", "away_cn": "W100", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 102, "goals_home": [], "goals_away": []}, {"match_id": "103", "date": "2026-07-18", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Match for third place", "stage": "三四名决赛", "stage_code": "third", "group": null, "home": "L101", "away": "L102", "home_code": "L101", "away_code": "L102", "home_cn": "L101", "away_cn": "L102", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "104", "date": "2026-07-19", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Final", "stage": "决赛", "stage_code": "final", "group": null, "home": "W101", "away": "W102", "home_code": "W101", "away_code": "W102", "home_cn": "W101", "away_cn": "W102", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}];
+var TODAY_INITIAL = {"date": "2026-05-29", "day_index": 0, "total_matchdays": 34, "matches": [], "total_matches": 0, "has_next": true, "has_prev": false, "next_date": "2026-06-12", "prev_date": null, "all_dates": ["2026-06-11", "2026-06-12", "2026-06-13", "2026-06-14", "2026-06-15", "2026-06-16", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-20", "2026-06-21", "2026-06-22", "2026-06-23", "2026-06-24", "2026-06-25", "2026-06-26", "2026-06-27", "2026-06-28", "2026-06-29", "2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04", "2026-07-05", "2026-07-06", "2026-07-07", "2026-07-09", "2026-07-10", "2026-07-11", "2026-07-14", "2026-07-15", "2026-07-18", "2026-07-19"]};
+var TODAY_TEAM_NAMES_CN = {"MEX": "墨西哥", "RSA": "南非", "KOR": "韩国", "CZE": "捷克", "CAN": "加拿大", "BIH": "波黑", "QAT": "卡塔尔", "SUI": "瑞士", "BRA": "巴西", "MAR": "摩洛哥", "HAI": "海地", "SCO": "苏格兰", "USA": "美国", "PAR": "巴拉圭", "AUS": "澳大利亚", "TUR": "土耳其", "GER": "德国", "CUW": "库拉索", "CIV": "科特迪瓦", "ECU": "厄瓜多尔", "NED": "荷兰", "JPN": "日本", "SWE": "瑞典", "TUN": "突尼斯", "BEL": "比利时", "EGY": "埃及", "IRN": "伊朗", "NZL": "新西兰", "ESP": "西班牙", "CPV": "佛得角", "KSA": "沙特", "URU": "乌拉圭", "FRA": "法国", "SEN": "塞内加尔", "IRQ": "伊拉克", "NOR": "挪威", "ARG": "阿根廷", "ALG": "阿尔及利亚", "AUT": "奥地利", "JOR": "约旦", "POR": "葡萄牙", "COD": "刚果(金)", "UZB": "乌兹别克斯坦", "COL": "哥伦比亚", "ENG": "英格兰", "CRO": "克罗地亚", "GHA": "加纳", "PAN": "巴拿马"};
+var TODAY_CURRENT_DATE = TODAY_INITIAL.date;
+var TODAY_ALL_DATES = TODAY_INITIAL.all_dates || [];
+var TODAY_REFRESH_TIMER = null;
+
+// ====== Poisson Prediction Engine (JS port) ======
+var AVG_TOTAL_GOALS = 2.6;
+var ELO_PER_GOAL = 200.0;
+var MIN_LAMBDA = 0.3;
+var MAX_LAMBDA = 4.0;
+
+function factorial(n) {
+  var r = 1;
+  for (var i = 2; i <= n; i++) r *= i;
+  return r;
+}
+
+function poissonProb(k, lam) {
+  if (lam <= 0) return k === 0 ? 1 : 0;
+  return (Math.pow(lam, k) * Math.exp(-lam)) / factorial(k);
+}
+
+function expectedGoals(eloA, eloB) {
+  var dr = eloA - eloB;
+  var gd = dr / ELO_PER_GOAL;
+  var half = AVG_TOTAL_GOALS / 2;
+  var la = Math.max(MIN_LAMBDA, Math.min(MAX_LAMBDA, half + gd / 2));
+  var lb = Math.max(MIN_LAMBDA, Math.min(MAX_LAMBDA, half - gd / 2));
+  return [la, lb];
+}
+
+function matchOutcomeProbs(eloA, eloB, maxGoals) {
+  maxGoals = maxGoals || 8;
+  var lams = expectedGoals(eloA, eloB);
+  var la = lams[0], lb = lams[1];
+  var pWin = 0, pDraw = 0, pLose = 0;
+  for (var ga = 0; ga <= maxGoals; ga++) {
+    var pa = poissonProb(ga, la);
+    for (var gb = 0; gb <= maxGoals; gb++) {
+      var joint = pa * poissonProb(gb, lb);
+      if (ga > gb) pWin += joint;
+      else if (gb > ga) pLose += joint;
+      else pDraw += joint;
+    }
+  }
+  var total = pWin + pDraw + pLose;
+  if (total > 0) { pWin /= total; pDraw /= total; pLose /= total; }
+  return [pWin, pDraw, pLose];
+}
+
+// ====== Lookup helpers ======
+function cnName(name) {
+  // name could be English name (from schedule) or 3-letter code
+  if (TODAY_TEAM_NAMES_CN[name]) return TODAY_TEAM_NAMES_CN[name];
+  // Try code lookup
+  for (var code in TODAY_TEAM_NAMES_CN) {
+    if (TODAY_ELO_DATA.teams && TODAY_ELO_DATA.teams[code] &&
+        TODAY_ELO_DATA.teams[code].name === name) {
+      return TODAY_TEAM_NAMES_CN[code];
+    }
+  }
+  return name;
+}
+
+function getElo(enName) {
+  // Find ELO by English team name
+  var teams = TODAY_ELO_DATA.teams || {};
+  for (var code in teams) {
+    if (teams[code].name === enName) return teams[code].elo || 1500;
+  }
+  return 1500;
+}
+
+function getCode(enName) {
+  var teams = TODAY_ELO_DATA.teams || {};
+  for (var code in teams) {
+    if (teams[code].name === enName) return code;
+  }
+  return enName;
+}
+
+// ====== Get schedule for a specific date ======
+function getMatchesForDate(dateStr) {
+  return TODAY_SCHEDULE.filter(function(m) { return m.date === dateStr; });
+}
+
+// ====== Compute predictions for any date ======
+function computePredictions(dateStr) {
+  var matches = getMatchesForDate(dateStr);
+  if (!matches.length) return null;
+
+  var idx = TODAY_ALL_DATES.indexOf(dateStr);
+  if (idx < 0) idx = 0;
+
+  var preds = [];
+  matches.forEach(function(m) {
+    var home = m.home || '', away = m.away || '';
+    if (!home || !away || home === away) {
+      preds.push({
+        home: home || '待定', away: away || '待定',
+        home_cn: home || '待定', away_cn: away || '待定',
+        group: m.group, stage: m.stage, tbd: true,
+        finished: m.finished || false, score: m.score_ft
+      });
+      return;
+    }
+
+    var hElo = getElo(home), aElo = getElo(away);
+    var probs = matchOutcomeProbs(hElo, aElo);
+    var goals = expectedGoals(hElo, aElo);
+    var hCode = getCode(home), aCode = getCode(away);
+
+    preds.push({
+      home: home, away: away,
+      home_cn: cnName(hCode) || cnName(home),
+      away_cn: cnName(aCode) || cnName(away),
+      home_code: hCode, away_code: aCode,
+      home_elo: Math.round(hElo), away_elo: Math.round(aElo),
+      group: m.group, stage: m.stage,
+      home_win_pct: +(probs[0] * 100).toFixed(1),
+      draw_pct: +(probs[1] * 100).toFixed(1),
+      away_win_pct: +(probs[2] * 100).toFixed(1),
+      expected_goals_home: +goals[0].toFixed(2),
+      expected_goals_away: +goals[1].toFixed(2),
+      total_expected_goals: +(goals[0] + goals[1]).toFixed(2),
+      finished: m.finished || false, score: m.score_ft,
+      tbd: false
+    });
+  });
+
+  return {
+    date: dateStr,
+    day_index: idx,
+    total_matchdays: TODAY_ALL_DATES.length,
+    matches: preds,
+    total_matches: preds.length,
+    has_next: idx < TODAY_ALL_DATES.length - 1,
+    has_prev: idx > 0,
+    next_date: idx < TODAY_ALL_DATES.length - 1 ? TODAY_ALL_DATES[idx + 1] : null,
+    prev_date: idx > 0 ? TODAY_ALL_DATES[idx - 1] : null
+  };
+}
+
+// ====== Live Score Fetching ======
+function fetchLiveScores() {
+  try {
+    var apiUrl = 'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
+    return fetch(apiUrl).then(function(r) { return r.json(); }).then(function(data) {
+      updateLiveScores(data);
+    }).catch(function() { /* silently fail */ });
+  } catch(e) { return Promise.resolve(); }
+}
+
+function updateLiveScores(rawData) {
+  if (!rawData || !rawData.matches) return;
+  var updated = false;
+  rawData.matches.forEach(function(rm) {
+    var rdate = rm.date || '';
+    if (rdate !== TODAY_CURRENT_DATE) return;
+    var t1 = rm.team1 || '', t2 = rm.team2 || '';
+    var ft = rm.goals1 !== undefined && rm.goals2 !== undefined ?
+             [rm.goals1, rm.goals2] : null;
+    // Update schedule data
+    TODAY_SCHEDULE.forEach(function(m) {
+      if (m.date === rdate && m.home === t1 && m.away === t2) {
+        if (ft && !m.finished) { m.finished = true; m.score_ft = ft; updated = true; }
+        else if (ft) { m.score_ft = ft; updated = true; }
+      }
+    });
+  });
+  if (updated) {
+    var pred = computePredictions(TODAY_CURRENT_DATE);
+    if (pred) renderTodayMatches(pred);
+  }
+}
+
+// ====== Rendering ======
+function renderTodayMatches(data) {
+  var dateShort = data.date.slice(5);
+  document.getElementById('today-date-header').textContent = dateShort;
+
+  // Timeline
+  renderTimeline(data);
+
+  if (!data.matches || data.matches.length === 0) {
+    document.getElementById('today-matches').innerHTML =
+      '<div class="today-empty">该日暂无比赛 &#x1F4AD;<br><small>使用下方按钮跳转到有比赛的日期</small></div>';
+    // Fall through - still show navigation and refresh buttons
+  } else {
+    renderMatchCards(data);
+  }
+
+  // Navigation buttons (always visible if there are matchdays)
+  updateNavigation(data);
+}
+
+function renderMatchCards(data) {
+  var html = '';
+  data.matches.forEach(function(m) {
+    if (m.tbd) {
+      html += '<div class="match-item tbd">' +
+        '<div class="match-header-row">' +
+          '<span class="match-group-tag">' + (m.group || '淘汰赛') + '</span>' +
+          '<span>' + (m.stage || '') + '</span>' +
+        '</div>' +
+        '<div class="match-teams-row">' +
+          '<span style="color:#8890b5;">对阵待定</span>' +
+        '</div>' +
+      '</div>';
+      return;
+    }
+
+    var homeCN = m.home_cn, awayCN = m.away_cn;
+    var groupTag = m.group ? '<span class="match-group-tag">' + m.group + ' 组</span>' : '';
+    var homeStronger = m.home_win_pct >= m.away_win_pct;
+
+    // Score display
+    var scoreHtml = '';
+    var itemClass = 'match-item';
+    if (m.finished && m.score) {
+      itemClass += ' finished';
+      scoreHtml = '<span class="match-score-tag">' + m.score[0] + ' - ' + m.score[1] + '</span>';
+    }
+
+    html += '<div class="' + itemClass + '">' +
+      '<div class="match-header-row">' +
+        groupTag +
+        (scoreHtml || '<span>' + (m.stage || '') + '</span>') +
+      '</div>' +
+      '<div class="match-teams-row">' +
+        '<div class="team-block">' +
+          '<div class="tname" style="color:' + (homeStronger ? '#FFD700' : '') + '">' + homeCN + '</div>' +
+          '<div class="telo">ELO ' + m.home_elo + '</div>' +
+          (m.finished && m.score ? '<div class="tscore">' + m.score[0] + '</div>' : '') +
+        '</div>' +
+        '<div class="team-vs">' + (m.finished && m.score ? '' : 'VS') + '</div>' +
+        '<div class="team-block">' +
+          '<div class="tname" style="color:' + (!homeStronger ? '#FFD700' : '') + '">' + awayCN + '</div>' +
+          '<div class="telo">ELO ' + m.away_elo + '</div>' +
+          (m.finished && m.score ? '<div class="tscore">' + m.score[1] + '</div>' : '') +
+        '</div>' +
+      '</div>';
+
+    // Only show predictions for non-finished matches
+    if (!m.finished) {
+      html += '<div class="prob-row">' +
+        '<div class="prob-col home">' +
+          '<div class="plabel">' + homeCN + '胜 ' + m.home_win_pct + '%</div>' +
+          '<div class="prob-bar-wrap"><div class="prob-bar home" style="width:' + Math.max(m.home_win_pct, 3) + '%"></div></div>' +
+        '</div>' +
+        '<div class="prob-col draw">' +
+          '<div class="plabel">平局 ' + m.draw_pct + '%</div>' +
+          '<div class="prob-bar-wrap"><div class="prob-bar draw" style="width:' + Math.max(m.draw_pct, 3) + '%"></div></div>' +
+        '</div>' +
+        '<div class="prob-col away">' +
+          '<div class="plabel">' + awayCN + '胜 ' + m.away_win_pct + '%</div>' +
+          '<div class="prob-bar-wrap"><div class="prob-bar away" style="width:' + Math.max(m.away_win_pct, 3) + '%"></div></div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="goals-row">' +
+        '预期进球: <span class="gval ghome">' + m.expected_goals_home + '</span>' +
+        ' - <span class="gval gaway">' + m.expected_goals_away + '</span>' +
+        ' (总 <span style="color:#FFD700;font-weight:700;">' + m.total_expected_goals + '</span>)' +
+      '</div>';
+    }
+
+    html += '</div>';
+  });
+
+  document.getElementById('today-matches').innerHTML = html;
+}
+
+function updateNavigation(data) {
+  var btnPrev = document.getElementById('btn-prev-day');
+  var btnNext = document.getElementById('btn-next-day');
+  if (data.has_prev) {
+    btnPrev.disabled = false;
+    btnPrev.textContent = '\u25C0 前一天 (' + data.prev_date.slice(5) + ')';
+  } else {
+    btnPrev.disabled = true;
+    btnPrev.textContent = '\u25C0 前一天';
+  }
+  if (data.has_next) {
+    btnNext.disabled = false;
+    btnNext.textContent = '\u25B6 后一天 (' + data.next_date.slice(5) + ')';
+  } else {
+    btnNext.disabled = true;
+    btnNext.textContent = '\u2714 已是最后比赛日';
+  }
+  document.getElementById('today-progress-text').innerHTML =
+    '第 <span>' + (data.day_index + 1) + '</span> / ' + data.total_matchdays + ' 比赛日';
+  document.getElementById('today-actions').style.display = 'flex';
+  document.getElementById('today-sync-info').textContent =
+    '数据来源: openfootball API | 预测模型: ELO + Poisson | 上次生成: ' + new Date().toLocaleString('zh-CN');
+}
+
+function renderTimeline(data) {
+  var total = data.total_matchdays;
+  var current = data.day_index;
+  var start = Math.max(0, current - 3);
+  var end = Math.min(total, current + 4);
+  var html = '';
+  if (start > 0) html += '<span style="font-size:0.8em;">…</span>';
+  for (var i = start; i < end; i++) {
+    var cls = 'dot';
+    if (i < current) cls += ' done';
+    else if (i === current) cls += ' active';
+    html += '<span class="' + cls + '" title="第' + (i+1) + '比赛日"></span>';
+  }
+  if (end < total) html += '<span style="font-size:0.8em;">…</span>';
+  document.getElementById('today-timeline').innerHTML = html;
+}
+
+function navigateDay(dir) {
+  var idx = TODAY_ALL_DATES.indexOf(TODAY_CURRENT_DATE);
+  if (idx < 0) idx = 0;
+  var newIdx = idx + dir;
+  if (newIdx < 0 || newIdx >= TODAY_ALL_DATES.length) return;
+  TODAY_CURRENT_DATE = TODAY_ALL_DATES[newIdx];
+  // Save to localStorage
+  try { localStorage.setItem('wc2026_today_date', TODAY_CURRENT_DATE); } catch(e) {}
+  var pred = computePredictions(TODAY_CURRENT_DATE);
+  if (pred) renderTodayMatches(pred);
+  // Also refresh live scores when navigating
+  fetchLiveScores();
+}
+
+// ====== Manual Refresh ======
+function refreshNow() {
+  var btn = document.getElementById('btn-refresh');
+  if (btn.disabled) return;
+  btn.disabled = true;
+  btn.classList.add('spinning');
+  btn.innerHTML = '<span class="spin-icon">&#x21BB;</span> 刷新中…';
+
+  var started = Date.now();
+  fetchLiveScores().finally(function() {
+    var elapsed = Date.now() - started;
+    // Ensure minimum 600ms visible feedback
+    var delay = Math.max(0, 600 - elapsed);
+    setTimeout(function() {
+      btn.classList.remove('spinning');
+      btn.innerHTML = '<span class="spin-icon">&#x21BB;</span> 立即更新';
+      btn.disabled = false;
+    }, delay);
+  });
+}
+
+// ====== Init ======
+(function() {
+  // Restore saved date
+  try {
+    var saved = localStorage.getItem('wc2026_today_date');
+    if (saved && TODAY_ALL_DATES.indexOf(saved) >= 0) {
+      TODAY_CURRENT_DATE = saved;
+    }
+  } catch(e) {}
+
+  var pred = computePredictions(TODAY_CURRENT_DATE);
+  if (!pred && TODAY_ALL_DATES.length > 0) {
+    // Auto-navigate to first date that has matches
+    for (var i = 0; i < TODAY_ALL_DATES.length; i++) {
+      pred = computePredictions(TODAY_ALL_DATES[i]);
+      if (pred && pred.matches && pred.matches.length > 0) {
+        TODAY_CURRENT_DATE = TODAY_ALL_DATES[i];
+        break;
+      }
+    }
+  }
+  if (pred) {
+    renderTodayMatches(pred);
+  } else {
+    document.getElementById('today-matches').innerHTML =
+      '<div class="today-empty">暂无比赛数据</div>';
+  }
+
+  // Fetch live scores every 5 minutes
+  fetchLiveScores();
+  TODAY_REFRESH_TIMER = setInterval(fetchLiveScores, 5 * 60 * 1000);
+})();
+</script>
+<!-- ====== End 今日比赛预测模块 ====== -->
+
+<!-- ====== 全部 48 队晋级概率矩阵 ====== -->
+<div class="card">
+    <h2>&#x1F4CA; 全部 48 队晋级概率矩阵</h2>
+    <div class="table-scroll">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>球队</th>
+                <th>小组</th>
+                <th>ELO</th>
+                <th>夺冠</th>
+                <th>决赛</th>
+                <th>四强</th>
+                <th>八强</th>
+                <th>十六强</th>
+                <th>三十二强</th>
+                <th>小组出局</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="highlight">
+                <td>1</td>
+                <td><strong>法国</strong></td>
+                <td>I 组</td>
+                <td class="right">1877</td>
+                <td class="right" style="color:#FFD700">19.2%</td>
+                <td class="right" style="color:#FFD700">26.5%</td>
+                <td class="right">44.0%</td>
+                <td class="right">68.7%</td>
+                <td class="right">85.7%</td>
+                <td class="right">98.7%</td>
+                <td class="right" style="color:#8890b5">1.3%</td>
+            </tr>
+            <tr class="highlight">
+                <td>2</td>
+                <td><strong>西班牙</strong></td>
+                <td>H 组</td>
+                <td class="right">1876</td>
+                <td class="right" style="color:#FFD700">16.9%</td>
+                <td class="right" style="color:#FFD700">23.5%</td>
+                <td class="right">38.9%</td>
+                <td class="right">66.2%</td>
+                <td class="right">80.8%</td>
+                <td class="right">99.1%</td>
+                <td class="right" style="color:#8890b5">0.9%</td>
+            </tr>
+            <tr class="highlight">
+                <td>3</td>
+                <td><strong>阿根廷</strong></td>
+                <td>J 组</td>
+                <td class="right">1875</td>
+                <td class="right" style="color:#FFD700">16.4%</td>
+                <td class="right" style="color:#FFD700">23.0%</td>
+                <td class="right">39.4%</td>
+                <td class="right">59.6%</td>
+                <td class="right">86.2%</td>
+                <td class="right">99.0%</td>
+                <td class="right" style="color:#8890b5">1.0%</td>
+            </tr>
+            <tr class="">
+                <td>4</td>
+                <td><strong>英格兰</strong></td>
+                <td>L 组</td>
+                <td class="right">1826</td>
+                <td class="right" style="color:#FFA726">8.8%</td>
+                <td class="right" style="color:#FFA726">14.1%</td>
+                <td class="right">28.3%</td>
+                <td class="right">49.6%</td>
+                <td class="right">77.5%</td>
+                <td class="right">97.3%</td>
+                <td class="right" style="color:#8890b5">2.7%</td>
+            </tr>
+            <tr class="">
+                <td>5</td>
+                <td><strong>巴西</strong></td>
+                <td>C 组</td>
+                <td class="right">1761</td>
+                <td class="right" style="color:#ef5350">6.3%</td>
+                <td class="right" style="color:#FFD700">16.3%</td>
+                <td class="right">28.4%</td>
+                <td class="right">44.2%</td>
+                <td class="right">66.7%</td>
+                <td class="right">97.0%</td>
+                <td class="right" style="color:#8890b5">3.0%</td>
+            </tr>
+            <tr class="">
+                <td>6</td>
+                <td><strong>摩洛哥</strong></td>
+                <td>C 组</td>
+                <td class="right">1756</td>
+                <td class="right" style="color:#ef5350">6.0%</td>
+                <td class="right" style="color:#FFD700">15.5%</td>
+                <td class="right">27.4%</td>
+                <td class="right">43.4%</td>
+                <td class="right">64.8%</td>
+                <td class="right">96.4%</td>
+                <td class="right" style="color:#8890b5">3.6%</td>
+            </tr>
+            <tr class="">
+                <td>7</td>
+                <td><strong>荷兰</strong></td>
+                <td>F 组</td>
+                <td class="right">1758</td>
+                <td class="right" style="color:#ef5350">5.1%</td>
+                <td class="right" style="color:#FFA726">13.6%</td>
+                <td class="right">23.8%</td>
+                <td class="right">37.0%</td>
+                <td class="right">58.6%</td>
+                <td class="right">94.3%</td>
+                <td class="right" style="color:#8890b5">5.7%</td>
+            </tr>
+            <tr class="">
+                <td>8</td>
+                <td><strong>德国</strong></td>
+                <td>E 组</td>
+                <td class="right">1730</td>
+                <td class="right" style="color:#ef5350">3.9%</td>
+                <td class="right" style="color:#FFA726">11.2%</td>
+                <td class="right">20.8%</td>
+                <td class="right">33.3%</td>
+                <td class="right">66.4%</td>
+                <td class="right">97.0%</td>
+                <td class="right" style="color:#8890b5">3.0%</td>
+            </tr>
+            <tr class="">
+                <td>9</td>
+                <td><strong>比利时</strong></td>
+                <td>G 组</td>
+                <td class="right">1735</td>
+                <td class="right" style="color:#ef5350">3.8%</td>
+                <td class="right" style="color:#FFA726">10.4%</td>
+                <td class="right">19.9%</td>
+                <td class="right">39.1%</td>
+                <td class="right">60.2%</td>
+                <td class="right">96.8%</td>
+                <td class="right" style="color:#8890b5">3.2%</td>
+            </tr>
+            <tr class="">
+                <td>10</td>
+                <td><strong>葡萄牙</strong></td>
+                <td>K 组</td>
+                <td class="right">1764</td>
+                <td class="right" style="color:#ab47bc">2.8%</td>
+                <td class="right" style="color:#ef5350">5.6%</td>
+                <td class="right">13.8%</td>
+                <td class="right">29.2%</td>
+                <td class="right">59.0%</td>
+                <td class="right">95.5%</td>
+                <td class="right" style="color:#8890b5">4.5%</td>
+            </tr>
+            <tr class="">
+                <td>11</td>
+                <td><strong>墨西哥</strong></td>
+                <td>A 组</td>
+                <td class="right">1682</td>
+                <td class="right" style="color:#ab47bc">2.1%</td>
+                <td class="right" style="color:#ef5350">7.6%</td>
+                <td class="right">16.8%</td>
+                <td class="right">38.7%</td>
+                <td class="right">58.4%</td>
+                <td class="right">91.9%</td>
+                <td class="right" style="color:#8890b5">8.1%</td>
+            </tr>
+            <tr class="">
+                <td>12</td>
+                <td><strong>克罗地亚</strong></td>
+                <td>L 组</td>
+                <td class="right">1717</td>
+                <td class="right" style="color:#ab47bc">1.6%</td>
+                <td class="right" style="color:#ef5350">3.8%</td>
+                <td class="right">10.1%</td>
+                <td class="right">24.8%</td>
+                <td class="right">53.4%</td>
+                <td class="right">89.4%</td>
+                <td class="right" style="color:#8890b5">10.6%</td>
+            </tr>
+            <tr class="">
+                <td>13</td>
+                <td><strong>美国</strong></td>
+                <td>D 组</td>
+                <td class="right">1673</td>
+                <td class="right" style="color:#ab47bc">1.2%</td>
+                <td class="right" style="color:#ef5350">4.9%</td>
+                <td class="right">11.0%</td>
+                <td class="right">22.4%</td>
+                <td class="right">48.4%</td>
+                <td class="right">85.6%</td>
+                <td class="right" style="color:#8890b5">14.4%</td>
+            </tr>
+            <tr class="">
+                <td>14</td>
+                <td><strong>日本</strong></td>
+                <td>F 组</td>
+                <td class="right">1660</td>
+                <td class="right" style="color:#ab47bc">1.1%</td>
+                <td class="right" style="color:#ef5350">4.3%</td>
+                <td class="right">10.1%</td>
+                <td class="right">21.2%</td>
+                <td class="right">42.2%</td>
+                <td class="right">83.6%</td>
+                <td class="right" style="color:#8890b5">16.4%</td>
+            </tr>
+            <tr class="">
+                <td>15</td>
+                <td><strong>哥伦比亚</strong></td>
+                <td>K 组</td>
+                <td class="right">1693</td>
+                <td class="right" style="color:#78909c">0.8%</td>
+                <td class="right" style="color:#ab47bc">2.0%</td>
+                <td class="right">7.0%</td>
+                <td class="right">18.9%</td>
+                <td class="right">46.6%</td>
+                <td class="right">88.8%</td>
+                <td class="right" style="color:#8890b5">11.2%</td>
+            </tr>
+            <tr class="">
+                <td>16</td>
+                <td><strong>塞内加尔</strong></td>
+                <td>I 组</td>
+                <td class="right">1689</td>
+                <td class="right" style="color:#78909c">0.8%</td>
+                <td class="right" style="color:#ab47bc">2.3%</td>
+                <td class="right">6.7%</td>
+                <td class="right">16.9%</td>
+                <td class="right">53.1%</td>
+                <td class="right">87.8%</td>
+                <td class="right" style="color:#8890b5">12.2%</td>
+            </tr>
+            <tr class="">
+                <td>17</td>
+                <td><strong>乌拉圭</strong></td>
+                <td>H 组</td>
+                <td class="right">1673</td>
+                <td class="right" style="color:#78909c">0.8%</td>
+                <td class="right" style="color:#ab47bc">2.0%</td>
+                <td class="right">7.0%</td>
+                <td class="right">21.1%</td>
+                <td class="right">46.4%</td>
+                <td class="right">89.8%</td>
+                <td class="right" style="color:#8890b5">10.2%</td>
+            </tr>
+            <tr class="">
+                <td>18</td>
+                <td><strong>瑞士</strong></td>
+                <td>B 组</td>
+                <td class="right">1649</td>
+                <td class="right" style="color:#78909c">0.7%</td>
+                <td class="right" style="color:#ab47bc">2.4%</td>
+                <td class="right">7.1%</td>
+                <td class="right">21.2%</td>
+                <td class="right">55.7%</td>
+                <td class="right">91.9%</td>
+                <td class="right" style="color:#8890b5">8.1%</td>
+            </tr>
+            <tr class="">
+                <td>19</td>
+                <td><strong>伊朗</strong></td>
+                <td>G 组</td>
+                <td class="right">1615</td>
+                <td class="right" style="color:#78909c">0.4%</td>
+                <td class="right" style="color:#ab47bc">1.6%</td>
+                <td class="right">4.9%</td>
+                <td class="right">15.4%</td>
+                <td class="right">32.8%</td>
+                <td class="right">87.8%</td>
+                <td class="right" style="color:#8890b5">12.2%</td>
+            </tr>
+            <tr class="">
+                <td>20</td>
+                <td><strong>厄瓜多尔</strong></td>
+                <td>E 组</td>
+                <td class="right">1595</td>
+                <td class="right" style="color:#78909c">0.3%</td>
+                <td class="right" style="color:#ab47bc">1.7%</td>
+                <td class="right">5.0%</td>
+                <td class="right">12.4%</td>
+                <td class="right">38.6%</td>
+                <td class="right">85.2%</td>
+                <td class="right" style="color:#8890b5">14.8%</td>
+            </tr>
+            <tr class="">
+                <td>21</td>
+                <td><strong>韩国</strong></td>
+                <td>A 组</td>
+                <td class="right">1589</td>
+                <td class="right" style="color:#78909c">0.3%</td>
+                <td class="right" style="color:#ab47bc">1.5%</td>
+                <td class="right">4.9%</td>
+                <td class="right">16.8%</td>
+                <td class="right">39.6%</td>
+                <td class="right">78.8%</td>
+                <td class="right" style="color:#8890b5">21.1%</td>
+            </tr>
+            <tr class="">
+                <td>22</td>
+                <td><strong>土耳其</strong></td>
+                <td>D 组</td>
+                <td class="right">1599</td>
+                <td class="right" style="color:#78909c">0.2%</td>
+                <td class="right" style="color:#ab47bc">1.5%</td>
+                <td class="right">4.3%</td>
+                <td class="right">11.9%</td>
+                <td class="right">31.7%</td>
+                <td class="right">72.7%</td>
+                <td class="right" style="color:#8890b5">27.3%</td>
+            </tr>
+            <tr class="">
+                <td>23</td>
+                <td><strong>奥地利</strong></td>
+                <td>J 组</td>
+                <td class="right">1593</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right" style="color:#78909c">0.5%</td>
+                <td class="right">2.0%</td>
+                <td class="right">7.8%</td>
+                <td class="right">29.0%</td>
+                <td class="right">73.0%</td>
+                <td class="right" style="color:#8890b5">27.0%</td>
+            </tr>
+            <tr class="">
+                <td>24</td>
+                <td><strong>加拿大</strong></td>
+                <td>B 组</td>
+                <td class="right">1556</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right" style="color:#78909c">0.6%</td>
+                <td class="right">2.3%</td>
+                <td class="right">10.1%</td>
+                <td class="right">35.1%</td>
+                <td class="right">79.3%</td>
+                <td class="right" style="color:#8890b5">20.7%</td>
+            </tr>
+            <tr class="">
+                <td>25</td>
+                <td><strong>澳大利亚</strong></td>
+                <td>D 组</td>
+                <td class="right">1581</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right" style="color:#78909c">1.0%</td>
+                <td class="right">3.1%</td>
+                <td class="right">9.2%</td>
+                <td class="right">27.4%</td>
+                <td class="right">67.9%</td>
+                <td class="right" style="color:#8890b5">32.1%</td>
+            </tr>
+            <tr class="">
+                <td>26</td>
+                <td><strong>埃及</strong></td>
+                <td>G 组</td>
+                <td class="right">1563</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right" style="color:#78909c">0.6%</td>
+                <td class="right">2.4%</td>
+                <td class="right">8.6%</td>
+                <td class="right">22.9%</td>
+                <td class="right">78.8%</td>
+                <td class="right" style="color:#8890b5">21.2%</td>
+            </tr>
+            <tr class="">
+                <td>27</td>
+                <td><strong>科特迪瓦</strong></td>
+                <td>E 组</td>
+                <td class="right">1533</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right" style="color:#78909c">0.4%</td>
+                <td class="right">1.6%</td>
+                <td class="right">6.2%</td>
+                <td class="right">25.1%</td>
+                <td class="right">73.1%</td>
+                <td class="right" style="color:#8890b5">26.9%</td>
+            </tr>
+            <tr class="">
+                <td>28</td>
+                <td><strong>捷克</strong></td>
+                <td>A 组</td>
+                <td class="right">1501</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.2%</td>
+                <td class="right">1.1%</td>
+                <td class="right">5.5%</td>
+                <td class="right">19.3%</td>
+                <td class="right">57.6%</td>
+                <td class="right" style="color:#8890b5">42.4%</td>
+            </tr>
+            <tr class="">
+                <td>29</td>
+                <td><strong>巴拉圭</strong></td>
+                <td>D 组</td>
+                <td class="right">1504</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.2%</td>
+                <td class="right">0.8%</td>
+                <td class="right">3.4%</td>
+                <td class="right">13.7%</td>
+                <td class="right">48.2%</td>
+                <td class="right" style="color:#8890b5">51.8%</td>
+            </tr>
+            <tr class="">
+                <td>30</td>
+                <td><strong>瑞典</strong></td>
+                <td>F 组</td>
+                <td class="right">1515</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.2%</td>
+                <td class="right">0.9%</td>
+                <td class="right">4.2%</td>
+                <td class="right">14.5%</td>
+                <td class="right">49.5%</td>
+                <td class="right" style="color:#8890b5">50.4%</td>
+            </tr>
+            <tr class="">
+                <td>31</td>
+                <td><strong>挪威</strong></td>
+                <td>I 组</td>
+                <td class="right">1551</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.2%</td>
+                <td class="right">1.0%</td>
+                <td class="right">4.2%</td>
+                <td class="right">19.9%</td>
+                <td class="right">57.2%</td>
+                <td class="right" style="color:#8890b5">42.8%</td>
+            </tr>
+            <tr class="">
+                <td>32</td>
+                <td><strong>阿尔及利亚</strong></td>
+                <td>J 组</td>
+                <td class="right">1564</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.3%</td>
+                <td class="right">1.3%</td>
+                <td class="right">5.2%</td>
+                <td class="right">22.0%</td>
+                <td class="right">65.3%</td>
+                <td class="right" style="color:#8890b5">34.7%</td>
+            </tr>
+            <tr class="">
+                <td>33</td>
+                <td><strong>刚果(金)</strong></td>
+                <td>K 组</td>
+                <td class="right">1478</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.2%</td>
+                <td class="right">1.5%</td>
+                <td class="right">9.1%</td>
+                <td class="right">41.7%</td>
+                <td class="right" style="color:#8890b5">58.3%</td>
+            </tr>
+            <tr class="">
+                <td>34</td>
+                <td><strong>南非</strong> &#x26A0;</td>
+                <td>A 组</td>
+                <td class="right">1450</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.4%</td>
+                <td class="right">2.8%</td>
+                <td class="right">12.0%</td>
+                <td class="right">44.2%</td>
+                <td class="right" style="color:#8890b5">55.8%</td>
+            </tr>
+            <tr class="">
+                <td>35</td>
+                <td><strong>卡塔尔</strong> &#x26A0;</td>
+                <td>B 组</td>
+                <td class="right">1430</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right">0.3%</td>
+                <td class="right">2.2%</td>
+                <td class="right">11.9%</td>
+                <td class="right">48.6%</td>
+                <td class="right" style="color:#8890b5">51.4%</td>
+            </tr>
+            <tr class="">
+                <td>36</td>
+                <td><strong>波黑</strong> &#x26A0;</td>
+                <td>B 组</td>
+                <td class="right">1445</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right">0.4%</td>
+                <td class="right">2.7%</td>
+                <td class="right">13.8%</td>
+                <td class="right">52.4%</td>
+                <td class="right" style="color:#8890b5">47.6%</td>
+            </tr>
+            <tr class="">
+                <td>37</td>
+                <td><strong>苏格兰</strong></td>
+                <td>C 组</td>
+                <td class="right">1498</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right">0.8%</td>
+                <td class="right">3.5%</td>
+                <td class="right">13.6%</td>
+                <td class="right">55.9%</td>
+                <td class="right" style="color:#8890b5">44.1%</td>
+            </tr>
+            <tr class="">
+                <td>38</td>
+                <td><strong>海地</strong> &#x26A0;</td>
+                <td>C 组</td>
+                <td class="right">1320</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.1%</td>
+                <td class="right">1.1%</td>
+                <td class="right">13.7%</td>
+                <td class="right" style="color:#8890b5">86.3%</td>
+            </tr>
+            <tr class="">
+                <td>39</td>
+                <td><strong>Curaçao</strong> &#x26A0;</td>
+                <td>E 组</td>
+                <td class="right">1305</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.1%</td>
+                <td class="right">1.4%</td>
+                <td class="right">15.0%</td>
+                <td class="right" style="color:#8890b5">85.0%</td>
+            </tr>
+            <tr class="">
+                <td>40</td>
+                <td><strong>突尼斯</strong></td>
+                <td>F 组</td>
+                <td class="right">1483</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right">0.5%</td>
+                <td class="right">2.4%</td>
+                <td class="right">10.0%</td>
+                <td class="right">40.8%</td>
+                <td class="right" style="color:#8890b5">59.2%</td>
+            </tr>
+            <tr class="">
+                <td>41</td>
+                <td><strong>新西兰</strong></td>
+                <td>G 组</td>
+                <td class="right">1282</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.1%</td>
+                <td class="right">0.7%</td>
+                <td class="right">10.8%</td>
+                <td class="right" style="color:#8890b5">89.2%</td>
+            </tr>
+            <tr class="">
+                <td>42</td>
+                <td><strong>沙特阿拉伯</strong> &#x26A0;</td>
+                <td>H 组</td>
+                <td class="right">1460</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.2%</td>
+                <td class="right">1.6%</td>
+                <td class="right">8.9%</td>
+                <td class="right">43.7%</td>
+                <td class="right" style="color:#8890b5">56.3%</td>
+            </tr>
+            <tr class="">
+                <td>43</td>
+                <td><strong>佛得角</strong> &#x26A0;</td>
+                <td>H 组</td>
+                <td class="right">1370</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.4%</td>
+                <td class="right">2.8%</td>
+                <td class="right">22.8%</td>
+                <td class="right" style="color:#8890b5">77.2%</td>
+            </tr>
+            <tr class="">
+                <td>44</td>
+                <td><strong>伊拉克</strong> &#x26A0;</td>
+                <td>I 组</td>
+                <td class="right">1385</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.2%</td>
+                <td class="right">2.8%</td>
+                <td class="right">18.0%</td>
+                <td class="right" style="color:#8890b5">82.0%</td>
+            </tr>
+            <tr class="">
+                <td>45</td>
+                <td><strong>约旦</strong> &#x26A0;</td>
+                <td>J 组</td>
+                <td class="right">1400</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.1%</td>
+                <td class="right">0.4%</td>
+                <td class="right">3.5%</td>
+                <td class="right">22.9%</td>
+                <td class="right" style="color:#8890b5">77.1%</td>
+            </tr>
+            <tr class="">
+                <td>46</td>
+                <td><strong>乌兹别克斯坦</strong></td>
+                <td>K 组</td>
+                <td class="right">1465</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.2%</td>
+                <td class="right">1.4%</td>
+                <td class="right">8.1%</td>
+                <td class="right">38.1%</td>
+                <td class="right" style="color:#8890b5">61.9%</td>
+            </tr>
+            <tr class="">
+                <td>47</td>
+                <td><strong>加纳</strong> &#x26A0;</td>
+                <td>L 组</td>
+                <td class="right">1435</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right">0.0%</td>
+                <td class="right">0.5%</td>
+                <td class="right">3.6%</td>
+                <td class="right">23.5%</td>
+                <td class="right" style="color:#8890b5">76.5%</td>
+            </tr>
+            <tr class="">
+                <td>48</td>
+                <td><strong>巴拿马</strong></td>
+                <td>L 组</td>
+                <td class="right">1541</td>
+                <td class="right" style="color:#78909c">0.0%</td>
+                <td class="right" style="color:#78909c">0.1%</td>
+                <td class="right">0.7%</td>
+                <td class="right">4.0%</td>
+                <td class="right">15.1%</td>
+                <td class="right">53.4%</td>
+                <td class="right" style="color:#8890b5">46.6%</td>
+            </tr>
+        </tbody>
+    </table>
+    </div>
+</div>
+<div class="two-col">
+
+<!-- ---- 小组难度排名 ---- -->
+<div class="card">
+    <h2>&#x1F4A5; 小组难度排名</h2>
+    <div class="group-item ">
+        <div class="group-label">L 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1630</span>
+        </div>
+        <div class="group-teams">英格兰 &middot; 克罗地亚 &middot; 加纳 &middot; 巴拿马</div>
+        <div class="group-elo">
+            最高 1826 &middot;
+            最低 1435 &middot;
+            极差 391
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">I 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1626</span>
+        </div>
+        <div class="group-teams">法国 &middot; 塞内加尔 &middot; 挪威 &middot; 伊拉克</div>
+        <div class="group-elo">
+            最高 1877 &middot;
+            最低 1385 &middot;
+            极差 492
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">J 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1608</span>
+        </div>
+        <div class="group-teams">阿根廷 &middot; 阿尔及利亚 &middot; 奥地利 &middot; 约旦</div>
+        <div class="group-elo">
+            最高 1875 &middot;
+            最低 1400 &middot;
+            极差 475
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">F 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1604</span>
+        </div>
+        <div class="group-teams">荷兰 &middot; 日本 &middot; 瑞典 &middot; 突尼斯</div>
+        <div class="group-elo">
+            最高 1758 &middot;
+            最低 1483 &middot;
+            极差 275
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">K 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1600</span>
+        </div>
+        <div class="group-teams">葡萄牙 &middot; 哥伦比亚 &middot; 乌兹别克斯坦 &middot; 刚果(金)</div>
+        <div class="group-elo">
+            最高 1764 &middot;
+            最低 1465 &middot;
+            极差 298
+        </div>
+    </div>
+    <div class="group-item wide">
+        <div class="group-label">H 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1595</span>
+        </div>
+        <div class="group-teams">西班牙 &middot; 乌拉圭 &middot; 沙特阿拉伯 &middot; 佛得角</div>
+        <div class="group-elo">
+            最高 1876 &middot;
+            最低 1370 &middot;
+            极差 506
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">D 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1589</span>
+        </div>
+        <div class="group-teams">美国 &middot; 巴拉圭 &middot; 澳大利亚 &middot; 土耳其</div>
+        <div class="group-elo">
+            最高 1673 &middot;
+            最低 1504 &middot;
+            极差 170
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">C 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1584</span>
+        </div>
+        <div class="group-teams">巴西 &middot; 摩洛哥 &middot; 苏格兰 &middot; 海地</div>
+        <div class="group-elo">
+            最高 1761 &middot;
+            最低 1320 &middot;
+            极差 441
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">A 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1556</span>
+        </div>
+        <div class="group-teams">墨西哥 &middot; 韩国 &middot; 南非 &middot; 捷克</div>
+        <div class="group-elo">
+            最高 1682 &middot;
+            最低 1450 &middot;
+            极差 232
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">G 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1549</span>
+        </div>
+        <div class="group-teams">比利时 &middot; 伊朗 &middot; 埃及 &middot; 新西兰</div>
+        <div class="group-elo">
+            最高 1735 &middot;
+            最低 1282 &middot;
+            极差 453
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">E 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1541</span>
+        </div>
+        <div class="group-teams">德国 &middot; 厄瓜多尔 &middot; 科特迪瓦 &middot; Curaçao</div>
+        <div class="group-elo">
+            最高 1730 &middot;
+            最低 1305 &middot;
+            极差 425
+        </div>
+    </div>
+    <div class="group-item ">
+        <div class="group-label">B 组
+            <span style="font-size:0.7em;opacity:0.7">平均 ELO 1520</span>
+        </div>
+        <div class="group-teams">加拿大 &middot; 瑞士 &middot; 卡塔尔 &middot; 波黑</div>
+        <div class="group-elo">
+            最高 1649 &middot;
+            最低 1430 &middot;
+            极差 219
+        </div>
+    </div>
+</div>
+
+<!-- ---- 黑马预警 ---- -->
+<div class="card">
+    <h2>&#x1F40E; 黑马预警</h2>
+    <p style="color:#8890b5;font-size:0.84em;margin-bottom:12px;">
+        ELO 排名靠后但小组出线概率较高的球队（ELO &lt; 1590 且十六强率 &gt; 40%）
+    </p>
+    <table class="data-table">
+        <thead><tr><th>球队</th><th>小组</th><th>ELO</th><th>十六强</th><th>八强</th></tr></thead>
+        <tbody>
+        <tr><td colspan="5" style="text-align:center;color:#8890b5;">无符合条件的黑马球队</td></tr>        </tbody>
+    </table>
+</div>
+
+</div>
+<div class="card">
+    <h2>&#x2699; 模型说明</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;font-size:0.84em;color:#8890b5;">
+        <div>
+            <strong style="color:#4fc3f7;">第一步：ELO 评分 → 胜率</strong>
+            <p style="margin-top:4px;">P(A 胜) = 1 / (1 + 10<sup>(ELO<sub>B</sub> - ELO<sub>A</sub>) / 400</sup>)</p>
+        </div>
+        <div>
+            <strong style="color:#4fc3f7;">第二步：胜率 → 预期进球数</strong>
+            <p style="margin-top:4px;">200 ELO 分差 ≈ 1 球优势；世界杯场均进球约 2.6 球</p>
+        </div>
+        <div>
+            <strong style="color:#4fc3f7;">第三步：泊松分布模拟比分</strong>
+            <p style="margin-top:4px;">P(k) = &lambda;<sup>k</sup> &middot; e<sup>-&lambda;</sup> / k! — 双方独立采样</p>
+        </div>
+        <div>
+            <strong style="color:#4fc3f7;">第四步：蒙特卡洛模拟</strong>
+            <p style="margin-top:4px;">10,000 次完整锦标赛 = 每次 72 场小组赛 + 32 场淘汰赛</p>
+        </div>
+    </div>
+    <p style="margin-top:14px;font-size:0.74em;color:#666;line-height:1.7;">
+        &#x26A0; <strong>免责声明</strong>：本预测仅基于公开 ELO 评分和历史统计模型，不构成任何博彩或投资建议。
+        足球比赛结果受伤病、红黄牌、天气、临场状态等大量不可预测因素影响。
+        约 11 支低排名球队的 ELO 评分基于 FIFA 排名线性回归估算（标记为"估算"）。
+        数据来源：worldfootballrankings.com / FIFA / roadtowc.com / OneFootball。
+    </p>
+</div>
+
+<div class="footer">
+    <p>2026 年 FIFA 世界杯预测引擎 &middot; Python 构建 &middot; ELO + 泊松分布模型</p>
+    <p>数据截止 2026 年 5 月 &middot; 蒙特卡洛模拟（10,000 次迭代）</p>
+</div>
+</div><!-- /.container -->
+</div><!-- /#protected-content -->
+
+<!-- ====== 密码门 JS ====== -->
+<script>
+(function(){
+  var PWD_HASH = '35d44a6de2bbd084ea8cd4fbd0dea51b9a675cf9';
+  var PWD_VERSION = 'v2';
+  var overlay = document.getElementById('pwd-overlay');
+  var content = document.getElementById('protected-content');
+  if (localStorage.getItem('wc_pwd') === '1' && localStorage.getItem('wc_pwd_ver') === PWD_VERSION) {
+    overlay.style.display = 'none';
+    content.style.display = '';
+  }
+  window.wcCheckPwd = function() {
+    var input = document.getElementById('pwd-input').value.trim();
+    var err = document.getElementById('pwd-err');
+    if (!input) { err.style.display = ''; return; }
+    crypto.subtle.digest('SHA-1', new TextEncoder().encode(input)).then(function(buf) {
+      var hash = Array.from(new Uint8Array(buf)).map(function(b){ return ('0'+(b&0xFF).toString(16)).slice(-2); }).join('');
+      if (hash === PWD_HASH) {
+        err.style.display = 'none';
+        localStorage.setItem('wc_pwd','1');
+        localStorage.setItem('wc_pwd_ver', PWD_VERSION);
+        overlay.style.display = 'none';
+        content.style.display = '';
+      } else {
+        err.style.display = '';
+        document.getElementById('pwd-input').value = '';
+      }
+    });
+  };
+  document.getElementById('pwd-input').addEventListener('keydown', function(e){ if (e.key === 'Enter') window.wcCheckPwd(); });
+})();
+</script>
+
+<!-- ====== 动态时间 JS ====== -->
+<script>
+(function(){
+  var el = document.querySelector('.header .meta span[data-utc]');
+  if (!el) return;
+  var utc = new Date(el.getAttribute('data-utc'));
+  function update() {
+    var diff = Math.floor((new Date() - utc) / 1000);
+    var text;
+    if (diff < 60) text = '刚刚';
+    else if (diff < 3600) text = Math.floor(diff/60) + ' 分钟前';
+    else if (diff < 86400) text = Math.floor(diff/3600) + ' 小时前';
+    else text = Math.floor(diff/86400) + ' 天前';
+    el.textContent = text + ' 北京时间';
+  }
+  update();
+  setInterval(update, 60000);
+})();
+</script>
+
+</body>
+</html>
