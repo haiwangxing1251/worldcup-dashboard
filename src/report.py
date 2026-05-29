@@ -878,7 +878,7 @@ window.wcOpenGuess = function() {
       '<div style="font-size:0.8em;color:#8890b5;margin-bottom:6px;">&#x1F3C6; 我的夺冠预测</div>' +
       '<div style="font-size:1.4em;font-weight:800;color:#FFD700;">' + champ.cnName + '</div>' +
       '<div style="font-size:0.76em;color:#8890b5;margin-top:4px;">下注于 ' + t.toLocaleString('zh-CN') + '</div>' +
-      '<button onclick="localStorage.removeItem(\'wc_champ_guess\');wcOpenGuess();" style="margin-top:10px;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">取消竞猜</button>' +
+      '<button onclick="localStorage.removeItem(&quot;wc_champ_guess&quot;);wcOpenGuess();" style="margin-top:10px;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">取消竞猜</button>' +
     '</div>';
   } else {
     html += '<div style="color:#8890b5;font-size:0.88em;margin-bottom:14px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;">' +
@@ -914,7 +914,7 @@ window.wcOpenGuess = function() {
         '已结算 ' + settledCount + ' 场 · 猜中 <span style="color:#66bb6a;font-weight:700;">' + correctCount + '</span> 场 · 准确率 <span style="color:#FFD700;font-weight:800;">' + rate + '%</span>' +
       '</div>';
     }
-    html += '<button onclick="if(confirm(\'确定清空所有竞猜记录？\')){localStorage.removeItem(\'wc_match_guesses\');wcOpenGuess();}" style="margin-top:10px;width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">清空比赛竞猜记录</button>';
+    html += '<button onclick="if(confirm(&quot;确定清空所有竞猜记录？&quot;)){localStorage.removeItem(&quot;wc_match_guesses&quot;);wcOpenGuess();}" style="margin-top:10px;width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">清空比赛竞猜记录</button>';
   } else {
     html += '<div style="color:#8890b5;font-size:0.82em;text-align:center;padding:12px;">在今日比赛模块中点击比赛卡片可进行竞猜</div>';
   }
