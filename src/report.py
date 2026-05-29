@@ -403,6 +403,64 @@ body {{
     border-top: 1px solid rgba(255,255,255,0.06);
     margin-top: 30px;
 }}
+
+/* ---- 可排序表头 ---- */
+.sortable {{
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}}
+.sortable:hover {{ color: #FFD700; }}
+.sortable.sort-asc::after {{ content: ' ▲'; font-size:0.75em; color:#FFD700; }}
+.sortable.sort-desc::after {{ content: ' ▼'; font-size:0.75em; color:#FFD700; }}
+
+/* ---- 球队详情弹窗 ---- */
+#team-modal {{
+    display:none;
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.7);z-index:8888;
+    align-items:center;justify-content:center;
+}}
+#team-modal.open {{ display:flex; }}
+#team-modal-body {{
+    background:#111640;border-radius:16px;padding:24px;
+    max-width:480px;width:90%;max-height:85vh;overflow-y:auto;
+    border:1px solid rgba(255,255,255,0.1);position:relative;
+}}
+#team-modal-close {{
+    position:absolute;top:12px;right:14px;
+    background:none;border:none;color:#8890b5;font-size:1.4em;cursor:pointer;
+}}
+
+/* ---- 竞猜弹窗 ---- */
+#guess-modal {{
+    display:none;
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.75);z-index:8888;
+    align-items:flex-start;justify-content:center;overflow-y:auto;
+    padding:20px 0;
+}}
+#guess-modal.open {{ display:flex; }}
+#guess-modal-body {{
+    background:#111640;border-radius:16px;padding:24px;
+    max-width:560px;width:92%;
+    border:1px solid rgba(255,255,255,0.1);position:relative;
+    margin:auto;
+}}
+
+/* ---- 淘汰赛图 ---- */
+.bracket-wrap {{ overflow-x:auto; -webkit-overflow-scrolling:touch; }}
+.bracket-svg text {{ font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif; }}
+
+/* ---- 通知按钮 ---- */
+#notify-btn {{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 16px;border-radius:8px;border:1px solid rgba(255,215,0,0.4);
+    background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.84em;cursor:pointer;
+    transition:background 0.2s;
+}}
+#notify-btn:hover {{ background:rgba(255,215,0,0.15); }}
+#notify-btn.active {{ background:rgba(102,187,106,0.15);color:#66bb6a;border-color:rgba(102,187,106,0.4); }}
 </style>
 </head>
 <body>
@@ -486,34 +544,48 @@ body {{
 </div>
 
 <!-- ====== 全部 48 队晋级概率矩阵 ====== -->
-<div class="card">
-    <h2>&#x1F4CA; 全部 48 队晋级概率矩阵</h2>
+<div class="card" id="matrix-card">
+    <h2>&#x1F4CA; 全部 48 队晋级概率矩阵
+        <button onclick="wcShareCard()" style="margin-left:auto;padding:6px 14px;border-radius:8px;border:none;background:linear-gradient(135deg,#FFD700,#FFA726);color:#1a1a2e;font-size:0.75em;font-weight:700;cursor:pointer;">&#x1F4F1; 分享</button>
+    </h2>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+        <input id="matrix-search" type="text" placeholder="&#x1F50D; 搜索球队..." oninput="wcFilterMatrix()" style="flex:1;min-width:140px;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:#0a0e27;color:#e8e8ec;font-size:0.88em;outline:none;"/>
+        <select id="matrix-group-filter" onchange="wcFilterMatrix()" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:#0a0e27;color:#e8e8ec;font-size:0.85em;outline:none;">
+            <option value="">全部小组</option>
+            <option value="A">A 组</option><option value="B">B 组</option><option value="C">C 组</option>
+            <option value="D">D 组</option><option value="E">E 组</option><option value="F">F 组</option>
+            <option value="G">G 组</option><option value="H">H 组</option><option value="I">I 组</option>
+            <option value="J">J 组</option><option value="K">K 组</option><option value="L">L 组</option>
+        </select>
+        <span id="matrix-count" style="color:#8890b5;font-size:0.78em;white-space:nowrap;">48 支球队</span>
+    </div>
     <div class="table-scroll">
-    <table class="data-table">
+    <table class="data-table" id="matrix-table">
         <thead>
             <tr>
-                <th>#</th>
-                <th>球队</th>
-                <th>小组</th>
-                <th>ELO</th>
-                <th>夺冠</th>
-                <th>决赛</th>
-                <th>四强</th>
-                <th>八强</th>
-                <th>十六强</th>
-                <th>三十二强</th>
-                <th>小组出局</th>
+                <th onclick="wcSortMatrix(0)" class="sortable" data-col="0">#</th>
+                <th onclick="wcSortMatrix(1)" class="sortable" data-col="1">球队</th>
+                <th onclick="wcSortMatrix(2)" class="sortable" data-col="2">小组</th>
+                <th onclick="wcSortMatrix(3)" class="sortable" data-col="3">ELO &#x25BD;</th>
+                <th onclick="wcSortMatrix(4)" class="sortable" data-col="4">夺冠</th>
+                <th onclick="wcSortMatrix(5)" class="sortable" data-col="5">决赛</th>
+                <th onclick="wcSortMatrix(6)" class="sortable" data-col="6">四强</th>
+                <th onclick="wcSortMatrix(7)" class="sortable" data-col="7">八强</th>
+                <th onclick="wcSortMatrix(8)" class="sortable" data-col="8">十六强</th>
+                <th onclick="wcSortMatrix(9)" class="sortable" data-col="9">三十二强</th>
+                <th onclick="wcSortMatrix(10)" class="sortable" data-col="10">小组出局</th>
             </tr>
         </thead>
-        <tbody>
+        <tbody id="matrix-tbody">
 """
     # ---- 表格行 ----
     for i, r in enumerate(results):
         est_mark = ' &#x26A0;' if r['elo_estimated'] else ''
         group_class = 'highlight' if i < 3 else ''
-        html += f"""            <tr class="{group_class}">
+        cn_name = cn(r['name'])
+        html += f"""            <tr class="{group_class}" data-name="{cn_name}" data-en="{r['name']}" data-group="{r['group']}" data-elo="{r['elo']:.0f}" data-rank="{i+1}" onclick="wcShowTeamDetail('{r['name']}',{r['elo']:.0f},'{r['group']}',{r['champion_pct']:.1f},{r['final_pct']:.1f},{r['sf_pct']:.1f},{r['qf_pct']:.1f},{r['r16_pct']:.1f},{r['r32_pct']:.1f},{r['group_exit_pct']:.1f})" style="cursor:pointer;">
                 <td>{i + 1}</td>
-                <td><strong>{cn(r['name'])}</strong>{est_mark}</td>
+                <td><strong>{cn_name}</strong>{est_mark}</td>
                 <td>{gcn(r['group'])}</td>
                 <td class="right">{r['elo']:.0f}</td>
                 <td class="right" style="color:{_pct_color(r['champion_pct'])}">{r['champion_pct']:.1f}%</td>
@@ -629,6 +701,23 @@ body {{
     html += """</div><!-- /.container -->
 </div><!-- /#protected-content -->
 
+<!-- ====== 球队详情弹窗 ====== -->
+<div id="team-modal">
+  <div id="team-modal-body">
+    <button id="team-modal-close" onclick="document.getElementById('team-modal').classList.remove('open')">&#x2715;</button>
+    <div id="team-modal-content"></div>
+  </div>
+</div>
+
+<!-- ====== 竞猜弹窗 ====== -->
+<div id="guess-modal">
+  <div id="guess-modal-body">
+    <button style="position:absolute;top:12px;right:14px;background:none;border:none;color:#8890b5;font-size:1.4em;cursor:pointer;" onclick="document.getElementById('guess-modal').classList.remove('open')">&#x2715;</button>
+    <h3 style="color:#FFD700;margin-bottom:16px;">&#x1F3B2; 我的竞猜</h3>
+    <div id="guess-content"></div>
+  </div>
+</div>
+
 <!-- ====== 密码门 JS ====== -->
 <script>
 (function(){
@@ -679,7 +768,295 @@ body {{
   }
   update();
   setInterval(update, 60000);
-}})();
+})();
+</script>
+
+<!-- ====== 可搜索/排序表格 JS ====== -->
+<script>
+(function(){
+  var sortCol = 3, sortAsc = false;
+
+  window.wcFilterMatrix = function() {
+    var q = (document.getElementById('matrix-search').value||'').toLowerCase();
+    var g = document.getElementById('matrix-group-filter').value;
+    var rows = document.querySelectorAll('#matrix-tbody tr');
+    var shown = 0;
+    rows.forEach(function(r){
+      var name = (r.getAttribute('data-name')||'').toLowerCase();
+      var en = (r.getAttribute('data-en')||'').toLowerCase();
+      var grp = r.getAttribute('data-group')||'';
+      var show = (!q || name.indexOf(q)>=0 || en.indexOf(q)>=0) && (!g || grp===g);
+      r.style.display = show ? '' : 'none';
+      if (show) shown++;
+    });
+    document.getElementById('matrix-count').textContent = shown + ' 支球队';
+  };
+
+  window.wcSortMatrix = function(col) {
+    if (sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = col < 2; }
+    var tbody = document.getElementById('matrix-tbody');
+    var rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort(function(a, b){
+      var va = getCellVal(a, col), vb = getCellVal(b, col);
+      if (!isNaN(va) && !isNaN(vb)) return sortAsc ? va-vb : vb-va;
+      return sortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+    });
+    rows.forEach(function(r){ tbody.appendChild(r); });
+    document.querySelectorAll('#matrix-table th').forEach(function(th, i){
+      th.classList.remove('sort-asc','sort-desc');
+      if (i===col) th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
+    });
+  };
+
+  function getCellVal(row, col) {
+    var cells = row.querySelectorAll('td');
+    if (!cells[col]) return '';
+    var t = cells[col].textContent.replace('%','').trim();
+    return isNaN(t) ? t : parseFloat(t);
+  }
+})();
+</script>
+
+<!-- ====== 球队详情弹窗 JS ====== -->
+<script>
+window.wcShowTeamDetail = function(name, elo, group, champ, fin, sf, qf, r16, r32, out) {
+  var cn_names = window._wcTeamCN || {};
+  var cnName = cn_names[name] || name;
+  var stages = [
+    {label:'夺冠',pct:champ,col:'#FFD700'},
+    {label:'决赛',pct:fin,col:'#FFA726'},
+    {label:'四强',pct:sf,col:'#ef5350'},
+    {label:'八强',pct:qf,col:'#ab47bc'},
+    {label:'十六强',pct:r16,col:'#42a5f5'},
+    {label:'三十二强',pct:r32,col:'#26c6da'},
+    {label:'小组出局',pct:out,col:'#78909c'},
+  ];
+  var bars = stages.map(function(s){
+    var w = Math.min(s.pct * 3, 100);
+    return '<div style="margin-bottom:10px;">' +
+      '<div style="display:flex;justify-content:space-between;font-size:0.84em;margin-bottom:3px;">' +
+        '<span style="color:#c8cce8;">' + s.label + '</span>' +
+        '<span style="font-weight:700;color:' + s.col + '">' + s.pct.toFixed(1) + '%</span>' +
+      '</div>' +
+      '<div style="height:10px;background:rgba(255,255,255,0.06);border-radius:5px;overflow:hidden;">' +
+        '<div style="height:100%;width:' + w + '%;background:' + s.col + ';border-radius:5px;transition:width 0.5s;"></div>' +
+      '</div></div>';
+  }).join('');
+
+  var guess = JSON.parse(localStorage.getItem('wc_champ_guess')||'{}');
+  var isGuessed = guess.team === name;
+  var guessBtn = '<button onclick="wcGuessChamp(\'' + name + '\',\'' + cnName + '\')" style="width:100%;margin-top:14px;padding:10px;border-radius:8px;border:none;background:' +
+    (isGuessed ? 'rgba(102,187,106,0.2);color:#66bb6a;border:1px solid #66bb6a' : 'rgba(255,215,0,0.15);color:#FFD700;border:1px solid rgba(255,215,0,0.4)') +
+    ';font-size:0.9em;font-weight:600;cursor:pointer;">' +
+    (isGuessed ? '✅ 已竞猜 ' + cnName + ' 夺冠' : '🎯 竞猜 ' + cnName + ' 夺冠') + '</button>';
+
+  document.getElementById('team-modal-content').innerHTML =
+    '<div style="text-align:center;margin-bottom:18px;">' +
+      '<div style="font-size:2em;font-weight:900;color:#FFD700;">' + cnName + '</div>' +
+      '<div style="color:#8890b5;font-size:0.84em;margin-top:4px;">' + group + ' 组 · ELO ' + elo + '</div>' +
+    '</div>' + bars + guessBtn;
+  document.getElementById('team-modal').classList.add('open');
+};
+
+window.wcGuessChamp = function(name, cnName) {
+  localStorage.setItem('wc_champ_guess', JSON.stringify({team:name,cnName:cnName,time:Date.now()}));
+  document.getElementById('team-modal').classList.remove('open');
+  wcOpenGuess();
+};
+</script>
+
+<!-- ====== 我的竞猜 JS ====== -->
+<script>
+window.wcOpenGuess = function() {
+  var champ = JSON.parse(localStorage.getItem('wc_champ_guess')||'null');
+  var html = '';
+
+  if (champ) {
+    var t = new Date(champ.time);
+    html += '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.3);border-radius:10px;padding:14px;margin-bottom:16px;">' +
+      '<div style="font-size:0.8em;color:#8890b5;margin-bottom:6px;">&#x1F3C6; 我的夺冠预测</div>' +
+      '<div style="font-size:1.4em;font-weight:800;color:#FFD700;">' + champ.cnName + '</div>' +
+      '<div style="font-size:0.76em;color:#8890b5;margin-top:4px;">下注于 ' + t.toLocaleString('zh-CN') + '</div>' +
+      '<button onclick="localStorage.removeItem(\'wc_champ_guess\');wcOpenGuess();" style="margin-top:10px;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">取消竞猜</button>' +
+    '</div>';
+  } else {
+    html += '<div style="color:#8890b5;font-size:0.88em;margin-bottom:14px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;">' +
+      '点击下方表格中的任意球队行，即可竞猜该球队夺冠。' +
+    '</div>';
+  }
+
+  // 场次竞猜
+  var matchGuesses = JSON.parse(localStorage.getItem('wc_match_guesses')||'{}');
+  var guessCount = Object.keys(matchGuesses).length;
+  var correctCount = 0;
+  var settledCount = 0;
+
+  if (guessCount > 0) {
+    html += '<div style="font-size:0.88em;color:#8890b5;margin-bottom:8px;">&#x26BD; 比赛竞猜记录（' + guessCount + ' 场）</div>';
+    html += '<div style="max-height:300px;overflow-y:auto;">';
+    Object.values(matchGuesses).forEach(function(g){
+      var icon = '⏳', color = '#8890b5';
+      if (g.result) {
+        settledCount++;
+        if (g.guess === g.result) { icon='✅'; color='#66bb6a'; correctCount++; }
+        else { icon='❌'; color='#ef5350'; }
+      }
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-bottom:4px;background:rgba(255,255,255,0.03);border-radius:6px;">' +
+        '<span style="font-size:0.85em;">' + (g.homeCN||g.home) + ' vs ' + (g.awayCN||g.away) + '</span>' +
+        '<span style="font-size:0.8em;color:' + color + ';">' + icon + ' ' + wcGuessLabel(g.guess) + '</span>' +
+      '</div>';
+    });
+    html += '</div>';
+    if (settledCount > 0) {
+      var rate = (correctCount/settledCount*100).toFixed(0);
+      html += '<div style="text-align:center;margin-top:12px;padding:10px;background:rgba(79,195,247,0.08);border-radius:8px;">' +
+        '已结算 ' + settledCount + ' 场 · 猜中 <span style="color:#66bb6a;font-weight:700;">' + correctCount + '</span> 场 · 准确率 <span style="color:#FFD700;font-weight:800;">' + rate + '%</span>' +
+      '</div>';
+    }
+    html += '<button onclick="if(confirm(\'确定清空所有竞猜记录？\')){localStorage.removeItem(\'wc_match_guesses\');wcOpenGuess();}" style="margin-top:10px;width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">清空比赛竞猜记录</button>';
+  } else {
+    html += '<div style="color:#8890b5;font-size:0.82em;text-align:center;padding:12px;">在今日比赛模块中点击比赛卡片可进行竞猜</div>';
+  }
+
+  document.getElementById('guess-content').innerHTML = html;
+  document.getElementById('guess-modal').classList.add('open');
+};
+
+window.wcGuessLabel = function(g) {
+  return g==='home'?'主队胜':g==='draw'?'平局':'客队胜';
+};
+
+window.wcGuessMatch = function(home, homeCN, away, awayCN, guess) {
+  var key = home + '_' + away;
+  var all = JSON.parse(localStorage.getItem('wc_match_guesses')||'{}');
+  all[key] = {home:home, away:away, homeCN:homeCN, awayCN:awayCN, guess:guess, time:Date.now()};
+  localStorage.setItem('wc_match_guesses', JSON.stringify(all));
+  alert('✅ 已记录：' + homeCN + ' vs ' + awayCN + ' — ' + wcGuessLabel(guess));
+};
+
+window._wcTeamCN = {};
+</script>
+
+<!-- ====== 分享卡片 JS ====== -->
+<script>
+window.wcShareCard = function() {
+  var topTeams = [];
+  var rows = document.querySelectorAll('#matrix-tbody tr');
+  var shown = 0;
+  rows.forEach(function(r){
+    if (shown >= 5) return;
+    if (r.style.display === 'none') return;
+    var cells = r.querySelectorAll('td');
+    if (cells.length < 5) return;
+    topTeams.push({
+      rank: cells[0].textContent,
+      name: cells[1].textContent.replace('⚠','').trim(),
+      group: cells[2].textContent,
+      pct: cells[4].textContent
+    });
+    shown++;
+  });
+
+  var now = new Date().toLocaleDateString('zh-CN');
+  var html = '<div style="background:linear-gradient(135deg,#0a0e27,#1a237e);padding:20px;border-radius:12px;font-family:-apple-system,sans-serif;max-width:320px;">' +
+    '<div style="text-align:center;margin-bottom:14px;">' +
+      '<div style="font-size:1.5em;font-weight:900;background:linear-gradient(90deg,#FFD700,#FFA726);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">⚽ 2026 世界杯夺冠预测</div>' +
+      '<div style="color:#8890b5;font-size:0.72em;margin-top:4px;">' + now + ' · 蒙特卡洛模拟</div>' +
+    '</div>';
+
+  topTeams.forEach(function(t){
+    var icons = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+    var idx = parseInt(t.rank)-1;
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin-bottom:6px;background:rgba(255,255,255,0.06);border-radius:8px;">' +
+      '<span style="font-size:1.1em;">' + (icons[idx]||t.rank) + '</span>' +
+      '<span style="font-weight:700;color:#e8e8ec;flex:1;margin:0 10px;">' + t.name + '</span>' +
+      '<span style="font-weight:800;color:#FFD700;">' + t.pct + '</span>' +
+    '</div>';
+  });
+
+  html += '<div style="text-align:center;margin-top:12px;color:#8890b5;font-size:0.7em;">haiwangxing1251.github.io/worldcup-dashboard</div></div>';
+
+  var win = window.open('', '_blank', 'width=400,height=480');
+  if (!win) { alert('请允许弹窗以查看分享卡片'); return; }
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>分享</title></head><body style="margin:0;background:#0a0e27;display:flex;align-items:center;justify-content:center;min-height:100vh;">' + html + '<p style="text-align:center;color:#8890b5;font-size:12px;margin-top:10px;">长按图片保存</p></body></html>');
+  win.document.close();
+};
+</script>
+
+<!-- ====== 比赛日推送提醒 JS ====== -->
+<script>
+(function(){
+  var btn = document.getElementById('notify-btn');
+  if (!btn) return;
+
+  function updateBtn() {
+    var on = localStorage.getItem('wc_notify') === '1';
+    btn.className = 'active' ? (on ? 'active' : '') : '';
+    if (on) {
+      btn.className = 'active';
+      btn.innerHTML = '🔔 提醒已开启';
+    } else {
+      btn.className = '';
+      btn.innerHTML = '🔔 开启比赛提醒';
+    }
+  }
+
+  btn.addEventListener('click', function(){
+    var on = localStorage.getItem('wc_notify') === '1';
+    if (on) {
+      localStorage.removeItem('wc_notify');
+      updateBtn();
+      return;
+    }
+    if (!('Notification' in window)) {
+      alert('您的浏览器不支持桌面通知');
+      return;
+    }
+    Notification.requestPermission().then(function(p){
+      if (p === 'granted') {
+        localStorage.setItem('wc_notify', '1');
+        updateBtn();
+        new Notification('⚽ 世界杯预测', {
+          body: '提醒已开启！比赛前 30 分钟将收到通知',
+          icon: 'https://haiwangxing1251.github.io/worldcup-dashboard/favicon.ico'
+        });
+        scheduleNotifications();
+      } else {
+        alert('请在浏览器设置中允许通知权限');
+      }
+    });
+  });
+
+  function scheduleNotifications() {
+    if (!window.TODAY_SCHEDULE) return;
+    var now = Date.now();
+    TODAY_SCHEDULE.forEach(function(m){
+      if (m.finished || !m.date || !m.time) return;
+      try {
+        var mt = new Date(m.date + 'T' + m.time + ':00+08:00').getTime();
+        var remind = mt - 30*60*1000;
+        var delay = remind - now;
+        if (delay > 0 && delay < 24*60*60*1000) {
+          setTimeout(function(){
+            if (localStorage.getItem('wc_notify') !== '1') return;
+            new Notification('⚽ 比赛即将开始', {
+              body: (m.home||'') + ' vs ' + (m.away||'') + ' · 30分钟后开球',
+              icon: 'https://haiwangxing1251.github.io/worldcup-dashboard/favicon.ico'
+            });
+          }, delay);
+        }
+      } catch(e){}
+    });
+  }
+
+  updateBtn();
+  if (localStorage.getItem('wc_notify') === '1') {
+    Notification.requestPermission().then(function(p){
+      if (p === 'granted') scheduleNotifications();
+    });
+  }
+})();
 </script>
 
 </body>
