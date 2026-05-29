@@ -679,7 +679,7 @@ body {{
   }
   update();
   setInterval(update, 60000);
-}})();
+})();
 </script>
 
 </body>
