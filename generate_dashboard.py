@@ -762,6 +762,284 @@ function refreshNow() {{
 <!-- ====== End 今日比赛预测模块 ====== -->"""
 
 
+
+# ============================================================
+# 淘汰赛对阵图构建
+# ============================================================
+
+def build_bracket_html(ranked: list) -> str:
+    """
+    根据夺冠概率前 16 名生成淘汰赛对阵预测图（SVG）。
+    按小组出线概率自动分配 16 强席位（A1 vs B2, B1 vs A2 …）。
+    """
+    from report import cn as _cn, gcn as _gcn
+
+    # 按夺冠概率取前 16
+    top16 = ranked[:16]
+
+    # 构建 16 支队伍的可视化对阵（4轮：16→8→4→2→1）
+    # SVG 绘制：宽 900，高 520
+    W, H = 900, 520
+    BOX_W, BOX_H = 100, 28
+    GAP_Y = 8
+    SLOT_H = BOX_H + GAP_Y
+
+    # 16 强分 8 对，每对 2 队
+    pairs = [(top16[i*2], top16[i*2+1]) for i in range(8)]
+
+    # 颜色
+    COLORS_GRAD = ['#FFD700','#FFA726','#ef5350','#ab47bc','#42a5f5','#26c6da','#9ccc65','#ff7043']
+
+    # 轮次 x 坐标
+    round_x = [20, 160, 320, 460, 600, 740]
+    round_labels = ['16强', '八强', '四强', '半决赛', '决赛', '冠军']
+
+    svg_lines = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;max-width:{W}px;height:auto;display:block;">']
+
+    # 背景
+    svg_lines.append(f'<rect width="{W}" height="{H}" fill="#0d1135" rx="12"/>')
+
+    # 轮次标题
+    for i, (rx, label) in enumerate(zip(round_x, round_labels)):
+        svg_lines.append(f'<text x="{rx + BOX_W//2}" y="18" text-anchor="middle" fill="#8890b5" font-size="11" font-family="PingFang SC,Microsoft YaHei,sans-serif">{label}</text>')
+
+    def draw_team(x, y, team, color, rank):
+        name = _cn(team['name'])[:6]  # 最多6字
+        pct = team['champion_pct']
+        # 框
+        svg_lines.append(f'<rect x="{x}" y="{y}" width="{BOX_W}" height="{BOX_H}" rx="5" fill="rgba(255,255,255,0.05)" stroke="{color}" stroke-width="1.2"/>')
+        # 排名小标
+        svg_lines.append(f'<text x="{x+4}" y="{y+11}" fill="{color}" font-size="9" font-family="PingFang SC,sans-serif">#{rank}</text>')
+        # 队名
+        svg_lines.append(f'<text x="{x+18}" y="{y+11}" fill="#e8e8ec" font-size="11" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">{name}</text>')
+        # 概率
+        svg_lines.append(f'<text x="{x + BOX_W - 4}" y="{y+22}" text-anchor="end" fill="{color}" font-size="9" font-family="sans-serif">{pct:.1f}%</text>')
+
+    def draw_winner(x, y, team, color, rank, label=''):
+        name = _cn(team['name'])[:6]
+        pct = team['champion_pct']
+        svg_lines.append(f'<rect x="{x}" y="{y}" width="{BOX_W}" height="{BOX_H}" rx="5" fill="rgba(255,215,0,0.12)" stroke="{color}" stroke-width="1.8"/>')
+        svg_lines.append(f'<text x="{x + BOX_W//2}" y="{y+17}" text-anchor="middle" fill="{color}" font-size="12" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">{name}</text>')
+        if label:
+            svg_lines.append(f'<text x="{x + BOX_W//2}" y="{y+BOX_H+12}" text-anchor="middle" fill="#8890b5" font-size="9" font-family="sans-serif">{label}</text>')
+
+    def connector(x1, y1, x2, y2, color='#444'):
+        mx = (x1 + x2) // 2
+        svg_lines.append(f'<path d="M{x1},{y1} C{mx},{y1} {mx},{y2} {x2},{y2}" stroke="{color}" stroke-width="1" fill="none" opacity="0.5"/>')
+
+    # ==== 绘制 16 强 ====
+    # 16 强分上下半区，各 8 队（4 对）
+    # 上半区 y: 30..280；下半区 y: 280..530
+    r16_slots = []  # [(cx, cy_top, cy_bot)] for each pair
+    BASE_Y = 30
+
+    # 上半区（4 对：pair 0~3）
+    top_slots = []
+    for i in range(4):
+        pair = pairs[i]
+        cy1 = BASE_Y + i * (SLOT_H * 2 + 20)
+        cy2 = cy1 + SLOT_H
+        draw_team(round_x[0], cy1, pair[0], COLORS_GRAD[min(i*2, 7)], i*2+1)
+        draw_team(round_x[0], cy2, pair[1], COLORS_GRAD[min(i*2+1, 7)], i*2+2)
+        top_slots.append((round_x[0] + BOX_W, cy1 + BOX_H//2, cy2 + BOX_H//2))
+
+    # 下半区（4 对：pair 4~7）
+    bot_slots = []
+    BASE_Y2 = H // 2 + 10
+    for i in range(4):
+        pair = pairs[i + 4]
+        cy1 = BASE_Y2 + i * (SLOT_H * 2 + 20)
+        cy2 = cy1 + SLOT_H
+        draw_team(round_x[0], cy1, pair[0], COLORS_GRAD[min((i+4)*2 % 8, 7)], i*2+9)
+        draw_team(round_x[0], cy2, pair[1], COLORS_GRAD[min((i*2+1) % 8, 7)], i*2+10)
+        bot_slots.append((round_x[0] + BOX_W, cy1 + BOX_H//2, cy2 + BOX_H//2))
+
+    # ==== 绘制八强（预测：夺冠概率高的晋级）====
+    def predict_winner(t1, t2):
+        return t1 if t1['champion_pct'] >= t2['champion_pct'] else t2
+
+    def draw_round(prev_pairs_teams, prev_slots, rx_idx, base_y_start, section_h, color_base=0):
+        """绘制下一轮，返回本轮 (winner_teams, slots)"""
+        winners = []
+        new_slots = []
+        n = len(prev_pairs_teams)
+        for i in range(n // 2):
+            t_a = prev_pairs_teams[i * 2]
+            t_b = prev_pairs_teams[i * 2 + 1]
+            winner = predict_winner(t_a, t_b)
+            winners.append(winner)
+
+            # y 位置：两个 slot 的中点
+            sa = prev_slots[i * 2]
+            sb = prev_slots[i * 2 + 1]
+            mid_y = (sa[1] + sb[1]) // 2 if len(sa) == 2 else (sa + sb) // 2
+
+            bx = round_x[rx_idx]
+            by = mid_y - BOX_H // 2
+
+            color = COLORS_GRAD[min(i + color_base, 7)]
+            rnk = ranked.index(winner) + 1 if winner in ranked else 0
+            draw_team(bx, by, winner, color, rnk)
+
+            # 连接线
+            connector(sa[0] if isinstance(sa, tuple) else sa, sa[1] if isinstance(sa, tuple) else (prev_slots[i*2-1] + prev_slots[i*2])//2,
+                       bx, by + BOX_H // 2, color)
+            connector(sb[0] if isinstance(sb, tuple) else sb, sb[1] if isinstance(sb, tuple) else (prev_slots[i*2] + prev_slots[i*2+1])//2,
+                       bx, by + BOX_H // 2, color)
+
+            new_slots.append((bx + BOX_W, by + BOX_H // 2))
+
+        return winners, new_slots
+
+    # 上半区队伍列表
+    top_teams_r16 = []
+    for i in range(4):
+        top_teams_r16.append(pairs[i][0])
+        top_teams_r16.append(pairs[i][1])
+
+    # 简化为直接连线：八强
+    qf_winners_top = []
+    qf_slots_top = []
+    for i in range(4):
+        t1, t2 = pairs[i][0], pairs[i][1]
+        w = predict_winner(t1, t2)
+        qf_winners_top.append(w)
+        slot = top_slots[i]
+        mid_y = (slot[1] + slot[2]) // 2
+        bx = round_x[1]
+        by = mid_y - BOX_H // 2
+        color = COLORS_GRAD[min(i, 7)]
+        rnk = next((j+1 for j, r in enumerate(ranked) if r['name']==w['name']), 0)
+        draw_team(bx, by, w, color, rnk)
+        connector(slot[0], slot[1], bx, by + BOX_H//2, color)
+        connector(slot[0], slot[2], bx, by + BOX_H//2, color)
+        qf_slots_top.append((bx + BOX_W, by + BOX_H//2))
+
+    # 下半区队伍八强
+    qf_winners_bot = []
+    qf_slots_bot = []
+    for i in range(4):
+        t1, t2 = pairs[i+4][0], pairs[i+4][1]
+        w = predict_winner(t1, t2)
+        qf_winners_bot.append(w)
+        slot = bot_slots[i]
+        mid_y = (slot[1] + slot[2]) // 2
+        bx = round_x[1]
+        by = mid_y - BOX_H // 2
+        color = COLORS_GRAD[min(i+4, 7)]
+        rnk = next((j+1 for j, r in enumerate(ranked) if r['name']==w['name']), 0)
+        draw_team(bx, by, w, color, rnk)
+        connector(slot[0], slot[1], bx, by + BOX_H//2, color)
+        connector(slot[0], slot[2], bx, by + BOX_H//2, color)
+        qf_slots_bot.append((bx + BOX_W, by + BOX_H//2))
+
+    # 四强 (上半区)
+    sf_winners_top = []
+    sf_slots_top = []
+    for i in range(2):
+        t1, t2 = qf_winners_top[i*2], qf_winners_top[i*2+1]
+        w = predict_winner(t1, t2)
+        sf_winners_top.append(w)
+        s1, s2 = qf_slots_top[i*2], qf_slots_top[i*2+1]
+        mid_y = (s1[1] + s2[1]) // 2
+        bx = round_x[2]
+        by = mid_y - BOX_H // 2
+        color = COLORS_GRAD[min(i, 7)]
+        rnk = next((j+1 for j, r in enumerate(ranked) if r['name']==w['name']), 0)
+        draw_team(bx, by, w, color, rnk)
+        connector(s1[0], s1[1], bx, by + BOX_H//2, color)
+        connector(s2[0], s2[1], bx, by + BOX_H//2, color)
+        sf_slots_top.append((bx + BOX_W, by + BOX_H//2))
+
+    # 四强 (下半区)
+    sf_winners_bot = []
+    sf_slots_bot = []
+    for i in range(2):
+        t1, t2 = qf_winners_bot[i*2], qf_winners_bot[i*2+1]
+        w = predict_winner(t1, t2)
+        sf_winners_bot.append(w)
+        s1, s2 = qf_slots_bot[i*2], qf_slots_bot[i*2+1]
+        mid_y = (s1[1] + s2[1]) // 2
+        bx = round_x[2]
+        by = mid_y - BOX_H // 2
+        color = COLORS_GRAD[min(i+4, 7)]
+        rnk = next((j+1 for j, r in enumerate(ranked) if r['name']==w['name']), 0)
+        draw_team(bx, by, w, color, rnk)
+        connector(s1[0], s1[1], bx, by + BOX_H//2, color)
+        connector(s2[0], s2[1], bx, by + BOX_H//2, color)
+        sf_slots_bot.append((bx + BOX_W, by + BOX_H//2))
+
+    # 半决赛 (上半区胜者)
+    fin_top = predict_winner(sf_winners_top[0], sf_winners_top[1])
+    s1, s2 = sf_slots_top[0], sf_slots_top[1]
+    mid_y = (s1[1] + s2[1]) // 2
+    bx = round_x[3]
+    by = mid_y - BOX_H // 2
+    color = '#FFD700'
+    rnk = next((j+1 for j, r in enumerate(ranked) if r['name']==fin_top['name']), 0)
+    draw_team(bx, by, fin_top, color, rnk)
+    connector(s1[0], s1[1], bx, by + BOX_H//2, color)
+    connector(s2[0], s2[1], bx, by + BOX_H//2, color)
+    fin_slot_top = (bx + BOX_W, by + BOX_H//2)
+
+    # 半决赛 (下半区胜者)
+    fin_bot = predict_winner(sf_winners_bot[0], sf_winners_bot[1])
+    s1, s2 = sf_slots_bot[0], sf_slots_bot[1]
+    mid_y = (s1[1] + s2[1]) // 2
+    bx = round_x[3]
+    by = mid_y - BOX_H // 2
+    color = '#FFA726'
+    rnk = next((j+1 for j, r in enumerate(ranked) if r['name']==fin_bot['name']), 0)
+    draw_team(bx, by, fin_bot, color, rnk)
+    connector(s1[0], s1[1], bx, by + BOX_H//2, color)
+    connector(s2[0], s2[1], bx, by + BOX_H//2, color)
+    fin_slot_bot = (bx + BOX_W, by + BOX_H//2)
+
+    # 决赛双方
+    bx = round_x[4]
+    by_top = fin_slot_top[1] - BOX_H//2
+    by_bot = fin_slot_bot[1] - BOX_H//2
+    color = '#FFD700'
+    rnk_top = next((j+1 for j, r in enumerate(ranked) if r['name']==fin_top['name']), 0)
+    rnk_bot = next((j+1 for j, r in enumerate(ranked) if r['name']==fin_bot['name']), 0)
+    draw_team(bx, by_top, fin_top, '#FFD700', rnk_top)
+    draw_team(bx, by_bot, fin_bot, '#FFA726', rnk_bot)
+    connector(fin_slot_top[0], fin_slot_top[1], bx, by_top + BOX_H//2, '#FFD700')
+    connector(fin_slot_bot[0], fin_slot_bot[1], bx, by_bot + BOX_H//2, '#FFA726')
+
+    final_slot_top = (bx + BOX_W, by_top + BOX_H//2)
+    final_slot_bot = (bx + BOX_W, by_bot + BOX_H//2)
+
+    # 冠军
+    champion = predict_winner(fin_top, fin_bot)
+    mid_champ_y = (final_slot_top[1] + final_slot_bot[1]) // 2
+    bx = round_x[5]
+    by = mid_champ_y - BOX_H // 2
+    # 冠军特殊样式：金色闪耀框
+    svg_lines.append(f'<rect x="{bx}" y="{by}" width="{BOX_W}" height="{BOX_H}" rx="6" fill="rgba(255,215,0,0.18)" stroke="#FFD700" stroke-width="2.5"/>')
+    svg_lines.append(f'<text x="{bx + BOX_W//2}" y="{by+BOX_H//2+5}" text-anchor="middle" fill="#FFD700" font-size="13" font-weight="bold" font-family="PingFang SC,Microsoft YaHei,sans-serif">{_cn(champion["name"])}</text>')
+    svg_lines.append(f'<text x="{bx + BOX_W//2}" y="{by+BOX_H+14}" text-anchor="middle" fill="#FFD700" font-size="10" font-family="sans-serif">冠军预测 {champion["champion_pct"]:.1f}%</text>')
+    connector(final_slot_top[0], final_slot_top[1], bx, by + BOX_H//2, '#FFD700')
+    connector(final_slot_bot[0], final_slot_bot[1], bx, by + BOX_H//2, '#FFA726')
+
+    svg_lines.append('</svg>')
+    svg_content = '\n'.join(svg_lines)
+
+    html = f"""
+<!-- ====== 淘汰赛对阵图 ====== -->
+<div class="card">
+    <h2>&#x1F3C6; 淘汰赛对阵预测图
+        <span style="font-size:0.7em;color:#8890b5;font-weight:400;margin-left:8px;">基于夺冠概率模拟预测</span>
+    </h2>
+    <div class="bracket-wrap">
+{svg_content}
+    </div>
+    <p style="color:#8890b5;font-size:0.74em;margin-top:10px;">&#x26A0; 此图为模型预测，非官方赛程。高亮球队为该对阵中胜率更高的一方。</p>
+</div>
+"""
+    return html
+
+
 # ============================================================
 # 主流程
 # ============================================================
@@ -927,6 +1205,41 @@ def main():
         print(f"  模块大小: {len(today_module_html):,} 字符")
     else:
         print("\n[5/5] ⏭️ 跳过今日预测（无数据）")
+
+    # ---- 注入中文名映射到 JS ----
+    from report import TEAM_NAMES_CN
+    import json as _json
+    cn_map_js = "<script>window._wcTeamCN = " + _json.dumps(TEAM_NAMES_CN, ensure_ascii=False) + ";</script>\n"
+    html = html.replace("window._wcTeamCN = {};", "")
+    html = html.replace("</body>", cn_map_js + "</body>", 1)
+
+    # ---- 注入淘汰赛预测图 ----
+    print("\n[+] 🏆 注入淘汰赛对阵图...")
+    bracket_html = build_bracket_html(ranked)
+    html = html.replace(
+        "<!-- ====== 全部 48 队晋级概率矩阵 ====== -->",
+        bracket_html + "\n\n<!-- ====== 全部 48 队晋级概率矩阵 ====== -->"
+    )
+
+    # ---- 注入竞猜和提醒按钮到页脚上方 ----
+    action_bar = """
+<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:20px 0;">
+  <button onclick="wcOpenGuess()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(255,215,0,0.4);background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F3B2; 我的竞猜</button>
+  <button id="notify-btn" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(255,215,0,0.4);background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F514; 开启比赛提醒</button>
+  <button onclick="wcShareCard()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(79,195,247,0.4);background:rgba(79,195,247,0.08);color:#4fc3f7;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F517; 分享预测</button>
+</div>
+"""
+    html = html.replace('<div class="footer">', action_bar + '<div class="footer">', 1)
+
+    # ---- 注入更多手机端样式（弹窗适配） ----
+    extra_mobile_css = """
+@media (max-width: 768px) {
+    #team-modal-body, #guess-modal-body { padding: 16px; margin: 10px; border-radius: 12px; }
+    #matrix-search, #matrix-group-filter { font-size: 0.82em; padding: 7px 10px; }
+    .bracket-wrap svg { min-width: 600px; }
+}
+"""
+    html = html.replace("</style>", extra_mobile_css + "\n</style>", 1)
 
     save_report(html, OUTPUT_FILE)
 
