@@ -848,7 +848,9 @@ window.wcShowTeamDetail = function(name, elo, group, champ, fin, sf, qf, r16, r3
 
   var guess = JSON.parse(localStorage.getItem('wc_champ_guess')||'{}');
   var isGuessed = guess.team === name;
-  var guessBtn = '<button onclick="wcGuessChamp(\'' + name + '\',\'' + cnName + '\')" style="width:100%;margin-top:14px;padding:10px;border-radius:8px;border:none;background:' +
+  var safeName = name.replace(/'/g, "\\'");
+  var safeCnName = cnName.replace(/'/g, "\\'");
+  var guessBtn = '<button onclick="wcGuessChamp(\'' + safeName + '\',\'' + safeCnName + '\')" style="width:100%;margin-top:14px;padding:10px;border-radius:8px;border:none;background:' +
     (isGuessed ? 'rgba(102,187,106,0.2);color:#66bb6a;border:1px solid #66bb6a' : 'rgba(255,215,0,0.15);color:#FFD700;border:1px solid rgba(255,215,0,0.4)') +
     ';font-size:0.9em;font-weight:600;cursor:pointer;">' +
     (isGuessed ? '✅ 已竞猜 ' + cnName + ' 夺冠' : '🎯 竞猜 ' + cnName + ' 夺冠') + '</button>';
