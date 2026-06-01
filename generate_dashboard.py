@@ -641,6 +641,11 @@ function renderMatchCards(data) {{
         '预期进球: <span class="gval ghome">' + m.expected_goals_home + '</span>' +
         ' - <span class="gval gaway">' + m.expected_goals_away + '</span>' +
         ' (总 <span style="color:#FFD700;font-weight:700;">' + m.total_expected_goals + '</span>)' +
+      '</div>' +
+      '<div class="guess-btns" style="display:flex;gap:6px;margin-top:10px;">' +
+        '<button onclick="wcGuessMatch(\\'' + m.home + '\\',\\'' + homeCN + '\\',\\'' + m.away + '\\',\\'' + awayCN + '\\',\\'home\\')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(66,165,245,0.5);background:rgba(66,165,245,0.12);color:#42a5f5;font-size:0.78em;cursor:pointer;">主胜</button>' +
+        '<button onclick="wcGuessMatch(\\'' + m.home + '\\',\\'' + homeCN + '\\',\\'' + m.away + '\\',\\'' + awayCN + '\\',\\'draw\\')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(255,215,0,0.5);background:rgba(255,215,0,0.12);color:#FFD700;font-size:0.78em;cursor:pointer;">平局</button>' +
+        '<button onclick="wcGuessMatch(\\'' + m.home + '\\',\\'' + homeCN + '\\',\\'' + m.away + '\\',\\'' + awayCN + '\\',\\'away\\')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(239,83,80,0.5);background:rgba(239,83,80,0.12);color:#ef5350;font-size:0.78em;cursor:pointer;">客胜</button>' +
       '</div>';
     }}
 
@@ -649,6 +654,18 @@ function renderMatchCards(data) {{
 
   document.getElementById('today-matches').innerHTML = html;
 }}
+
+window.wcGuessLabel = function(g) {{
+  return g==='home'?'主队胜':g==='draw'?'平局':'客队胜';
+}};
+
+window.wcGuessMatch = function(home, homeCN, away, awayCN, guess) {{
+  var key = home + '_' + away;
+  var all = JSON.parse(localStorage.getItem('wc_match_guesses')||'{{}}');
+  all[key] = {{home:home, away:away, homeCN:homeCN, awayCN:awayCN, guess:guess, time:Date.now()}};
+  localStorage.setItem('wc_match_guesses', JSON.stringify(all));
+  alert('✅ 已记录：' + homeCN + ' vs ' + awayCN + ' — ' + wcGuessLabel(guess));
+}};
 
 function updateNavigation(data) {{
   var btnPrev = document.getElementById('btn-prev-day');
