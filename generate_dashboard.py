@@ -30,6 +30,12 @@ from simulator import WorldCupSimulator
 from report import generate_html_report, save_report, cn
 from model import EloPoissonModel
 
+# Windows 控制台 GBK 编码修复：尝试将 stdout 设为 UTF-8
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except (AttributeError, OSError):
+    pass  # 非终端环境（如管道）忽略
+
 # ============================================================
 # 路径配置
 # ============================================================
@@ -120,11 +126,21 @@ def compute_today_predictions(schedule_matches: list, elo_data: dict) -> dict:
         if name:
             teams_lookup[name] = code
 
-    today_matches = [m for m in schedule_matches if m["date"] == today_str]
+    # 先构建所有比赛日期列表（必须在前面定义，后面才能用）
     all_dates = sorted(set(m["date"] for m in schedule_matches))
 
+    today_matches = [m for m in schedule_matches if m["date"] == today_str]
+
+    # 如果今日没有比赛，自动取下一比赛日
+    target_date = today_str
+    if not today_matches:
+        future_dates = [d for d in all_dates if d > today_str]
+        if future_dates:
+            target_date = future_dates[0]
+            today_matches = [m for m in schedule_matches if m["date"] == target_date]
+
     try:
-        day_index = all_dates.index(today_str)
+        day_index = all_dates.index(target_date)
     except ValueError:
         day_index = 0
 
@@ -170,7 +186,7 @@ def compute_today_predictions(schedule_matches: list, elo_data: dict) -> dict:
         })
 
     return {
-        "date": today_str,
+        "date": target_date,
         "day_index": day_index,
         "total_matchdays": len(all_dates),
         "matches": matches_with_pred,
@@ -768,12 +784,12 @@ function refreshNow() {{
 
 def main():
     print("=" * 60)
-    print("🔮 2026 世界杯预测引擎 — 自动仪表盘生成")
+    print(" 2026 世界杯预测引擎 — 自动仪表盘生成")
     print(f"   时间: {datetime.now(timezone(timedelta(hours=8))).strftime('%Y-%m-%d %H:%M:%S')} 北京时间")
     print("=" * 60)
 
     # ---- 第 1 步：获取实时比赛数据 ----
-    print("\n[1/4] 📡 从 openfootball API 获取实时数据...")
+    print("\n[1/4]  从 openfootball API 获取实时数据...")
     t0 = time.time()
 
     try:
@@ -782,17 +798,17 @@ def main():
         print(f"  已完赛: {tournament['finished_matches']}")
         print(f"  今日:   {tournament['today_matches']}")
     except Exception as e:
-        print(f"  ⚠️ API 获取失败: {e}")
+        print(f"  ️ API 获取失败: {e}")
         tournament = {"finished_matches": 0, "today_matches": 0, "total_matches": 104}
 
     # ---- 第 2 步：获取赛果并更新 ELO ----
-    print("\n[2/4] 📊 更新 ELO 评分...")
+    print("\n[2/4]  更新 ELO 评分...")
 
     try:
         results = get_match_results_for_elo()
         print(f"  获取到 {len(results)} 场已完赛比分")
     except Exception as e:
-        print(f"  ⚠️ 赛果获取失败: {e}")
+        print(f"  ️ 赛果获取失败: {e}")
         results = []
 
     if results:
@@ -806,7 +822,7 @@ def main():
         num_teams_updated = 0
 
     # ---- 第 3 步：蒙特卡洛模拟 ----
-    print(f"\n[3/4] 🎲 运行 {NUM_SIMS:,} 次蒙特卡洛模拟...")
+    print(f"\n[3/4]  运行 {NUM_SIMS:,} 次蒙特卡洛模拟...")
 
     sim = WorldCupSimulator(
         GROUPS_FILE, ELO_FILE,
@@ -826,7 +842,7 @@ def main():
     print(f"  生成 {len(ranked)} 支球队排名")
 
     # ---- 第 3.5 步：加载赛程 + 计算今日预测 ----
-    print("\n[3.5/5] 📅 加载赛程数据 + 计算今日比赛预测...")
+    print("\n[3.5/5]  加载赛程数据 + 计算今日比赛预测...")
 
     schedule_matches = []
     today_pred = None
@@ -840,11 +856,11 @@ def main():
         print(f"  赛程: {len(schedule_matches)} 场比赛")
         print(f"  今日: {len(today_pred['matches'])} 场 ({today_pred['date']})")
     except Exception as e:
-        print(f"  ⚠️ 赛程/预测加载失败: {e}")
+        print(f"  ️ 赛程/预测加载失败: {e}")
         today_pred = None
 
     # ---- 第 4 步：生成 HTML 仪表盘 ----
-    print("\n[4/5] 📄 生成 HTML 仪表盘...")
+    print("\n[4/5]  生成 HTML 仪表盘...")
 
     sync_info = {
         "matches_found": len(results),
@@ -915,8 +931,8 @@ def main():
     html = html.replace("</style>", mobile_css + "\n</style>")
 
     # ---- 注入今日比赛预测模块 ----
-    if today_pred and schedule_matches:
-        print("\n[5/5] 💉 注入今日比赛预测模块...")
+    if True:  # 始终注入今日比赛模块（无条件）
+        print("\n[5/5]  注入今日比赛预测模块...")
         today_module_html = build_today_module_html(
             elo_data, schedule_matches, today_pred
         )
@@ -931,7 +947,7 @@ def main():
     save_report(html, OUTPUT_FILE)
 
     elapsed = time.time() - t0
-    print(f"\n✅ 全部完成! 耗时 {elapsed:.1f}s")
+    print(f"\n 全部完成! 耗时 {elapsed:.1f}s")
     print(f"   仪表盘: {OUTPUT_FILE}")
     print(f"   球队数: {len(ranked)}")
     print(f"   赛果:   {len(results)} 场")

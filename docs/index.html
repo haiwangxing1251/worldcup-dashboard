@@ -243,6 +243,64 @@ body {
     margin-top: 30px;
 }
 
+/* ---- 可排序表头 ---- */
+.sortable {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+.sortable:hover { color: #FFD700; }
+.sortable.sort-asc::after { content: ' ▲'; font-size:0.75em; color:#FFD700; }
+.sortable.sort-desc::after { content: ' ▼'; font-size:0.75em; color:#FFD700; }
+
+/* ---- 球队详情弹窗 ---- */
+#team-modal {
+    display:none;
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.7);z-index:8888;
+    align-items:center;justify-content:center;
+}
+#team-modal.open { display:flex; }
+#team-modal-body {
+    background:#111640;border-radius:16px;padding:24px;
+    max-width:480px;width:90%;max-height:85vh;overflow-y:auto;
+    border:1px solid rgba(255,255,255,0.1);position:relative;
+}
+#team-modal-close {
+    position:absolute;top:12px;right:14px;
+    background:none;border:none;color:#8890b5;font-size:1.4em;cursor:pointer;
+}
+
+/* ---- 竞猜弹窗 ---- */
+#guess-modal {
+    display:none;
+    position:fixed;top:0;left:0;width:100%;height:100%;
+    background:rgba(0,0,0,0.75);z-index:8888;
+    align-items:flex-start;justify-content:center;overflow-y:auto;
+    padding:20px 0;
+}
+#guess-modal.open { display:flex; }
+#guess-modal-body {
+    background:#111640;border-radius:16px;padding:24px;
+    max-width:560px;width:92%;
+    border:1px solid rgba(255,255,255,0.1);position:relative;
+    margin:auto;
+}
+
+/* ---- 淘汰赛图 ---- */
+.bracket-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.bracket-svg text { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif; }
+
+/* ---- 通知按钮 ---- */
+#notify-btn {
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 16px;border-radius:8px;border:1px solid rgba(255,215,0,0.4);
+    background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.84em;cursor:pointer;
+    transition:background 0.2s;
+}
+#notify-btn:hover { background:rgba(255,215,0,0.15); }
+#notify-btn.active { background:rgba(102,187,106,0.15);color:#66bb6a;border-color:rgba(102,187,106,0.4); }
+
 /* ====== 移动端全页优化 ====== */
 @media (max-width: 768px) {
     body { font-size: 14px; line-height: 1.55; }
@@ -319,7 +377,7 @@ body {
     <div class="meta">
         数据来源：FIFA 官方抽签（2025 年 12 月）&middot;
         ELO: 实时同步 &middot; 赛果: 0 场真实比分 &middot;
-        生成时间：<span data-utc="2026-05-29T05:21:16Z">2026-05-29 13:21 北京时间</span>
+        生成时间：<span data-utc="2026-06-01T23:15:39Z">2026-06-02 07:15 北京时间</span>
     </div>
 </div>
 
@@ -716,7 +774,7 @@ body {
 // ====== Embedded Data ======
 var TODAY_ELO_DATA = {"source": "World Football ELO Ratings (worldfootballrankings.com)", "date": "2026-05-27", "description": "ELO ratings for all 48 FIFA World Cup 2026 teams. Ratings for teams outside top 50 are estimated based on FIFA rank regression.", "note_estimated": "Teams marked estimated=true have ELO extrapolated from FIFA ranking using linear regression on top-50 data. Exact ELO unavailable as they rank below top 50 globally.", "teams": {"FRA": {"elo": 1877.32, "rank": 1, "estimated": false, "name": "France"}, "ESP": {"elo": 1876.4, "rank": 2, "estimated": false, "name": "Spain"}, "ARG": {"elo": 1874.81, "rank": 3, "estimated": false, "name": "Argentina"}, "ENG": {"elo": 1825.97, "rank": 4, "estimated": false, "name": "England"}, "POR": {"elo": 1763.83, "rank": 5, "estimated": false, "name": "Portugal"}, "BRA": {"elo": 1761.16, "rank": 6, "estimated": false, "name": "Brazil"}, "NED": {"elo": 1757.87, "rank": 7, "estimated": false, "name": "Netherlands"}, "MAR": {"elo": 1756.21, "rank": 8, "estimated": false, "name": "Morocco"}, "BEL": {"elo": 1734.71, "rank": 9, "estimated": false, "name": "Belgium"}, "GER": {"elo": 1730.37, "rank": 10, "estimated": false, "name": "Germany"}, "CRO": {"elo": 1717.07, "rank": 11, "estimated": false, "name": "Croatia"}, "COL": {"elo": 1693.09, "rank": 13, "estimated": false, "name": "Colombia"}, "SEN": {"elo": 1688.99, "rank": 14, "estimated": false, "name": "Senegal"}, "MEX": {"elo": 1682.11, "rank": 15, "estimated": false, "name": "Mexico"}, "USA": {"elo": 1673.13, "rank": 16, "estimated": false, "name": "United States"}, "URU": {"elo": 1673.07, "rank": 17, "estimated": false, "name": "Uruguay"}, "JPN": {"elo": 1660.43, "rank": 18, "estimated": false, "name": "Japan"}, "SUI": {"elo": 1649.4, "rank": 19, "estimated": false, "name": "Switzerland"}, "IRN": {"elo": 1615.3, "rank": 21, "estimated": false, "name": "Iran"}, "TUR": {"elo": 1599.04, "rank": 22, "estimated": false, "name": "Turkey"}, "ECU": {"elo": 1594.78, "rank": 23, "estimated": false, "name": "Ecuador"}, "AUT": {"elo": 1593.45, "rank": 24, "estimated": false, "name": "Austria"}, "KOR": {"elo": 1588.66, "rank": 25, "estimated": false, "name": "South Korea"}, "AUS": {"elo": 1580.67, "rank": 27, "estimated": false, "name": "Australia"}, "ALG": {"elo": 1564.26, "rank": 28, "estimated": false, "name": "Algeria"}, "EGY": {"elo": 1563.24, "rank": 29, "estimated": false, "name": "Egypt"}, "CAN": {"elo": 1556.48, "rank": 30, "estimated": false, "name": "Canada"}, "NOR": {"elo": 1550.94, "rank": 31, "estimated": false, "name": "Norway"}, "PAN": {"elo": 1540.64, "rank": 33, "estimated": false, "name": "Panama"}, "CIV": {"elo": 1532.98, "rank": 34, "estimated": false, "name": "Ivory Coast"}, "SWE": {"elo": 1514.77, "rank": 38, "estimated": false, "name": "Sweden"}, "PAR": {"elo": 1503.5, "rank": 40, "estimated": false, "name": "Paraguay"}, "CZE": {"elo": 1501.38, "rank": 41, "estimated": false, "name": "Czech Republic"}, "SCO": {"elo": 1498.35, "rank": 43, "estimated": false, "name": "Scotland"}, "TUN": {"elo": 1483.05, "rank": 44, "estimated": false, "name": "Tunisia"}, "COD": {"elo": 1478.35, "rank": 46, "estimated": false, "name": "DR Congo"}, "UZB": {"elo": 1465.34, "rank": 50, "estimated": false, "name": "Uzbekistan"}, "KSA": {"elo": 1460.0, "rank": 53, "estimated": true, "name": "Saudi Arabia"}, "RSA": {"elo": 1450.0, "rank": 55, "estimated": true, "name": "South Africa"}, "BIH": {"elo": 1445.0, "rank": 56, "estimated": true, "name": "Bosnia & Herzegovina"}, "QAT": {"elo": 1430.0, "rank": 58, "estimated": true, "name": "Qatar"}, "GHA": {"elo": 1435.0, "rank": 60, "estimated": true, "name": "Ghana"}, "JOR": {"elo": 1400.0, "rank": 64, "estimated": true, "name": "Jordan"}, "IRQ": {"elo": 1385.0, "rank": 68, "estimated": true, "name": "Iraq"}, "CPV": {"elo": 1370.0, "rank": 72, "estimated": true, "name": "Cape Verde"}, "HAI": {"elo": 1320.0, "rank": 87, "estimated": true, "name": "Haiti"}, "CUW": {"elo": 1305.0, "rank": 91, "estimated": true, "name": "Curacao"}, "NZL": {"elo": 1281.6, "rank": 105, "estimated": false, "name": "New Zealand"}}};
 var TODAY_SCHEDULE = [{"match_id": "1", "date": "2026-06-11", "time_bj": "03:00", "time_raw": "13:00 UTC-6", "round": "Matchday 1", "stage": "小组赛第1轮", "stage_code": "group", "group": "A", "home": "Mexico", "away": "South Africa", "home_code": "MEX", "away_code": "RSA", "home_cn": "墨西哥", "away_cn": "南非", "venue": "Mexico City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "2", "date": "2026-06-11", "time_bj": "10:00", "time_raw": "20:00 UTC-6", "round": "Matchday 1", "stage": "小组赛第1轮", "stage_code": "group", "group": "A", "home": "South Korea", "away": "Czech Republic", "home_code": "KOR", "away_code": "CZE", "home_cn": "韩国", "away_cn": "捷克", "venue": "Guadalajara (Zapopan)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "3", "date": "2026-06-18", "time_bj": "00:00", "time_raw": "12:00 UTC-4", "round": "Matchday 8", "stage": "小组赛第2轮", "stage_code": "group", "group": "A", "home": "Czech Republic", "away": "South Africa", "home_code": "CZE", "away_code": "RSA", "home_cn": "捷克", "away_cn": "南非", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "4", "date": "2026-06-18", "time_bj": "09:00", "time_raw": "19:00 UTC-6", "round": "Matchday 8", "stage": "小组赛第2轮", "stage_code": "group", "group": "A", "home": "Mexico", "away": "South Korea", "home_code": "MEX", "away_code": "KOR", "home_cn": "墨西哥", "away_cn": "韩国", "venue": "Guadalajara (Zapopan)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "5", "date": "2026-06-24", "time_bj": "09:00", "time_raw": "19:00 UTC-6", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "A", "home": "Czech Republic", "away": "Mexico", "home_code": "CZE", "away_code": "MEX", "home_cn": "捷克", "away_cn": "墨西哥", "venue": "Mexico City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "6", "date": "2026-06-24", "time_bj": "09:00", "time_raw": "19:00 UTC-6", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "A", "home": "South Africa", "away": "South Korea", "home_code": "RSA", "away_code": "KOR", "home_cn": "南非", "away_cn": "韩国", "venue": "Monterrey (Guadalupe)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "7", "date": "2026-06-12", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Matchday 2", "stage": "小组赛第1轮", "stage_code": "group", "group": "B", "home": "Canada", "away": "Bosnia & Herzegovina", "home_code": "CAN", "away_code": "BIH", "home_cn": "加拿大", "away_cn": "波黑", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "8", "date": "2026-06-13", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 3", "stage": "小组赛第1轮", "stage_code": "group", "group": "B", "home": "Qatar", "away": "Switzerland", "home_code": "QAT", "away_code": "SUI", "home_cn": "卡塔尔", "away_cn": "瑞士", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "9", "date": "2026-06-18", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 8", "stage": "小组赛第2轮", "stage_code": "group", "group": "B", "home": "Switzerland", "away": "Bosnia & Herzegovina", "home_code": "SUI", "away_code": "BIH", "home_cn": "瑞士", "away_cn": "波黑", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "10", "date": "2026-06-18", "time_bj": "06:00", "time_raw": "15:00 UTC-7", "round": "Matchday 8", "stage": "小组赛第2轮", "stage_code": "group", "group": "B", "home": "Canada", "away": "Qatar", "home_code": "CAN", "away_code": "QAT", "home_cn": "加拿大", "away_cn": "卡塔尔", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "11", "date": "2026-06-24", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "B", "home": "Switzerland", "away": "Canada", "home_code": "SUI", "away_code": "CAN", "home_cn": "瑞士", "away_cn": "加拿大", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "12", "date": "2026-06-24", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "B", "home": "Bosnia & Herzegovina", "away": "Qatar", "home_code": "BIH", "away_code": "QAT", "home_cn": "波黑", "away_cn": "卡塔尔", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "13", "date": "2026-06-13", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 3", "stage": "小组赛第1轮", "stage_code": "group", "group": "C", "home": "Brazil", "away": "Morocco", "home_code": "BRA", "away_code": "MAR", "home_cn": "巴西", "away_cn": "摩洛哥", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "14", "date": "2026-06-13", "time_bj": "09:00", "time_raw": "21:00 UTC-4", "round": "Matchday 3", "stage": "小组赛第1轮", "stage_code": "group", "group": "C", "home": "Haiti", "away": "Scotland", "home_code": "HAI", "away_code": "SCO", "home_cn": "海地", "away_cn": "苏格兰", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "15", "date": "2026-06-19", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 9", "stage": "小组赛第2轮", "stage_code": "group", "group": "C", "home": "Scotland", "away": "Morocco", "home_code": "SCO", "away_code": "MAR", "home_cn": "苏格兰", "away_cn": "摩洛哥", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "16", "date": "2026-06-19", "time_bj": "08:30", "time_raw": "20:30 UTC-4", "round": "Matchday 9", "stage": "小组赛第2轮", "stage_code": "group", "group": "C", "home": "Brazil", "away": "Haiti", "home_code": "BRA", "away_code": "HAI", "home_cn": "巴西", "away_cn": "海地", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "17", "date": "2026-06-24", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "C", "home": "Scotland", "away": "Brazil", "home_code": "SCO", "away_code": "BRA", "home_cn": "苏格兰", "away_cn": "巴西", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "18", "date": "2026-06-24", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 14", "stage": "小组赛第3轮", "stage_code": "group", "group": "C", "home": "Morocco", "away": "Haiti", "home_code": "MAR", "away_code": "HAI", "home_cn": "摩洛哥", "away_cn": "海地", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "19", "date": "2026-06-12", "time_bj": "09:00", "time_raw": "18:00 UTC-7", "round": "Matchday 2", "stage": "小组赛第1轮", "stage_code": "group", "group": "D", "home": "USA", "away": "Paraguay", "home_code": "USA", "away_code": "PAR", "home_cn": "美国", "away_cn": "巴拉圭", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "20", "date": "2026-06-13", "time_bj": "12:00", "time_raw": "21:00 UTC-7", "round": "Matchday 3", "stage": "小组赛第1轮", "stage_code": "group", "group": "D", "home": "Australia", "away": "Turkey", "home_code": "AUS", "away_code": "TUR", "home_cn": "澳大利亚", "away_cn": "土耳其", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "21", "date": "2026-06-19", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 9", "stage": "小组赛第2轮", "stage_code": "group", "group": "D", "home": "USA", "away": "Australia", "home_code": "USA", "away_code": "AUS", "home_cn": "美国", "away_cn": "澳大利亚", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "22", "date": "2026-06-19", "time_bj": "11:00", "time_raw": "20:00 UTC-7", "round": "Matchday 9", "stage": "小组赛第2轮", "stage_code": "group", "group": "D", "home": "Turkey", "away": "Paraguay", "home_code": "TUR", "away_code": "PAR", "home_cn": "土耳其", "away_cn": "巴拉圭", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "23", "date": "2026-06-25", "time_bj": "10:00", "time_raw": "19:00 UTC-7", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "D", "home": "Turkey", "away": "USA", "home_code": "TUR", "away_code": "USA", "home_cn": "土耳其", "away_cn": "美国", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "24", "date": "2026-06-25", "time_bj": "10:00", "time_raw": "19:00 UTC-7", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "D", "home": "Paraguay", "away": "Australia", "home_code": "PAR", "away_code": "AUS", "home_cn": "巴拉圭", "away_cn": "澳大利亚", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "25", "date": "2026-06-14", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Matchday 4", "stage": "小组赛第1轮", "stage_code": "group", "group": "E", "home": "Germany", "away": "Curaçao", "home_code": "GER", "away_code": "CUW", "home_cn": "德国", "away_cn": "库拉索", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "26", "date": "2026-06-14", "time_bj": "07:00", "time_raw": "19:00 UTC-4", "round": "Matchday 4", "stage": "小组赛第1轮", "stage_code": "group", "group": "E", "home": "Ivory Coast", "away": "Ecuador", "home_code": "CIV", "away_code": "ECU", "home_cn": "科特迪瓦", "away_cn": "厄瓜多尔", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "27", "date": "2026-06-20", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Matchday 10", "stage": "小组赛第2轮", "stage_code": "group", "group": "E", "home": "Germany", "away": "Ivory Coast", "home_code": "GER", "away_code": "CIV", "home_cn": "德国", "away_cn": "科特迪瓦", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "28", "date": "2026-06-20", "time_bj": "08:00", "time_raw": "19:00 UTC-5", "round": "Matchday 10", "stage": "小组赛第2轮", "stage_code": "group", "group": "E", "home": "Ecuador", "away": "Curaçao", "home_code": "ECU", "away_code": "CUW", "home_cn": "厄瓜多尔", "away_cn": "库拉索", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "29", "date": "2026-06-25", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "E", "home": "Curaçao", "away": "Ivory Coast", "home_code": "CUW", "away_code": "CIV", "home_cn": "库拉索", "away_cn": "科特迪瓦", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "30", "date": "2026-06-25", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "E", "home": "Ecuador", "away": "Germany", "home_code": "ECU", "away_code": "GER", "home_cn": "厄瓜多尔", "away_cn": "德国", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "31", "date": "2026-06-14", "time_bj": "04:00", "time_raw": "15:00 UTC-5", "round": "Matchday 4", "stage": "小组赛第1轮", "stage_code": "group", "group": "F", "home": "Netherlands", "away": "Japan", "home_code": "NED", "away_code": "JPN", "home_cn": "荷兰", "away_cn": "日本", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "32", "date": "2026-06-14", "time_bj": "10:00", "time_raw": "20:00 UTC-6", "round": "Matchday 4", "stage": "小组赛第1轮", "stage_code": "group", "group": "F", "home": "Sweden", "away": "Tunisia", "home_code": "SWE", "away_code": "TUN", "home_cn": "瑞典", "away_cn": "突尼斯", "venue": "Monterrey (Guadalupe)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "33", "date": "2026-06-20", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Matchday 10", "stage": "小组赛第2轮", "stage_code": "group", "group": "F", "home": "Netherlands", "away": "Sweden", "home_code": "NED", "away_code": "SWE", "home_cn": "荷兰", "away_cn": "瑞典", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "34", "date": "2026-06-20", "time_bj": "12:00", "time_raw": "22:00 UTC-6", "round": "Matchday 10", "stage": "小组赛第2轮", "stage_code": "group", "group": "F", "home": "Tunisia", "away": "Japan", "home_code": "TUN", "away_code": "JPN", "home_cn": "突尼斯", "away_cn": "日本", "venue": "Monterrey (Guadalupe)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "35", "date": "2026-06-25", "time_bj": "07:00", "time_raw": "18:00 UTC-5", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "F", "home": "Japan", "away": "Sweden", "home_code": "JPN", "away_code": "SWE", "home_cn": "日本", "away_cn": "瑞典", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "36", "date": "2026-06-25", "time_bj": "07:00", "time_raw": "18:00 UTC-5", "round": "Matchday 15", "stage": "小组赛第3轮", "stage_code": "group", "group": "F", "home": "Tunisia", "away": "Netherlands", "home_code": "TUN", "away_code": "NED", "home_cn": "突尼斯", "away_cn": "荷兰", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "37", "date": "2026-06-15", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 5", "stage": "小组赛第1轮", "stage_code": "group", "group": "G", "home": "Belgium", "away": "Egypt", "home_code": "BEL", "away_code": "EGY", "home_cn": "比利时", "away_cn": "埃及", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "38", "date": "2026-06-15", "time_bj": "09:00", "time_raw": "18:00 UTC-7", "round": "Matchday 5", "stage": "小组赛第1轮", "stage_code": "group", "group": "G", "home": "Iran", "away": "New Zealand", "home_code": "IRN", "away_code": "NZL", "home_cn": "伊朗", "away_cn": "新西兰", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "39", "date": "2026-06-21", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Matchday 11", "stage": "小组赛第2轮", "stage_code": "group", "group": "G", "home": "Belgium", "away": "Iran", "home_code": "BEL", "away_code": "IRN", "home_cn": "比利时", "away_cn": "伊朗", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "40", "date": "2026-06-21", "time_bj": "09:00", "time_raw": "18:00 UTC-7", "round": "Matchday 11", "stage": "小组赛第2轮", "stage_code": "group", "group": "G", "home": "New Zealand", "away": "Egypt", "home_code": "NZL", "away_code": "EGY", "home_cn": "新西兰", "away_cn": "埃及", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "41", "date": "2026-06-26", "time_bj": "11:00", "time_raw": "20:00 UTC-7", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "G", "home": "Egypt", "away": "Iran", "home_code": "EGY", "away_code": "IRN", "home_cn": "埃及", "away_cn": "伊朗", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "42", "date": "2026-06-26", "time_bj": "11:00", "time_raw": "20:00 UTC-7", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "G", "home": "New Zealand", "away": "Belgium", "home_code": "NZL", "away_code": "BEL", "home_cn": "新西兰", "away_cn": "比利时", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "43", "date": "2026-06-15", "time_bj": "00:00", "time_raw": "12:00 UTC-4", "round": "Matchday 5", "stage": "小组赛第1轮", "stage_code": "group", "group": "H", "home": "Spain", "away": "Cape Verde", "home_code": "ESP", "away_code": "CPV", "home_cn": "西班牙", "away_cn": "佛得角", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "44", "date": "2026-06-15", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 5", "stage": "小组赛第1轮", "stage_code": "group", "group": "H", "home": "Saudi Arabia", "away": "Uruguay", "home_code": "KSA", "away_code": "URU", "home_cn": "沙特", "away_cn": "乌拉圭", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "45", "date": "2026-06-21", "time_bj": "00:00", "time_raw": "12:00 UTC-4", "round": "Matchday 11", "stage": "小组赛第2轮", "stage_code": "group", "group": "H", "home": "Spain", "away": "Saudi Arabia", "home_code": "ESP", "away_code": "KSA", "home_cn": "西班牙", "away_cn": "沙特", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "46", "date": "2026-06-21", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 11", "stage": "小组赛第2轮", "stage_code": "group", "group": "H", "home": "Uruguay", "away": "Cape Verde", "home_code": "URU", "away_code": "CPV", "home_cn": "乌拉圭", "away_cn": "佛得角", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "47", "date": "2026-06-26", "time_bj": "08:00", "time_raw": "19:00 UTC-5", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "H", "home": "Cape Verde", "away": "Saudi Arabia", "home_code": "CPV", "away_code": "KSA", "home_cn": "佛得角", "away_cn": "沙特", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "48", "date": "2026-06-26", "time_bj": "08:00", "time_raw": "18:00 UTC-6", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "H", "home": "Uruguay", "away": "Spain", "home_code": "URU", "away_code": "ESP", "home_cn": "乌拉圭", "away_cn": "西班牙", "venue": "Guadalajara (Zapopan)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "49", "date": "2026-06-16", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Matchday 6", "stage": "小组赛第1轮", "stage_code": "group", "group": "I", "home": "France", "away": "Senegal", "home_code": "FRA", "away_code": "SEN", "home_cn": "法国", "away_cn": "塞内加尔", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "50", "date": "2026-06-16", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Matchday 6", "stage": "小组赛第1轮", "stage_code": "group", "group": "I", "home": "Iraq", "away": "Norway", "home_code": "IRQ", "away_code": "NOR", "home_cn": "伊拉克", "away_cn": "挪威", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "51", "date": "2026-06-22", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Matchday 12", "stage": "小组赛第2轮", "stage_code": "group", "group": "I", "home": "France", "away": "Iraq", "home_code": "FRA", "away_code": "IRQ", "home_cn": "法国", "away_cn": "伊拉克", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "52", "date": "2026-06-22", "time_bj": "08:00", "time_raw": "20:00 UTC-4", "round": "Matchday 12", "stage": "小组赛第2轮", "stage_code": "group", "group": "I", "home": "Norway", "away": "Senegal", "home_code": "NOR", "away_code": "SEN", "home_cn": "挪威", "away_cn": "塞内加尔", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "53", "date": "2026-06-26", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "I", "home": "Norway", "away": "France", "home_code": "NOR", "away_code": "FRA", "home_cn": "挪威", "away_cn": "法国", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "54", "date": "2026-06-26", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Matchday 16", "stage": "小组赛第3轮", "stage_code": "group", "group": "I", "home": "Senegal", "away": "Iraq", "home_code": "SEN", "away_code": "IRQ", "home_cn": "塞内加尔", "away_cn": "伊拉克", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "55", "date": "2026-06-16", "time_bj": "09:00", "time_raw": "20:00 UTC-5", "round": "Matchday 6", "stage": "小组赛第1轮", "stage_code": "group", "group": "J", "home": "Argentina", "away": "Algeria", "home_code": "ARG", "away_code": "ALG", "home_cn": "阿根廷", "away_cn": "阿尔及利亚", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "56", "date": "2026-06-16", "time_bj": "12:00", "time_raw": "21:00 UTC-7", "round": "Matchday 6", "stage": "小组赛第1轮", "stage_code": "group", "group": "J", "home": "Austria", "away": "Jordan", "home_code": "AUT", "away_code": "JOR", "home_cn": "奥地利", "away_cn": "约旦", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "57", "date": "2026-06-22", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Matchday 12", "stage": "小组赛第2轮", "stage_code": "group", "group": "J", "home": "Argentina", "away": "Austria", "home_code": "ARG", "away_code": "AUT", "home_cn": "阿根廷", "away_cn": "奥地利", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "58", "date": "2026-06-22", "time_bj": "11:00", "time_raw": "20:00 UTC-7", "round": "Matchday 12", "stage": "小组赛第2轮", "stage_code": "group", "group": "J", "home": "Jordan", "away": "Algeria", "home_code": "JOR", "away_code": "ALG", "home_cn": "约旦", "away_cn": "阿尔及利亚", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "59", "date": "2026-06-27", "time_bj": "10:00", "time_raw": "21:00 UTC-5", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "J", "home": "Algeria", "away": "Austria", "home_code": "ALG", "away_code": "AUT", "home_cn": "阿尔及利亚", "away_cn": "奥地利", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "60", "date": "2026-06-27", "time_bj": "10:00", "time_raw": "21:00 UTC-5", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "J", "home": "Jordan", "away": "Argentina", "home_code": "JOR", "away_code": "ARG", "home_cn": "约旦", "away_cn": "阿根廷", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "61", "date": "2026-06-17", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Matchday 7", "stage": "小组赛第1轮", "stage_code": "group", "group": "K", "home": "Portugal", "away": "DR Congo", "home_code": "POR", "away_code": "COD", "home_cn": "葡萄牙", "away_cn": "刚果(金)", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "62", "date": "2026-06-17", "time_bj": "10:00", "time_raw": "20:00 UTC-6", "round": "Matchday 7", "stage": "小组赛第1轮", "stage_code": "group", "group": "K", "home": "Uzbekistan", "away": "Colombia", "home_code": "UZB", "away_code": "COL", "home_cn": "乌兹别克斯坦", "away_cn": "哥伦比亚", "venue": "Mexico City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "63", "date": "2026-06-23", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Matchday 13", "stage": "小组赛第2轮", "stage_code": "group", "group": "K", "home": "Portugal", "away": "Uzbekistan", "home_code": "POR", "away_code": "UZB", "home_cn": "葡萄牙", "away_cn": "乌兹别克斯坦", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "64", "date": "2026-06-23", "time_bj": "10:00", "time_raw": "20:00 UTC-6", "round": "Matchday 13", "stage": "小组赛第2轮", "stage_code": "group", "group": "K", "home": "Colombia", "away": "DR Congo", "home_code": "COL", "away_code": "COD", "home_cn": "哥伦比亚", "away_cn": "刚果(金)", "venue": "Guadalajara (Zapopan)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "65", "date": "2026-06-27", "time_bj": "07:30", "time_raw": "19:30 UTC-4", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "K", "home": "Colombia", "away": "Portugal", "home_code": "COL", "away_code": "POR", "home_cn": "哥伦比亚", "away_cn": "葡萄牙", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "66", "date": "2026-06-27", "time_bj": "07:30", "time_raw": "19:30 UTC-4", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "K", "home": "DR Congo", "away": "Uzbekistan", "home_code": "COD", "away_code": "UZB", "home_cn": "刚果(金)", "away_cn": "乌兹别克斯坦", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "67", "date": "2026-06-17", "time_bj": "04:00", "time_raw": "15:00 UTC-5", "round": "Matchday 7", "stage": "小组赛第1轮", "stage_code": "group", "group": "L", "home": "England", "away": "Croatia", "home_code": "ENG", "away_code": "CRO", "home_cn": "英格兰", "away_cn": "克罗地亚", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "68", "date": "2026-06-17", "time_bj": "07:00", "time_raw": "19:00 UTC-4", "round": "Matchday 7", "stage": "小组赛第1轮", "stage_code": "group", "group": "L", "home": "Ghana", "away": "Panama", "home_code": "GHA", "away_code": "PAN", "home_cn": "加纳", "away_cn": "巴拿马", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "69", "date": "2026-06-23", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Matchday 13", "stage": "小组赛第2轮", "stage_code": "group", "group": "L", "home": "England", "away": "Ghana", "home_code": "ENG", "away_code": "GHA", "home_cn": "英格兰", "away_cn": "加纳", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "70", "date": "2026-06-23", "time_bj": "07:00", "time_raw": "19:00 UTC-4", "round": "Matchday 13", "stage": "小组赛第2轮", "stage_code": "group", "group": "L", "home": "Panama", "away": "Croatia", "home_code": "PAN", "away_code": "CRO", "home_cn": "巴拿马", "away_cn": "克罗地亚", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "71", "date": "2026-06-27", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "L", "home": "Panama", "away": "England", "home_code": "PAN", "away_code": "ENG", "home_cn": "巴拿马", "away_cn": "英格兰", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "72", "date": "2026-06-27", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Matchday 17", "stage": "小组赛第3轮", "stage_code": "group", "group": "L", "home": "Croatia", "away": "Ghana", "home_code": "CRO", "away_code": "GHA", "home_cn": "克罗地亚", "away_cn": "加纳", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "73", "date": "2026-06-28", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "2A", "away": "2B", "home_code": "2A", "away_code": "2B", "home_cn": "2A", "away_cn": "2B", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 73, "goals_home": [], "goals_away": []}, {"match_id": "74", "date": "2026-06-29", "time_bj": "04:30", "time_raw": "16:30 UTC-4", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1E", "away": "3A/B/C/D/F", "home_code": "1E", "away_code": "3A/B/C/D/F", "home_cn": "1E", "away_cn": "3A/B/C/D/F", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 74, "goals_home": [], "goals_away": []}, {"match_id": "75", "date": "2026-06-29", "time_bj": "09:00", "time_raw": "19:00 UTC-6", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1F", "away": "2C", "home_code": "1F", "away_code": "2C", "home_cn": "1F", "away_cn": "2C", "venue": "Monterrey (Guadalupe)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 75, "goals_home": [], "goals_away": []}, {"match_id": "76", "date": "2026-06-29", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1C", "away": "2F", "home_code": "1C", "away_code": "2F", "home_cn": "1C", "away_cn": "2F", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 76, "goals_home": [], "goals_away": []}, {"match_id": "77", "date": "2026-06-30", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1I", "away": "3C/D/F/G/H", "home_code": "1I", "away_code": "3C/D/F/G/H", "home_cn": "1I", "away_cn": "3C/D/F/G/H", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 77, "goals_home": [], "goals_away": []}, {"match_id": "78", "date": "2026-06-30", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "2E", "away": "2I", "home_code": "2E", "away_code": "2I", "home_cn": "2E", "away_cn": "2I", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 78, "goals_home": [], "goals_away": []}, {"match_id": "79", "date": "2026-06-30", "time_bj": "09:00", "time_raw": "19:00 UTC-6", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1A", "away": "3C/E/F/H/I", "home_code": "1A", "away_code": "3C/E/F/H/I", "home_cn": "1A", "away_cn": "3C/E/F/H/I", "venue": "Mexico City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 79, "goals_home": [], "goals_away": []}, {"match_id": "80", "date": "2026-07-01", "time_bj": "00:00", "time_raw": "12:00 UTC-4", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1L", "away": "3E/H/I/J/K", "home_code": "1L", "away_code": "3E/H/I/J/K", "home_cn": "1L", "away_cn": "3E/H/I/J/K", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 80, "goals_home": [], "goals_away": []}, {"match_id": "81", "date": "2026-07-01", "time_bj": "08:00", "time_raw": "17:00 UTC-7", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1D", "away": "3B/E/F/I/J", "home_code": "1D", "away_code": "3B/E/F/I/J", "home_cn": "1D", "away_cn": "3B/E/F/I/J", "venue": "San Francisco Bay Area (Santa Clara)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 81, "goals_home": [], "goals_away": []}, {"match_id": "82", "date": "2026-07-01", "time_bj": "04:00", "time_raw": "13:00 UTC-7", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1G", "away": "3A/E/H/I/J", "home_code": "1G", "away_code": "3A/E/H/I/J", "home_cn": "1G", "away_cn": "3A/E/H/I/J", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 82, "goals_home": [], "goals_away": []}, {"match_id": "83", "date": "2026-07-02", "time_bj": "07:00", "time_raw": "19:00 UTC-4", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "2K", "away": "2L", "home_code": "2K", "away_code": "2L", "home_cn": "2K", "away_cn": "2L", "venue": "Toronto", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 83, "goals_home": [], "goals_away": []}, {"match_id": "84", "date": "2026-07-02", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1H", "away": "2J", "home_code": "1H", "away_code": "2J", "home_cn": "1H", "away_cn": "2J", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 84, "goals_home": [], "goals_away": []}, {"match_id": "85", "date": "2026-07-02", "time_bj": "11:00", "time_raw": "20:00 UTC-7", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1B", "away": "3E/F/G/I/J", "home_code": "1B", "away_code": "3E/F/G/I/J", "home_cn": "1B", "away_cn": "3E/F/G/I/J", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 85, "goals_home": [], "goals_away": []}, {"match_id": "86", "date": "2026-07-03", "time_bj": "06:00", "time_raw": "18:00 UTC-4", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1J", "away": "2H", "home_code": "1J", "away_code": "2H", "home_cn": "1J", "away_cn": "2H", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 86, "goals_home": [], "goals_away": []}, {"match_id": "87", "date": "2026-07-03", "time_bj": "09:30", "time_raw": "20:30 UTC-5", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "1K", "away": "3D/E/I/J/L", "home_code": "1K", "away_code": "3D/E/I/J/L", "home_cn": "1K", "away_cn": "3D/E/I/J/L", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 87, "goals_home": [], "goals_away": []}, {"match_id": "88", "date": "2026-07-03", "time_bj": "02:00", "time_raw": "13:00 UTC-5", "round": "Round of 32", "stage": "三十二强", "stage_code": "r32", "group": null, "home": "2D", "away": "2G", "home_code": "2D", "away_code": "2G", "home_cn": "2D", "away_cn": "2G", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 88, "goals_home": [], "goals_away": []}, {"match_id": "89", "date": "2026-07-04", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W74", "away": "W77", "home_code": "W74", "away_code": "W77", "home_cn": "W74", "away_cn": "W77", "venue": "Philadelphia", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 89, "goals_home": [], "goals_away": []}, {"match_id": "90", "date": "2026-07-04", "time_bj": "01:00", "time_raw": "12:00 UTC-5", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W73", "away": "W75", "home_code": "W73", "away_code": "W75", "home_cn": "W73", "away_cn": "W75", "venue": "Houston", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 90, "goals_home": [], "goals_away": []}, {"match_id": "91", "date": "2026-07-05", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W76", "away": "W78", "home_code": "W76", "away_code": "W78", "home_cn": "W76", "away_cn": "W78", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 91, "goals_home": [], "goals_away": []}, {"match_id": "92", "date": "2026-07-05", "time_bj": "08:00", "time_raw": "18:00 UTC-6", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W79", "away": "W80", "home_code": "W79", "away_code": "W80", "home_cn": "W79", "away_cn": "W80", "venue": "Mexico City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 92, "goals_home": [], "goals_away": []}, {"match_id": "93", "date": "2026-07-06", "time_bj": "03:00", "time_raw": "14:00 UTC-5", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W83", "away": "W84", "home_code": "W83", "away_code": "W84", "home_cn": "W83", "away_cn": "W84", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 93, "goals_home": [], "goals_away": []}, {"match_id": "94", "date": "2026-07-06", "time_bj": "08:00", "time_raw": "17:00 UTC-7", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W81", "away": "W82", "home_code": "W81", "away_code": "W82", "home_cn": "W81", "away_cn": "W82", "venue": "Seattle", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 94, "goals_home": [], "goals_away": []}, {"match_id": "95", "date": "2026-07-07", "time_bj": "00:00", "time_raw": "12:00 UTC-4", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W86", "away": "W88", "home_code": "W86", "away_code": "W88", "home_cn": "W86", "away_cn": "W88", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 95, "goals_home": [], "goals_away": []}, {"match_id": "96", "date": "2026-07-07", "time_bj": "04:00", "time_raw": "13:00 UTC-7", "round": "Round of 16", "stage": "十六强", "stage_code": "r16", "group": null, "home": "W85", "away": "W87", "home_code": "W85", "away_code": "W87", "home_cn": "W85", "away_cn": "W87", "venue": "Vancouver", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 96, "goals_home": [], "goals_away": []}, {"match_id": "97", "date": "2026-07-09", "time_bj": "04:00", "time_raw": "16:00 UTC-4", "round": "Quarter-final", "stage": "四分之一决赛", "stage_code": "qf", "group": null, "home": "W89", "away": "W90", "home_code": "W89", "away_code": "W90", "home_cn": "W89", "away_cn": "W90", "venue": "Boston (Foxborough)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 97, "goals_home": [], "goals_away": []}, {"match_id": "98", "date": "2026-07-10", "time_bj": "03:00", "time_raw": "12:00 UTC-7", "round": "Quarter-final", "stage": "四分之一决赛", "stage_code": "qf", "group": null, "home": "W93", "away": "W94", "home_code": "W93", "away_code": "W94", "home_cn": "W93", "away_cn": "W94", "venue": "Los Angeles (Inglewood)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 98, "goals_home": [], "goals_away": []}, {"match_id": "99", "date": "2026-07-11", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Quarter-final", "stage": "四分之一决赛", "stage_code": "qf", "group": null, "home": "W91", "away": "W92", "home_code": "W91", "away_code": "W92", "home_cn": "W91", "away_cn": "W92", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 99, "goals_home": [], "goals_away": []}, {"match_id": "100", "date": "2026-07-11", "time_bj": "09:00", "time_raw": "20:00 UTC-5", "round": "Quarter-final", "stage": "四分之一决赛", "stage_code": "qf", "group": null, "home": "W95", "away": "W96", "home_code": "W95", "away_code": "W96", "home_cn": "W95", "away_cn": "W96", "venue": "Kansas City", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 100, "goals_home": [], "goals_away": []}, {"match_id": "101", "date": "2026-07-14", "time_bj": "03:00", "time_raw": "14:00 UTC-5", "round": "Semi-final", "stage": "半决赛", "stage_code": "sf", "group": null, "home": "W97", "away": "W98", "home_code": "W97", "away_code": "W98", "home_cn": "W97", "away_cn": "W98", "venue": "Dallas (Arlington)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 101, "goals_home": [], "goals_away": []}, {"match_id": "102", "date": "2026-07-15", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Semi-final", "stage": "半决赛", "stage_code": "sf", "group": null, "home": "W99", "away": "W100", "home_code": "W99", "away_code": "W100", "home_cn": "W99", "away_cn": "W100", "venue": "Atlanta", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": 102, "goals_home": [], "goals_away": []}, {"match_id": "103", "date": "2026-07-18", "time_bj": "05:00", "time_raw": "17:00 UTC-4", "round": "Match for third place", "stage": "三四名决赛", "stage_code": "third", "group": null, "home": "L101", "away": "L102", "home_code": "L101", "away_code": "L102", "home_cn": "L101", "away_cn": "L102", "venue": "Miami (Miami Gardens)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}, {"match_id": "104", "date": "2026-07-19", "time_bj": "03:00", "time_raw": "15:00 UTC-4", "round": "Final", "stage": "决赛", "stage_code": "final", "group": null, "home": "W101", "away": "W102", "home_code": "W101", "away_code": "W102", "home_cn": "W101", "away_cn": "W102", "venue": "New York/New Jersey (East Rutherford)", "score_ft": null, "score_ht": null, "finished": false, "started": false, "knockout_num": null, "goals_home": [], "goals_away": []}];
-var TODAY_INITIAL = {"date": "2026-05-29", "day_index": 0, "total_matchdays": 34, "matches": [], "total_matches": 0, "has_next": true, "has_prev": false, "next_date": "2026-06-12", "prev_date": null, "all_dates": ["2026-06-11", "2026-06-12", "2026-06-13", "2026-06-14", "2026-06-15", "2026-06-16", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-20", "2026-06-21", "2026-06-22", "2026-06-23", "2026-06-24", "2026-06-25", "2026-06-26", "2026-06-27", "2026-06-28", "2026-06-29", "2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04", "2026-07-05", "2026-07-06", "2026-07-07", "2026-07-09", "2026-07-10", "2026-07-11", "2026-07-14", "2026-07-15", "2026-07-18", "2026-07-19"]};
+var TODAY_INITIAL = {"date": "2026-06-11", "day_index": 0, "total_matchdays": 34, "matches": [{"home": "Mexico", "away": "South Africa", "home_cn": "墨西哥", "away_cn": "南非", "home_code": "MEX", "away_code": "RSA", "home_elo": 1682, "away_elo": 1450, "group": "A", "stage": "小组赛第1轮", "home_win_pct": 65.0, "draw_pct": 21.4, "away_win_pct": 13.6, "expected_goals_home": 1.88, "expected_goals_away": 0.72, "total_expected_goals": 2.6, "finished": false, "score": null, "tbd": false}, {"home": "South Korea", "away": "Czech Republic", "home_cn": "韩国", "away_cn": "捷克", "home_code": "KOR", "away_code": "CZE", "home_elo": 1589, "away_elo": 1501, "group": "A", "stage": "小组赛第1轮", "home_win_pct": 47.3, "draw_pct": 25.6, "away_win_pct": 27.0, "expected_goals_home": 1.52, "expected_goals_away": 1.08, "total_expected_goals": 2.6, "finished": false, "score": null, "tbd": false}], "total_matches": 2, "has_next": true, "has_prev": false, "next_date": "2026-06-12", "prev_date": null, "all_dates": ["2026-06-11", "2026-06-12", "2026-06-13", "2026-06-14", "2026-06-15", "2026-06-16", "2026-06-17", "2026-06-18", "2026-06-19", "2026-06-20", "2026-06-21", "2026-06-22", "2026-06-23", "2026-06-24", "2026-06-25", "2026-06-26", "2026-06-27", "2026-06-28", "2026-06-29", "2026-06-30", "2026-07-01", "2026-07-02", "2026-07-03", "2026-07-04", "2026-07-05", "2026-07-06", "2026-07-07", "2026-07-09", "2026-07-10", "2026-07-11", "2026-07-14", "2026-07-15", "2026-07-18", "2026-07-19"]};
 var TODAY_TEAM_NAMES_CN = {"MEX": "墨西哥", "RSA": "南非", "KOR": "韩国", "CZE": "捷克", "CAN": "加拿大", "BIH": "波黑", "QAT": "卡塔尔", "SUI": "瑞士", "BRA": "巴西", "MAR": "摩洛哥", "HAI": "海地", "SCO": "苏格兰", "USA": "美国", "PAR": "巴拉圭", "AUS": "澳大利亚", "TUR": "土耳其", "GER": "德国", "CUW": "库拉索", "CIV": "科特迪瓦", "ECU": "厄瓜多尔", "NED": "荷兰", "JPN": "日本", "SWE": "瑞典", "TUN": "突尼斯", "BEL": "比利时", "EGY": "埃及", "IRN": "伊朗", "NZL": "新西兰", "ESP": "西班牙", "CPV": "佛得角", "KSA": "沙特", "URU": "乌拉圭", "FRA": "法国", "SEN": "塞内加尔", "IRQ": "伊拉克", "NOR": "挪威", "ARG": "阿根廷", "ALG": "阿尔及利亚", "AUT": "奥地利", "JOR": "约旦", "POR": "葡萄牙", "COD": "刚果(金)", "UZB": "乌兹别克斯坦", "COL": "哥伦比亚", "ENG": "英格兰", "CRO": "克罗地亚", "GHA": "加纳", "PAN": "巴拿马"};
 var TODAY_CURRENT_DATE = TODAY_INITIAL.date;
 var TODAY_ALL_DATES = TODAY_INITIAL.all_dates || [];
@@ -1101,27 +1159,40 @@ function refreshNow() {
 <!-- ====== End 今日比赛预测模块 ====== -->
 
 <!-- ====== 全部 48 队晋级概率矩阵 ====== -->
-<div class="card">
-    <h2>&#x1F4CA; 全部 48 队晋级概率矩阵</h2>
+<div class="card" id="matrix-card">
+    <h2>&#x1F4CA; 全部 48 队晋级概率矩阵
+        <button onclick="wcShareCard()" style="margin-left:auto;padding:6px 14px;border-radius:8px;border:none;background:linear-gradient(135deg,#FFD700,#FFA726);color:#1a1a2e;font-size:0.75em;font-weight:700;cursor:pointer;">&#x1F4F1; 分享</button>
+    </h2>
+    <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;align-items:center;">
+        <input id="matrix-search" type="text" placeholder="&#x1F50D; 搜索球队..." oninput="wcFilterMatrix()" style="flex:1;min-width:140px;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:#0a0e27;color:#e8e8ec;font-size:0.88em;outline:none;"/>
+        <select id="matrix-group-filter" onchange="wcFilterMatrix()" style="padding:8px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.12);background:#0a0e27;color:#e8e8ec;font-size:0.85em;outline:none;">
+            <option value="">全部小组</option>
+            <option value="A">A 组</option><option value="B">B 组</option><option value="C">C 组</option>
+            <option value="D">D 组</option><option value="E">E 组</option><option value="F">F 组</option>
+            <option value="G">G 组</option><option value="H">H 组</option><option value="I">I 组</option>
+            <option value="J">J 组</option><option value="K">K 组</option><option value="L">L 组</option>
+        </select>
+        <span id="matrix-count" style="color:#8890b5;font-size:0.78em;white-space:nowrap;">48 支球队</span>
+    </div>
     <div class="table-scroll">
-    <table class="data-table">
+    <table class="data-table" id="matrix-table">
         <thead>
             <tr>
-                <th>#</th>
-                <th>球队</th>
-                <th>小组</th>
-                <th>ELO</th>
-                <th>夺冠</th>
-                <th>决赛</th>
-                <th>四强</th>
-                <th>八强</th>
-                <th>十六强</th>
-                <th>三十二强</th>
-                <th>小组出局</th>
+                <th onclick="wcSortMatrix(0)" class="sortable" data-col="0">#</th>
+                <th onclick="wcSortMatrix(1)" class="sortable" data-col="1">球队</th>
+                <th onclick="wcSortMatrix(2)" class="sortable" data-col="2">小组</th>
+                <th onclick="wcSortMatrix(3)" class="sortable" data-col="3">ELO &#x25BD;</th>
+                <th onclick="wcSortMatrix(4)" class="sortable" data-col="4">夺冠</th>
+                <th onclick="wcSortMatrix(5)" class="sortable" data-col="5">决赛</th>
+                <th onclick="wcSortMatrix(6)" class="sortable" data-col="6">四强</th>
+                <th onclick="wcSortMatrix(7)" class="sortable" data-col="7">八强</th>
+                <th onclick="wcSortMatrix(8)" class="sortable" data-col="8">十六强</th>
+                <th onclick="wcSortMatrix(9)" class="sortable" data-col="9">三十二强</th>
+                <th onclick="wcSortMatrix(10)" class="sortable" data-col="10">小组出局</th>
             </tr>
         </thead>
-        <tbody>
-            <tr class="highlight">
+        <tbody id="matrix-tbody">
+            <tr class="highlight" data-name="法国" data-en="France" data-group="I" data-elo="1877" data-rank="1" onclick="wcShowTeamDetail('France',1877,'I',19.2,26.5,44.0,68.7,85.7,98.7,1.3)" style="cursor:pointer;">
                 <td>1</td>
                 <td><strong>法国</strong></td>
                 <td>I 组</td>
@@ -1134,7 +1205,7 @@ function refreshNow() {
                 <td class="right">98.7%</td>
                 <td class="right" style="color:#8890b5">1.3%</td>
             </tr>
-            <tr class="highlight">
+            <tr class="highlight" data-name="西班牙" data-en="Spain" data-group="H" data-elo="1876" data-rank="2" onclick="wcShowTeamDetail('Spain',1876,'H',16.9,23.5,38.9,66.2,80.8,99.1,0.9)" style="cursor:pointer;">
                 <td>2</td>
                 <td><strong>西班牙</strong></td>
                 <td>H 组</td>
@@ -1147,7 +1218,7 @@ function refreshNow() {
                 <td class="right">99.1%</td>
                 <td class="right" style="color:#8890b5">0.9%</td>
             </tr>
-            <tr class="highlight">
+            <tr class="highlight" data-name="阿根廷" data-en="Argentina" data-group="J" data-elo="1875" data-rank="3" onclick="wcShowTeamDetail('Argentina',1875,'J',16.4,23.0,39.4,59.6,86.2,99.0,1.0)" style="cursor:pointer;">
                 <td>3</td>
                 <td><strong>阿根廷</strong></td>
                 <td>J 组</td>
@@ -1160,7 +1231,7 @@ function refreshNow() {
                 <td class="right">99.0%</td>
                 <td class="right" style="color:#8890b5">1.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="英格兰" data-en="England" data-group="L" data-elo="1826" data-rank="4" onclick="wcShowTeamDetail('England',1826,'L',8.8,14.1,28.3,49.6,77.5,97.3,2.7)" style="cursor:pointer;">
                 <td>4</td>
                 <td><strong>英格兰</strong></td>
                 <td>L 组</td>
@@ -1173,7 +1244,7 @@ function refreshNow() {
                 <td class="right">97.3%</td>
                 <td class="right" style="color:#8890b5">2.7%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="巴西" data-en="Brazil" data-group="C" data-elo="1761" data-rank="5" onclick="wcShowTeamDetail('Brazil',1761,'C',6.3,16.3,28.4,44.2,66.7,97.0,3.0)" style="cursor:pointer;">
                 <td>5</td>
                 <td><strong>巴西</strong></td>
                 <td>C 组</td>
@@ -1186,7 +1257,7 @@ function refreshNow() {
                 <td class="right">97.0%</td>
                 <td class="right" style="color:#8890b5">3.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="摩洛哥" data-en="Morocco" data-group="C" data-elo="1756" data-rank="6" onclick="wcShowTeamDetail('Morocco',1756,'C',6.0,15.5,27.4,43.4,64.8,96.4,3.6)" style="cursor:pointer;">
                 <td>6</td>
                 <td><strong>摩洛哥</strong></td>
                 <td>C 组</td>
@@ -1199,7 +1270,7 @@ function refreshNow() {
                 <td class="right">96.4%</td>
                 <td class="right" style="color:#8890b5">3.6%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="荷兰" data-en="Netherlands" data-group="F" data-elo="1758" data-rank="7" onclick="wcShowTeamDetail('Netherlands',1758,'F',5.1,13.6,23.8,37.0,58.6,94.3,5.7)" style="cursor:pointer;">
                 <td>7</td>
                 <td><strong>荷兰</strong></td>
                 <td>F 组</td>
@@ -1212,7 +1283,7 @@ function refreshNow() {
                 <td class="right">94.3%</td>
                 <td class="right" style="color:#8890b5">5.7%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="德国" data-en="Germany" data-group="E" data-elo="1730" data-rank="8" onclick="wcShowTeamDetail('Germany',1730,'E',3.9,11.2,20.8,33.3,66.4,97.0,3.0)" style="cursor:pointer;">
                 <td>8</td>
                 <td><strong>德国</strong></td>
                 <td>E 组</td>
@@ -1225,7 +1296,7 @@ function refreshNow() {
                 <td class="right">97.0%</td>
                 <td class="right" style="color:#8890b5">3.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="比利时" data-en="Belgium" data-group="G" data-elo="1735" data-rank="9" onclick="wcShowTeamDetail('Belgium',1735,'G',3.8,10.4,19.9,39.1,60.2,96.8,3.2)" style="cursor:pointer;">
                 <td>9</td>
                 <td><strong>比利时</strong></td>
                 <td>G 组</td>
@@ -1238,7 +1309,7 @@ function refreshNow() {
                 <td class="right">96.8%</td>
                 <td class="right" style="color:#8890b5">3.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="葡萄牙" data-en="Portugal" data-group="K" data-elo="1764" data-rank="10" onclick="wcShowTeamDetail('Portugal',1764,'K',2.8,5.6,13.8,29.2,59.0,95.5,4.5)" style="cursor:pointer;">
                 <td>10</td>
                 <td><strong>葡萄牙</strong></td>
                 <td>K 组</td>
@@ -1251,7 +1322,7 @@ function refreshNow() {
                 <td class="right">95.5%</td>
                 <td class="right" style="color:#8890b5">4.5%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="墨西哥" data-en="Mexico" data-group="A" data-elo="1682" data-rank="11" onclick="wcShowTeamDetail('Mexico',1682,'A',2.1,7.6,16.8,38.7,58.4,91.9,8.1)" style="cursor:pointer;">
                 <td>11</td>
                 <td><strong>墨西哥</strong></td>
                 <td>A 组</td>
@@ -1264,7 +1335,7 @@ function refreshNow() {
                 <td class="right">91.9%</td>
                 <td class="right" style="color:#8890b5">8.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="克罗地亚" data-en="Croatia" data-group="L" data-elo="1717" data-rank="12" onclick="wcShowTeamDetail('Croatia',1717,'L',1.6,3.8,10.1,24.8,53.4,89.4,10.6)" style="cursor:pointer;">
                 <td>12</td>
                 <td><strong>克罗地亚</strong></td>
                 <td>L 组</td>
@@ -1277,7 +1348,7 @@ function refreshNow() {
                 <td class="right">89.4%</td>
                 <td class="right" style="color:#8890b5">10.6%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="美国" data-en="United States" data-group="D" data-elo="1673" data-rank="13" onclick="wcShowTeamDetail('United States',1673,'D',1.2,4.9,11.0,22.4,48.4,85.6,14.4)" style="cursor:pointer;">
                 <td>13</td>
                 <td><strong>美国</strong></td>
                 <td>D 组</td>
@@ -1290,7 +1361,7 @@ function refreshNow() {
                 <td class="right">85.6%</td>
                 <td class="right" style="color:#8890b5">14.4%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="日本" data-en="Japan" data-group="F" data-elo="1660" data-rank="14" onclick="wcShowTeamDetail('Japan',1660,'F',1.1,4.3,10.1,21.2,42.2,83.6,16.4)" style="cursor:pointer;">
                 <td>14</td>
                 <td><strong>日本</strong></td>
                 <td>F 组</td>
@@ -1303,7 +1374,7 @@ function refreshNow() {
                 <td class="right">83.6%</td>
                 <td class="right" style="color:#8890b5">16.4%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="哥伦比亚" data-en="Colombia" data-group="K" data-elo="1693" data-rank="15" onclick="wcShowTeamDetail('Colombia',1693,'K',0.8,2.0,7.0,18.9,46.6,88.8,11.2)" style="cursor:pointer;">
                 <td>15</td>
                 <td><strong>哥伦比亚</strong></td>
                 <td>K 组</td>
@@ -1316,7 +1387,7 @@ function refreshNow() {
                 <td class="right">88.8%</td>
                 <td class="right" style="color:#8890b5">11.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="塞内加尔" data-en="Senegal" data-group="I" data-elo="1689" data-rank="16" onclick="wcShowTeamDetail('Senegal',1689,'I',0.8,2.3,6.7,16.9,53.1,87.8,12.2)" style="cursor:pointer;">
                 <td>16</td>
                 <td><strong>塞内加尔</strong></td>
                 <td>I 组</td>
@@ -1329,7 +1400,7 @@ function refreshNow() {
                 <td class="right">87.8%</td>
                 <td class="right" style="color:#8890b5">12.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="乌拉圭" data-en="Uruguay" data-group="H" data-elo="1673" data-rank="17" onclick="wcShowTeamDetail('Uruguay',1673,'H',0.8,2.0,7.0,21.1,46.4,89.8,10.2)" style="cursor:pointer;">
                 <td>17</td>
                 <td><strong>乌拉圭</strong></td>
                 <td>H 组</td>
@@ -1342,7 +1413,7 @@ function refreshNow() {
                 <td class="right">89.8%</td>
                 <td class="right" style="color:#8890b5">10.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="瑞士" data-en="Switzerland" data-group="B" data-elo="1649" data-rank="18" onclick="wcShowTeamDetail('Switzerland',1649,'B',0.7,2.4,7.1,21.2,55.7,91.9,8.1)" style="cursor:pointer;">
                 <td>18</td>
                 <td><strong>瑞士</strong></td>
                 <td>B 组</td>
@@ -1355,7 +1426,7 @@ function refreshNow() {
                 <td class="right">91.9%</td>
                 <td class="right" style="color:#8890b5">8.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="伊朗" data-en="Iran" data-group="G" data-elo="1615" data-rank="19" onclick="wcShowTeamDetail('Iran',1615,'G',0.4,1.6,4.9,15.4,32.8,87.8,12.2)" style="cursor:pointer;">
                 <td>19</td>
                 <td><strong>伊朗</strong></td>
                 <td>G 组</td>
@@ -1368,7 +1439,7 @@ function refreshNow() {
                 <td class="right">87.8%</td>
                 <td class="right" style="color:#8890b5">12.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="厄瓜多尔" data-en="Ecuador" data-group="E" data-elo="1595" data-rank="20" onclick="wcShowTeamDetail('Ecuador',1595,'E',0.3,1.7,5.0,12.4,38.6,85.2,14.8)" style="cursor:pointer;">
                 <td>20</td>
                 <td><strong>厄瓜多尔</strong></td>
                 <td>E 组</td>
@@ -1381,7 +1452,7 @@ function refreshNow() {
                 <td class="right">85.2%</td>
                 <td class="right" style="color:#8890b5">14.8%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="韩国" data-en="South Korea" data-group="A" data-elo="1589" data-rank="21" onclick="wcShowTeamDetail('South Korea',1589,'A',0.3,1.5,4.9,16.8,39.6,78.8,21.1)" style="cursor:pointer;">
                 <td>21</td>
                 <td><strong>韩国</strong></td>
                 <td>A 组</td>
@@ -1394,7 +1465,7 @@ function refreshNow() {
                 <td class="right">78.8%</td>
                 <td class="right" style="color:#8890b5">21.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="土耳其" data-en="Turkey" data-group="D" data-elo="1599" data-rank="22" onclick="wcShowTeamDetail('Turkey',1599,'D',0.2,1.5,4.3,11.9,31.7,72.7,27.3)" style="cursor:pointer;">
                 <td>22</td>
                 <td><strong>土耳其</strong></td>
                 <td>D 组</td>
@@ -1407,7 +1478,7 @@ function refreshNow() {
                 <td class="right">72.7%</td>
                 <td class="right" style="color:#8890b5">27.3%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="奥地利" data-en="Austria" data-group="J" data-elo="1593" data-rank="23" onclick="wcShowTeamDetail('Austria',1593,'J',0.1,0.5,2.0,7.8,29.0,73.0,27.0)" style="cursor:pointer;">
                 <td>23</td>
                 <td><strong>奥地利</strong></td>
                 <td>J 组</td>
@@ -1420,7 +1491,7 @@ function refreshNow() {
                 <td class="right">73.0%</td>
                 <td class="right" style="color:#8890b5">27.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="加拿大" data-en="Canada" data-group="B" data-elo="1556" data-rank="24" onclick="wcShowTeamDetail('Canada',1556,'B',0.1,0.6,2.3,10.1,35.1,79.3,20.7)" style="cursor:pointer;">
                 <td>24</td>
                 <td><strong>加拿大</strong></td>
                 <td>B 组</td>
@@ -1433,7 +1504,7 @@ function refreshNow() {
                 <td class="right">79.3%</td>
                 <td class="right" style="color:#8890b5">20.7%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="澳大利亚" data-en="Australia" data-group="D" data-elo="1581" data-rank="25" onclick="wcShowTeamDetail('Australia',1581,'D',0.1,1.0,3.1,9.2,27.4,67.9,32.1)" style="cursor:pointer;">
                 <td>25</td>
                 <td><strong>澳大利亚</strong></td>
                 <td>D 组</td>
@@ -1446,7 +1517,7 @@ function refreshNow() {
                 <td class="right">67.9%</td>
                 <td class="right" style="color:#8890b5">32.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="埃及" data-en="Egypt" data-group="G" data-elo="1563" data-rank="26" onclick="wcShowTeamDetail('Egypt',1563,'G',0.1,0.6,2.4,8.6,22.9,78.8,21.2)" style="cursor:pointer;">
                 <td>26</td>
                 <td><strong>埃及</strong></td>
                 <td>G 组</td>
@@ -1459,7 +1530,7 @@ function refreshNow() {
                 <td class="right">78.8%</td>
                 <td class="right" style="color:#8890b5">21.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="科特迪瓦" data-en="Ivory Coast" data-group="E" data-elo="1533" data-rank="27" onclick="wcShowTeamDetail('Ivory Coast',1533,'E',0.1,0.4,1.6,6.2,25.1,73.1,26.9)" style="cursor:pointer;">
                 <td>27</td>
                 <td><strong>科特迪瓦</strong></td>
                 <td>E 组</td>
@@ -1472,7 +1543,7 @@ function refreshNow() {
                 <td class="right">73.1%</td>
                 <td class="right" style="color:#8890b5">26.9%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="捷克" data-en="Czech Republic" data-group="A" data-elo="1501" data-rank="28" onclick="wcShowTeamDetail('Czech Republic',1501,'A',0.0,0.2,1.1,5.5,19.3,57.6,42.4)" style="cursor:pointer;">
                 <td>28</td>
                 <td><strong>捷克</strong></td>
                 <td>A 组</td>
@@ -1485,7 +1556,7 @@ function refreshNow() {
                 <td class="right">57.6%</td>
                 <td class="right" style="color:#8890b5">42.4%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="巴拉圭" data-en="Paraguay" data-group="D" data-elo="1504" data-rank="29" onclick="wcShowTeamDetail('Paraguay',1504,'D',0.0,0.2,0.8,3.4,13.7,48.2,51.8)" style="cursor:pointer;">
                 <td>29</td>
                 <td><strong>巴拉圭</strong></td>
                 <td>D 组</td>
@@ -1498,7 +1569,7 @@ function refreshNow() {
                 <td class="right">48.2%</td>
                 <td class="right" style="color:#8890b5">51.8%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="瑞典" data-en="Sweden" data-group="F" data-elo="1515" data-rank="30" onclick="wcShowTeamDetail('Sweden',1515,'F',0.0,0.2,0.9,4.2,14.5,49.5,50.4)" style="cursor:pointer;">
                 <td>30</td>
                 <td><strong>瑞典</strong></td>
                 <td>F 组</td>
@@ -1511,7 +1582,7 @@ function refreshNow() {
                 <td class="right">49.5%</td>
                 <td class="right" style="color:#8890b5">50.4%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="挪威" data-en="Norway" data-group="I" data-elo="1551" data-rank="31" onclick="wcShowTeamDetail('Norway',1551,'I',0.0,0.2,1.0,4.2,19.9,57.2,42.8)" style="cursor:pointer;">
                 <td>31</td>
                 <td><strong>挪威</strong></td>
                 <td>I 组</td>
@@ -1524,7 +1595,7 @@ function refreshNow() {
                 <td class="right">57.2%</td>
                 <td class="right" style="color:#8890b5">42.8%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="阿尔及利亚" data-en="Algeria" data-group="J" data-elo="1564" data-rank="32" onclick="wcShowTeamDetail('Algeria',1564,'J',0.0,0.3,1.3,5.2,22.0,65.3,34.7)" style="cursor:pointer;">
                 <td>32</td>
                 <td><strong>阿尔及利亚</strong></td>
                 <td>J 组</td>
@@ -1537,7 +1608,7 @@ function refreshNow() {
                 <td class="right">65.3%</td>
                 <td class="right" style="color:#8890b5">34.7%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="刚果(金)" data-en="DR Congo" data-group="K" data-elo="1478" data-rank="33" onclick="wcShowTeamDetail('DR Congo',1478,'K',0.0,0.0,0.2,1.5,9.1,41.7,58.3)" style="cursor:pointer;">
                 <td>33</td>
                 <td><strong>刚果(金)</strong></td>
                 <td>K 组</td>
@@ -1550,7 +1621,7 @@ function refreshNow() {
                 <td class="right">41.7%</td>
                 <td class="right" style="color:#8890b5">58.3%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="南非" data-en="South Africa" data-group="A" data-elo="1450" data-rank="34" onclick="wcShowTeamDetail('South Africa',1450,'A',0.0,0.0,0.4,2.8,12.0,44.2,55.8)" style="cursor:pointer;">
                 <td>34</td>
                 <td><strong>南非</strong> &#x26A0;</td>
                 <td>A 组</td>
@@ -1563,7 +1634,7 @@ function refreshNow() {
                 <td class="right">44.2%</td>
                 <td class="right" style="color:#8890b5">55.8%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="卡塔尔" data-en="Qatar" data-group="B" data-elo="1430" data-rank="35" onclick="wcShowTeamDetail('Qatar',1430,'B',0.0,0.1,0.3,2.2,11.9,48.6,51.4)" style="cursor:pointer;">
                 <td>35</td>
                 <td><strong>卡塔尔</strong> &#x26A0;</td>
                 <td>B 组</td>
@@ -1576,7 +1647,7 @@ function refreshNow() {
                 <td class="right">48.6%</td>
                 <td class="right" style="color:#8890b5">51.4%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="波黑" data-en="Bosnia & Herzegovina" data-group="B" data-elo="1445" data-rank="36" onclick="wcShowTeamDetail('Bosnia & Herzegovina',1445,'B',0.0,0.1,0.4,2.7,13.8,52.4,47.6)" style="cursor:pointer;">
                 <td>36</td>
                 <td><strong>波黑</strong> &#x26A0;</td>
                 <td>B 组</td>
@@ -1589,7 +1660,7 @@ function refreshNow() {
                 <td class="right">52.4%</td>
                 <td class="right" style="color:#8890b5">47.6%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="苏格兰" data-en="Scotland" data-group="C" data-elo="1498" data-rank="37" onclick="wcShowTeamDetail('Scotland',1498,'C',0.0,0.1,0.8,3.5,13.6,55.9,44.1)" style="cursor:pointer;">
                 <td>37</td>
                 <td><strong>苏格兰</strong></td>
                 <td>C 组</td>
@@ -1602,7 +1673,7 @@ function refreshNow() {
                 <td class="right">55.9%</td>
                 <td class="right" style="color:#8890b5">44.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="海地" data-en="Haiti" data-group="C" data-elo="1320" data-rank="38" onclick="wcShowTeamDetail('Haiti',1320,'C',0.0,0.0,0.0,0.1,1.1,13.7,86.3)" style="cursor:pointer;">
                 <td>38</td>
                 <td><strong>海地</strong> &#x26A0;</td>
                 <td>C 组</td>
@@ -1615,7 +1686,7 @@ function refreshNow() {
                 <td class="right">13.7%</td>
                 <td class="right" style="color:#8890b5">86.3%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="Curaçao" data-en="Curaçao" data-group="E" data-elo="1305" data-rank="39" onclick="wcShowTeamDetail('Curaçao',1305,'E',0.0,0.0,0.0,0.1,1.4,15.0,85.0)" style="cursor:pointer;">
                 <td>39</td>
                 <td><strong>Curaçao</strong> &#x26A0;</td>
                 <td>E 组</td>
@@ -1628,7 +1699,7 @@ function refreshNow() {
                 <td class="right">15.0%</td>
                 <td class="right" style="color:#8890b5">85.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="突尼斯" data-en="Tunisia" data-group="F" data-elo="1483" data-rank="40" onclick="wcShowTeamDetail('Tunisia',1483,'F',0.0,0.1,0.5,2.4,10.0,40.8,59.2)" style="cursor:pointer;">
                 <td>40</td>
                 <td><strong>突尼斯</strong></td>
                 <td>F 组</td>
@@ -1641,7 +1712,7 @@ function refreshNow() {
                 <td class="right">40.8%</td>
                 <td class="right" style="color:#8890b5">59.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="新西兰" data-en="New Zealand" data-group="G" data-elo="1282" data-rank="41" onclick="wcShowTeamDetail('New Zealand',1282,'G',0.0,0.0,0.0,0.1,0.7,10.8,89.2)" style="cursor:pointer;">
                 <td>41</td>
                 <td><strong>新西兰</strong></td>
                 <td>G 组</td>
@@ -1654,7 +1725,7 @@ function refreshNow() {
                 <td class="right">10.8%</td>
                 <td class="right" style="color:#8890b5">89.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="沙特阿拉伯" data-en="Saudi Arabia" data-group="H" data-elo="1460" data-rank="42" onclick="wcShowTeamDetail('Saudi Arabia',1460,'H',0.0,0.0,0.2,1.6,8.9,43.7,56.3)" style="cursor:pointer;">
                 <td>42</td>
                 <td><strong>沙特阿拉伯</strong> &#x26A0;</td>
                 <td>H 组</td>
@@ -1667,7 +1738,7 @@ function refreshNow() {
                 <td class="right">43.7%</td>
                 <td class="right" style="color:#8890b5">56.3%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="佛得角" data-en="Cape Verde" data-group="H" data-elo="1370" data-rank="43" onclick="wcShowTeamDetail('Cape Verde',1370,'H',0.0,0.0,0.0,0.4,2.8,22.8,77.2)" style="cursor:pointer;">
                 <td>43</td>
                 <td><strong>佛得角</strong> &#x26A0;</td>
                 <td>H 组</td>
@@ -1680,7 +1751,7 @@ function refreshNow() {
                 <td class="right">22.8%</td>
                 <td class="right" style="color:#8890b5">77.2%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="伊拉克" data-en="Iraq" data-group="I" data-elo="1385" data-rank="44" onclick="wcShowTeamDetail('Iraq',1385,'I',0.0,0.0,0.0,0.2,2.8,18.0,82.0)" style="cursor:pointer;">
                 <td>44</td>
                 <td><strong>伊拉克</strong> &#x26A0;</td>
                 <td>I 组</td>
@@ -1693,7 +1764,7 @@ function refreshNow() {
                 <td class="right">18.0%</td>
                 <td class="right" style="color:#8890b5">82.0%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="约旦" data-en="Jordan" data-group="J" data-elo="1400" data-rank="45" onclick="wcShowTeamDetail('Jordan',1400,'J',0.0,0.0,0.1,0.4,3.5,22.9,77.1)" style="cursor:pointer;">
                 <td>45</td>
                 <td><strong>约旦</strong> &#x26A0;</td>
                 <td>J 组</td>
@@ -1706,7 +1777,7 @@ function refreshNow() {
                 <td class="right">22.9%</td>
                 <td class="right" style="color:#8890b5">77.1%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="乌兹别克斯坦" data-en="Uzbekistan" data-group="K" data-elo="1465" data-rank="46" onclick="wcShowTeamDetail('Uzbekistan',1465,'K',0.0,0.0,0.2,1.4,8.1,38.1,61.9)" style="cursor:pointer;">
                 <td>46</td>
                 <td><strong>乌兹别克斯坦</strong></td>
                 <td>K 组</td>
@@ -1719,7 +1790,7 @@ function refreshNow() {
                 <td class="right">38.1%</td>
                 <td class="right" style="color:#8890b5">61.9%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="加纳" data-en="Ghana" data-group="L" data-elo="1435" data-rank="47" onclick="wcShowTeamDetail('Ghana',1435,'L',0.0,0.0,0.0,0.5,3.6,23.5,76.5)" style="cursor:pointer;">
                 <td>47</td>
                 <td><strong>加纳</strong> &#x26A0;</td>
                 <td>L 组</td>
@@ -1732,7 +1803,7 @@ function refreshNow() {
                 <td class="right">23.5%</td>
                 <td class="right" style="color:#8890b5">76.5%</td>
             </tr>
-            <tr class="">
+            <tr class="" data-name="巴拿马" data-en="Panama" data-group="L" data-elo="1541" data-rank="48" onclick="wcShowTeamDetail('Panama',1541,'L',0.0,0.1,0.7,4.0,15.1,53.4,46.6)" style="cursor:pointer;">
                 <td>48</td>
                 <td><strong>巴拿马</strong></td>
                 <td>L 组</td>
@@ -1937,6 +2008,23 @@ function refreshNow() {
 </div><!-- /.container -->
 </div><!-- /#protected-content -->
 
+<!-- ====== 球队详情弹窗 ====== -->
+<div id="team-modal">
+  <div id="team-modal-body">
+    <button id="team-modal-close" onclick="document.getElementById('team-modal').classList.remove('open')">&#x2715;</button>
+    <div id="team-modal-content"></div>
+  </div>
+</div>
+
+<!-- ====== 竞猜弹窗 ====== -->
+<div id="guess-modal">
+  <div id="guess-modal-body">
+    <button style="position:absolute;top:12px;right:14px;background:none;border:none;color:#8890b5;font-size:1.4em;cursor:pointer;" onclick="document.getElementById('guess-modal').classList.remove('open')">&#x2715;</button>
+    <h3 style="color:#FFD700;margin-bottom:16px;">&#x1F3B2; 我的竞猜</h3>
+    <div id="guess-content"></div>
+  </div>
+</div>
+
 <!-- ====== 密码门 JS ====== -->
 <script>
 (function(){
@@ -1987,6 +2075,298 @@ function refreshNow() {
   }
   update();
   setInterval(update, 60000);
+})();
+</script>
+
+<!-- ====== 可搜索/排序表格 JS ====== -->
+<script>
+(function(){
+  var sortCol = 3, sortAsc = false;
+
+  window.wcFilterMatrix = function() {
+    var q = (document.getElementById('matrix-search').value||'').toLowerCase();
+    var g = document.getElementById('matrix-group-filter').value;
+    var rows = document.querySelectorAll('#matrix-tbody tr');
+    var shown = 0;
+    rows.forEach(function(r){
+      var name = (r.getAttribute('data-name')||'').toLowerCase();
+      var en = (r.getAttribute('data-en')||'').toLowerCase();
+      var grp = r.getAttribute('data-group')||'';
+      var show = (!q || name.indexOf(q)>=0 || en.indexOf(q)>=0) && (!g || grp===g);
+      r.style.display = show ? '' : 'none';
+      if (show) shown++;
+    });
+    document.getElementById('matrix-count').textContent = shown + ' 支球队';
+  };
+
+  window.wcSortMatrix = function(col) {
+    if (sortCol === col) sortAsc = !sortAsc;
+    else { sortCol = col; sortAsc = col < 2; }
+    var tbody = document.getElementById('matrix-tbody');
+    var rows = Array.from(tbody.querySelectorAll('tr'));
+    rows.sort(function(a, b){
+      var va = getCellVal(a, col), vb = getCellVal(b, col);
+      if (!isNaN(va) && !isNaN(vb)) return sortAsc ? va-vb : vb-va;
+      return sortAsc ? String(va).localeCompare(String(vb)) : String(vb).localeCompare(String(va));
+    });
+    rows.forEach(function(r){ tbody.appendChild(r); });
+    document.querySelectorAll('#matrix-table th').forEach(function(th, i){
+      th.classList.remove('sort-asc','sort-desc');
+      if (i===col) th.classList.add(sortAsc ? 'sort-asc' : 'sort-desc');
+    });
+  };
+
+  function getCellVal(row, col) {
+    var cells = row.querySelectorAll('td');
+    if (!cells[col]) return '';
+    var t = cells[col].textContent.replace('%','').trim();
+    return isNaN(t) ? t : parseFloat(t);
+  }
+})();
+</script>
+
+<!-- ====== 球队详情弹窗 JS ====== -->
+<script>
+window.wcShowTeamDetail = function(name, elo, group, champ, fin, sf, qf, r16, r32, out) {
+  var cn_names = window._wcTeamCN || {};
+  var cnName = cn_names[name] || name;
+  var stages = [
+    {label:'夺冠',pct:champ,col:'#FFD700'},
+    {label:'决赛',pct:fin,col:'#FFA726'},
+    {label:'四强',pct:sf,col:'#ef5350'},
+    {label:'八强',pct:qf,col:'#ab47bc'},
+    {label:'十六强',pct:r16,col:'#42a5f5'},
+    {label:'三十二强',pct:r32,col:'#26c6da'},
+    {label:'小组出局',pct:out,col:'#78909c'},
+  ];
+  var bars = stages.map(function(s){
+    var w = Math.min(s.pct * 3, 100);
+    return '<div style="margin-bottom:10px;">' +
+      '<div style="display:flex;justify-content:space-between;font-size:0.84em;margin-bottom:3px;">' +
+        '<span style="color:#c8cce8;">' + s.label + '</span>' +
+        '<span style="font-weight:700;color:' + s.col + '">' + s.pct.toFixed(1) + '%</span>' +
+      '</div>' +
+      '<div style="height:10px;background:rgba(255,255,255,0.06);border-radius:5px;overflow:hidden;">' +
+        '<div style="height:100%;width:' + w + '%;background:' + s.col + ';border-radius:5px;transition:width 0.5s;"></div>' +
+      '</div></div>';
+  }).join('');
+
+  var guess = JSON.parse(localStorage.getItem('wc_champ_guess')||'{}');
+  var isGuessed = guess.team === name;
+  var safeName = name.replace(/'/g, "\'");
+  var safeCnName = cnName.replace(/'/g, "\'");
+  var guessBtn = '<button onclick="wcGuessChamp('' + safeName + '','' + safeCnName + '')" style="width:100%;margin-top:14px;padding:10px;border-radius:8px;border:none;background:' +
+    (isGuessed ? 'rgba(102,187,106,0.2);color:#66bb6a;border:1px solid #66bb6a' : 'rgba(255,215,0,0.15);color:#FFD700;border:1px solid rgba(255,215,0,0.4)') +
+    ';font-size:0.9em;font-weight:600;cursor:pointer;">' +
+    (isGuessed ? '✅ 已竞猜 ' + cnName + ' 夺冠' : '🎯 竞猜 ' + cnName + ' 夺冠') + '</button>';
+
+  document.getElementById('team-modal-content').innerHTML =
+    '<div style="text-align:center;margin-bottom:18px;">' +
+      '<div style="font-size:2em;font-weight:900;color:#FFD700;">' + cnName + '</div>' +
+      '<div style="color:#8890b5;font-size:0.84em;margin-top:4px;">' + group + ' 组 · ELO ' + elo + '</div>' +
+    '</div>' + bars + guessBtn;
+  document.getElementById('team-modal').classList.add('open');
+};
+
+window.wcGuessChamp = function(name, cnName) {
+  localStorage.setItem('wc_champ_guess', JSON.stringify({team:name,cnName:cnName,time:Date.now()}));
+  document.getElementById('team-modal').classList.remove('open');
+  wcOpenGuess();
+};
+</script>
+
+<!-- ====== 我的竞猜 JS ====== -->
+<script>
+window.wcOpenGuess = function() {
+  var champ = JSON.parse(localStorage.getItem('wc_champ_guess')||'null');
+  var html = '';
+
+  if (champ) {
+    var t = new Date(champ.time);
+    html += '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.3);border-radius:10px;padding:14px;margin-bottom:16px;">' +
+      '<div style="font-size:0.8em;color:#8890b5;margin-bottom:6px;">&#x1F3C6; 我的夺冠预测</div>' +
+      '<div style="font-size:1.4em;font-weight:800;color:#FFD700;">' + champ.cnName + '</div>' +
+      '<div style="font-size:0.76em;color:#8890b5;margin-top:4px;">下注于 ' + t.toLocaleString('zh-CN') + '</div>' +
+      '<button onclick="localStorage.removeItem(&quot;wc_champ_guess&quot;);wcOpenGuess();" style="margin-top:10px;padding:6px 12px;border-radius:6px;border:1px solid rgba(255,255,255,0.15);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">取消竞猜</button>' +
+    '</div>';
+  } else {
+    html += '<div style="color:#8890b5;font-size:0.88em;margin-bottom:14px;padding:12px;background:rgba(255,255,255,0.03);border-radius:8px;">' +
+      '点击下方表格中的任意球队行，即可竞猜该球队夺冠。' +
+    '</div>';
+  }
+
+  // 场次竞猜
+  var matchGuesses = JSON.parse(localStorage.getItem('wc_match_guesses')||'{}');
+  var guessCount = Object.keys(matchGuesses).length;
+  var correctCount = 0;
+  var settledCount = 0;
+
+  if (guessCount > 0) {
+    html += '<div style="font-size:0.88em;color:#8890b5;margin-bottom:8px;">&#x26BD; 比赛竞猜记录（' + guessCount + ' 场）</div>';
+    html += '<div style="max-height:300px;overflow-y:auto;">';
+    Object.values(matchGuesses).forEach(function(g){
+      var icon = '⏳', color = '#8890b5';
+      if (g.result) {
+        settledCount++;
+        if (g.guess === g.result) { icon='✅'; color='#66bb6a'; correctCount++; }
+        else { icon='❌'; color='#ef5350'; }
+      }
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin-bottom:4px;background:rgba(255,255,255,0.03);border-radius:6px;">' +
+        '<span style="font-size:0.85em;">' + (g.homeCN||g.home) + ' vs ' + (g.awayCN||g.away) + '</span>' +
+        '<span style="font-size:0.8em;color:' + color + ';">' + icon + ' ' + wcGuessLabel(g.guess) + '</span>' +
+      '</div>';
+    });
+    html += '</div>';
+    if (settledCount > 0) {
+      var rate = (correctCount/settledCount*100).toFixed(0);
+      html += '<div style="text-align:center;margin-top:12px;padding:10px;background:rgba(79,195,247,0.08);border-radius:8px;">' +
+        '已结算 ' + settledCount + ' 场 · 猜中 <span style="color:#66bb6a;font-weight:700;">' + correctCount + '</span> 场 · 准确率 <span style="color:#FFD700;font-weight:800;">' + rate + '%</span>' +
+      '</div>';
+    }
+    html += '<button onclick="if(confirm(&quot;确定清空所有竞猜记录？&quot;)){localStorage.removeItem(&quot;wc_match_guesses&quot;);wcOpenGuess();}" style="margin-top:10px;width:100%;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.1);background:none;color:#8890b5;font-size:0.78em;cursor:pointer;">清空比赛竞猜记录</button>';
+  } else {
+    html += '<div style="color:#8890b5;font-size:0.82em;text-align:center;padding:12px;">在今日比赛模块中点击比赛卡片可进行竞猜</div>';
+  }
+
+  document.getElementById('guess-content').innerHTML = html;
+  document.getElementById('guess-modal').classList.add('open');
+};
+
+window.wcGuessLabel = function(g) {
+  return g==='home'?'主队胜':g==='draw'?'平局':'客队胜';
+};
+
+window.wcGuessMatch = function(home, homeCN, away, awayCN, guess) {
+  var key = home + '_' + away;
+  var all = JSON.parse(localStorage.getItem('wc_match_guesses')||'{}');
+  all[key] = {home:home, away:away, homeCN:homeCN, awayCN:awayCN, guess:guess, time:Date.now()};
+  localStorage.setItem('wc_match_guesses', JSON.stringify(all));
+  alert('✅ 已记录：' + homeCN + ' vs ' + awayCN + ' — ' + wcGuessLabel(guess));
+};
+
+window._wcTeamCN = {};
+</script>
+
+<!-- ====== 分享卡片 JS ====== -->
+<script>
+window.wcShareCard = function() {
+  var topTeams = [];
+  var rows = document.querySelectorAll('#matrix-tbody tr');
+  var shown = 0;
+  rows.forEach(function(r){
+    if (shown >= 5) return;
+    if (r.style.display === 'none') return;
+    var cells = r.querySelectorAll('td');
+    if (cells.length < 5) return;
+    topTeams.push({
+      rank: cells[0].textContent,
+      name: cells[1].textContent.replace('⚠','').trim(),
+      group: cells[2].textContent,
+      pct: cells[4].textContent
+    });
+    shown++;
+  });
+
+  var now = new Date().toLocaleDateString('zh-CN');
+  var html = '<div style="background:linear-gradient(135deg,#0a0e27,#1a237e);padding:20px;border-radius:12px;font-family:-apple-system,sans-serif;max-width:320px;">' +
+    '<div style="text-align:center;margin-bottom:14px;">' +
+      '<div style="font-size:1.5em;font-weight:900;background:linear-gradient(90deg,#FFD700,#FFA726);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">⚽ 2026 世界杯夺冠预测</div>' +
+      '<div style="color:#8890b5;font-size:0.72em;margin-top:4px;">' + now + ' · 蒙特卡洛模拟</div>' +
+    '</div>';
+
+  topTeams.forEach(function(t){
+    var icons = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+    var idx = parseInt(t.rank)-1;
+    html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;margin-bottom:6px;background:rgba(255,255,255,0.06);border-radius:8px;">' +
+      '<span style="font-size:1.1em;">' + (icons[idx]||t.rank) + '</span>' +
+      '<span style="font-weight:700;color:#e8e8ec;flex:1;margin:0 10px;">' + t.name + '</span>' +
+      '<span style="font-weight:800;color:#FFD700;">' + t.pct + '</span>' +
+    '</div>';
+  });
+
+  html += '<div style="text-align:center;margin-top:12px;color:#8890b5;font-size:0.7em;">haiwangxing1251.github.io/worldcup-dashboard</div></div>';
+
+  var win = window.open('', '_blank', 'width=400,height=480');
+  if (!win) { alert('请允许弹窗以查看分享卡片'); return; }
+  win.document.write('<!DOCTYPE html><html><head>
+<meta http-equiv="refresh" content="3600">
+<meta charset="UTF-8"><title>分享</title></head><body style="margin:0;background:#0a0e27;display:flex;align-items:center;justify-content:center;min-height:100vh;">' + html + '<p style="text-align:center;color:#8890b5;font-size:12px;margin-top:10px;">长按图片保存</p></body></html>');
+  win.document.close();
+};
+</script>
+
+<!-- ====== 比赛日推送提醒 JS ====== -->
+<script>
+(function(){
+  var btn = document.getElementById('notify-btn');
+  if (!btn) return;
+
+  function updateBtn() {
+    var on = localStorage.getItem('wc_notify') === '1';
+    btn.className = 'active' ? (on ? 'active' : '') : '';
+    if (on) {
+      btn.className = 'active';
+      btn.innerHTML = '🔔 提醒已开启';
+    } else {
+      btn.className = '';
+      btn.innerHTML = '🔔 开启比赛提醒';
+    }
+  }
+
+  btn.addEventListener('click', function(){
+    var on = localStorage.getItem('wc_notify') === '1';
+    if (on) {
+      localStorage.removeItem('wc_notify');
+      updateBtn();
+      return;
+    }
+    if (!('Notification' in window)) {
+      alert('您的浏览器不支持桌面通知');
+      return;
+    }
+    Notification.requestPermission().then(function(p){
+      if (p === 'granted') {
+        localStorage.setItem('wc_notify', '1');
+        updateBtn();
+        new Notification('⚽ 世界杯预测', {
+          body: '提醒已开启！比赛前 30 分钟将收到通知',
+          icon: 'https://haiwangxing1251.github.io/worldcup-dashboard/favicon.ico'
+        });
+        scheduleNotifications();
+      } else {
+        alert('请在浏览器设置中允许通知权限');
+      }
+    });
+  });
+
+  function scheduleNotifications() {
+    if (!window.TODAY_SCHEDULE) return;
+    var now = Date.now();
+    TODAY_SCHEDULE.forEach(function(m){
+      if (m.finished || !m.date || !m.time) return;
+      try {
+        var mt = new Date(m.date + 'T' + m.time + ':00+08:00').getTime();
+        var remind = mt - 30*60*1000;
+        var delay = remind - now;
+        if (delay > 0 && delay < 24*60*60*1000) {
+          setTimeout(function(){
+            if (localStorage.getItem('wc_notify') !== '1') return;
+            new Notification('⚽ 比赛即将开始', {
+              body: (m.home||'') + ' vs ' + (m.away||'') + ' · 30分钟后开球',
+              icon: 'https://haiwangxing1251.github.io/worldcup-dashboard/favicon.ico'
+            });
+          }, delay);
+        }
+      } catch(e){}
+    });
+  }
+
+  updateBtn();
+  if (localStorage.getItem('wc_notify') === '1') {
+    Notification.requestPermission().then(function(p){
+      if (p === 'granted') scheduleNotifications();
+    });
+  }
 })();
 </script>
 
