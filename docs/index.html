@@ -377,7 +377,7 @@ body {
     <div class="meta">
         数据来源：FIFA 官方抽签（2025 年 12 月）&middot;
         ELO: 实时同步 &middot; 赛果: 0 场真实比分 &middot;
-        生成时间：<span data-utc="2026-06-01T23:40:59Z">2026-06-02 07:40 北京时间</span>
+        生成时间：<span data-utc="2026-06-01T23:47:59Z">2026-06-02 07:47 北京时间</span>
     </div>
 </div>
 
@@ -1040,9 +1040,9 @@ function renderMatchCards(data) {
         ' (总 <span style="color:#FFD700;font-weight:700;">' + m.total_expected_goals + '</span>)' +
       '</div>' +
       '<div class="guess-btns" style="display:flex;gap:6px;margin-top:10px;">' +
-        '<button onclick="wcGuessMatch('' + m.home + '','' + homeCN + '','' + m.away + '','' + awayCN + '','home')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(66,165,245,0.5);background:rgba(66,165,245,0.12);color:#42a5f5;font-size:0.78em;cursor:pointer;">主胜</button>' +
-        '<button onclick="wcGuessMatch('' + m.home + '','' + homeCN + '','' + m.away + '','' + awayCN + '','draw')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(255,215,0,0.5);background:rgba(255,215,0,0.12);color:#FFD700;font-size:0.78em;cursor:pointer;">平局</button>' +
-        '<button onclick="wcGuessMatch('' + m.home + '','' + homeCN + '','' + m.away + '','' + awayCN + '','away')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(239,83,80,0.5);background:rgba(239,83,80,0.12);color:#ef5350;font-size:0.78em;cursor:pointer;">客胜</button>' +
+        '<button onclick="wcGuessMatch(\'' + m.home + '\',\'' + homeCN + '\',\'' + m.away + '\',\'' + awayCN + '\',\'home\')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(66,165,245,0.5);background:rgba(66,165,245,0.12);color:#42a5f5;font-size:0.78em;cursor:pointer;">主胜</button>' +
+        '<button onclick="wcGuessMatch(\'' + m.home + '\',\'' + homeCN + '\',\'' + m.away + '\',\'' + awayCN + '\',\'draw\')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(255,215,0,0.5);background:rgba(255,215,0,0.12);color:#FFD700;font-size:0.78em;cursor:pointer;">平局</button>' +
+        '<button onclick="wcGuessMatch(\'' + m.home + '\',\'' + homeCN + '\',\'' + m.away + '\',\'' + awayCN + '\',\'away\')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(239,83,80,0.5);background:rgba(239,83,80,0.12);color:#ef5350;font-size:0.78em;cursor:pointer;">客胜</button>' +
       '</div>';
     }
 
