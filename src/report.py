@@ -9,7 +9,6 @@
 - 模型说明
 """
 
-import json
 import os
 from datetime import datetime, timedelta, timezone
 from typing import List, Dict
@@ -583,7 +582,10 @@ body {{
         est_mark = ' &#x26A0;' if r['elo_estimated'] else ''
         group_class = 'highlight' if i < 3 else ''
         cn_name = cn(r['name'])
-        html += f"""            <tr class="{group_class}" data-name="{cn_name}" data-en="{r['name']}" data-group="{r['group']}" data-elo="{r['elo']:.0f}" data-rank="{i+1}" onclick="wcShowTeamDetail('{r['name']}',{r['elo']:.0f},'{r['group']}',{r['champion_pct']:.1f},{r['final_pct']:.1f},{r['sf_pct']:.1f},{r['qf_pct']:.1f},{r['r16_pct']:.1f},{r['r32_pct']:.1f},{r['group_exit_pct']:.1f})" style="cursor:pointer;">
+        # JS 字符串安全转义：生成单引号包裹的JS字符串，内部单引号转义
+        name_js = "'" + r['name'].replace("\\", "\\\\").replace("'", "\\'") + "'"
+        group_js = "'" + r['group'].replace("\\", "\\\\").replace("'", "\\'") + "'"
+        html += f"""            <tr class="{group_class}" data-name="{cn_name}" data-en="{r['name']}" data-group="{r['group']}" data-elo="{r['elo']:.0f}" data-rank="{i+1}" onclick="wcShowTeamDetail({name_js},{r['elo']:.0f},{group_js},{r['champion_pct']:.1f},{r['final_pct']:.1f},{r['sf_pct']:.1f},{r['qf_pct']:.1f},{r['r16_pct']:.1f},{r['r32_pct']:.1f},{r['group_exit_pct']:.1f})" style="cursor:pointer;">
                 <td>{i + 1}</td>
                 <td><strong>{cn_name}</strong>{est_mark}</td>
                 <td>{gcn(r['group'])}</td>
