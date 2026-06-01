@@ -52,8 +52,11 @@ jobs:
 
       - name: 运行预测引擎
         run: |
-          echo "🔮 2026 世界杯预测引擎启动"
+          echo "预测引擎启动"
           python generate_dashboard.py
+
+      - name: 修复竞猜按钮事件委托
+        run: python fix_guess_buttons.py
 
       - name: 提交生成的仪表盘
         run: |

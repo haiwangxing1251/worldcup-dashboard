@@ -659,9 +659,9 @@ function renderMatchCards(data) {{
         ' (总 <span style="color:#FFD700;font-weight:700;">' + m.total_expected_goals + '</span>)' +
       '</div>' +
       '<div class="guess-btns" style="display:flex;gap:6px;margin-top:10px;">' +
-        '<button onclick="wcGuessMatch(\\'' + m.home + '\\',\\'' + homeCN + '\\',\\'' + m.away + '\\',\\'' + awayCN + '\\',\\'home\\')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(66,165,245,0.5);background:rgba(66,165,245,0.12);color:#42a5f5;font-size:0.78em;cursor:pointer;">主胜</button>' +
-        '<button onclick="wcGuessMatch(\\'' + m.home + '\\',\\'' + homeCN + '\\',\\'' + m.away + '\\',\\'' + awayCN + '\\',\\'draw\\')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(255,215,0,0.5);background:rgba(255,215,0,0.12);color:#FFD700;font-size:0.78em;cursor:pointer;">平局</button>' +
-        '<button onclick="wcGuessMatch(\\'' + m.home + '\\',\\'' + homeCN + '\\',\\'' + m.away + '\\',\\'' + awayCN + '\\',\\'away\\')" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(239,83,80,0.5);background:rgba(239,83,80,0.12);color:#ef5350;font-size:0.78em;cursor:pointer;">客胜</button>' +
+        '<button class="guess-btn" data-home="' + m.home + '" data-home-cn="' + homeCN + '" data-away="' + m.away + '" data-away-cn="' + awayCN + '" data-guess="home" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(66,165,245,0.5);background:rgba(66,165,245,0.12);color:#42a5f5;font-size:0.78em;cursor:pointer;">主胜</button>' +
+        '<button class="guess-btn" data-home="' + m.home + '" data-home-cn="' + homeCN + '" data-away="' + m.away + '" data-away-cn="' + awayCN + '" data-guess="draw" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(255,215,0,0.5);background:rgba(255,215,0,0.12);color:#FFD700;font-size:0.78em;cursor:pointer;">平局</button>' +
+        '<button class="guess-btn" data-home="' + m.home + '" data-home-cn="' + homeCN + '" data-away="' + m.away + '" data-away-cn="' + awayCN + '" data-guess="away" style="flex:1;padding:6px;border-radius:6px;border:1px solid rgba(239,83,80,0.5);background:rgba(239,83,80,0.12);color:#ef5350;font-size:0.78em;cursor:pointer;">客胜</button>' +
       '</div>';
     }}
 
