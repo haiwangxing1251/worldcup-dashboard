@@ -29,6 +29,7 @@ from worldcup_api import (
 from simulator import WorldCupSimulator
 from report import generate_html_report, save_report, cn
 from model import EloPoissonModel
+from odds_fetcher import fetch_odds, merge_odds_to_elo
 
 # Windows 控制台 GBK 编码修复：尝试将 stdout 设为 UTF-8
 try:
@@ -116,6 +117,21 @@ def update_elo_from_match_results(elo_path: str, results: list) -> dict:
 
 def compute_today_predictions(schedule_matches: list, elo_data: dict) -> dict:
     """Compute win/draw/loss predictions for today's matches."""
+    # 融合赔率数据到 ELO 评分中（提升预测准确度）
+    try:
+        odds_data = fetch_odds(use_cache=True, cache_minutes=60)
+        if odds_data and odds_data.get("outright"):
+            elo_dict = {code: info["elo"] for code, info in elo_data.get("teams", {}).items()}
+            merged = merge_odds_to_elo(odds_data, elo_dict, alpha=0.6)
+            for code, new_elo in merged.items():
+                if code in elo_data.get("teams", {}):
+                    elo_data["teams"][code]["elo"] = new_elo
+            print(f"  ✅ 赔率融合完成（{len(odds_data['outright'])} 条赔率）")
+        else:
+            print("  ⚠ 无赔率数据，使用纯 ELO 预测")
+    except Exception as e:
+        print(f"  ⚠ 赔率融合失败：{e}，使用纯 ELO 预测")
+
     model = EloPoissonModel()
     today_str = datetime.now(timezone(timedelta(hours=8))).strftime("%Y-%m-%d")
 
