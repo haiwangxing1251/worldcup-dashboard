@@ -55,9 +55,6 @@ jobs:
           echo "预测引擎启动"
           python generate_dashboard.py
 
-      - name: 修复竞猜按钮事件委托
-        run: python fix_guess_buttons.py
-
       - name: 提交生成的仪表盘
         run: |
           git config user.name "github-actions[bot]"
