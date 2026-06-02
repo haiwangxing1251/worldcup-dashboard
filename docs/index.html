@@ -377,7 +377,7 @@ body {
     <div class="meta">
         数据来源：FIFA 官方抽签（2025 年 12 月）&middot;
         ELO: 实时同步 &middot; 赛果: 0 场真实比分 &middot;
-        生成时间：<span data-utc="2026-06-01T23:56:30Z">2026-06-02 07:56 北京时间</span>
+        生成时间：<span data-utc="2026-06-02T00:15:44Z">2026-06-02 08:15 北京时间</span>
     </div>
 </div>
 
@@ -1064,6 +1064,18 @@ window.wcGuessMatch = function(home, homeCN, away, awayCN, guess) {
   alert('已记录：' + homeCN + ' vs ' + awayCN + ' — ' + wcGuessLabel(guess));
 };
 
+// 竞猜按钮事件委托（事件委托，不依赖 onclick 转义）
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.guess-btn');
+  if (!btn) return;
+  var h = btn.dataset.home, hc = btn.dataset.homeCn;
+  var a = btn.dataset.away, ac = btn.dataset.awayCn;
+  var g = btn.dataset.guess;
+  if (h && a && g && window.wcGuessMatch) {
+    window.wcGuessMatch(h, hc, a, ac, g);
+  }
+});
+
 function updateNavigation(data) {
   var btnPrev = document.getElementById('btn-prev-day');
   var btnNext = document.getElementById('btn-next-day');
@@ -1172,19 +1184,6 @@ function refreshNow() {
   fetchLiveScores();
   TODAY_REFRESH_TIMER = setInterval(fetchLiveScores, 5 * 60 * 1000);
 })();
-
-// 竞猜按钮事件委托 (guess-delegate)
-document.addEventListener('click', function(e) {
-  var btn = e.target.closest && e.target.closest('.guess-btn');
-  if (!btn) return;
-  var h = btn.dataset.home, hc = btn.dataset.homeCn;
-  var a = btn.dataset.away, ac = btn.dataset.awayCn;
-  var g = btn.dataset.guess;
-  if (h && a && g && window.wcGuessMatch) {
-    window.wcGuessMatch(h, hc, a, ac, g);
-  }
-});
-
 </script>
 <!-- ====== End 今日比赛预测模块 ====== -->
 
