@@ -377,7 +377,7 @@ body {
     <div class="meta">
         数据来源：FIFA 官方抽签（2025 年 12 月）&middot;
         ELO: 实时同步 &middot; 赛果: 0 场真实比分 &middot;
-        生成时间：<span data-utc="2026-06-02T00:23:34Z">2026-06-02 08:23 北京时间</span>
+        生成时间：<span data-utc="2026-06-02T00:31:06Z">2026-06-02 08:31 北京时间</span>
     </div>
 </div>
 
@@ -588,6 +588,14 @@ body {
     </div>
 </div>
 
+
+<!-- ====== 快捷操作按钮 ====== -->
+<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:20px 0;">
+  <button onclick="wcOpenGuess()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(255,215,0,0.4);background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.9em;font-weight:600;cursor:pointer;transition:background 0.2s;">&#x1F3B2; 我的竞猜</button>
+  <button id="notify-btn" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(255,215,0,0.4);background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.9em;font-weight:600;cursor:pointer;transition:background 0.2s;">&#x1F514; 开启比赛提醒</button>
+  <button onclick="wcShareCard()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(79,195,247,0.4);background:rgba(79,195,247,0.08);color:#4fc3f7;font-size:0.9em;font-weight:600;cursor:pointer;transition:background 0.2s;">&#x1F517; 分享预测</button>
+</div>
+<!-- ====== End 快捷操作按钮 ====== -->
 
 <!-- ====== 今日比赛预测模块 ====== -->
 <style>
@@ -2028,12 +2036,6 @@ function refreshNow() {
         约 11 支低排名球队的 ELO 评分基于 FIFA 排名线性回归估算（标记为"估算"）。
         数据来源：worldfootballrankings.com / FIFA / roadtowc.com / OneFootball。
     </p>
-</div>
-
-<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:20px 0;">
-  <button onclick="wcOpenGuess()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(255,215,0,0.4);background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F3B2; 我的竞猜</button>
-  <button id="notify-btn" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(255,215,0,0.4);background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F514; 开启比赛提醒</button>
-  <button onclick="wcShareCard()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(79,195,247,0.4);background:rgba(79,195,247,0.08);color:#4fc3f7;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F517; 分享预测</button>
 </div>
 
 <div class="footer">

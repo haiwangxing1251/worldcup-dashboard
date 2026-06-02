@@ -692,15 +692,6 @@ body {{
 </div>
 """
 
-    # ===== 底部按钮行 =====
-    html += """
-<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:20px 0;">
-  <button onclick="wcOpenGuess()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(255,215,0,0.4);background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F3B2; 我的竞猜</button>
-  <button id="notify-btn" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(255,215,0,0.4);background:rgba(255,215,0,0.08);color:#FFD700;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F514; 开启比赛提醒</button>
-  <button onclick="wcShareCard()" style="display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:10px;border:1px solid rgba(79,195,247,0.4);background:rgba(79,195,247,0.08);color:#4fc3f7;font-size:0.9em;font-weight:600;cursor:pointer;">&#x1F517; 分享预测</button>
-</div>
-"""
-
     # ===== 页脚 =====
     html += f"""
 <div class="footer">
