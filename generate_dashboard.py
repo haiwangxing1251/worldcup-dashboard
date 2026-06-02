@@ -683,6 +683,18 @@ window.wcGuessMatch = function(home, homeCN, away, awayCN, guess) {{
   alert('已记录：' + homeCN + ' vs ' + awayCN + ' — ' + wcGuessLabel(guess));
 }};
 
+// 竞猜按钮事件委托（事件委托，不依赖 onclick 转义）
+document.addEventListener('click', function(e) {{
+  var btn = e.target.closest('.guess-btn');
+  if (!btn) return;
+  var h = btn.dataset.home, hc = btn.dataset.homeCn;
+  var a = btn.dataset.away, ac = btn.dataset.awayCn;
+  var g = btn.dataset.guess;
+  if (h && a && g && window.wcGuessMatch) {{
+    window.wcGuessMatch(h, hc, a, ac, g);
+  }}
+}});
+
 function updateNavigation(data) {{
   var btnPrev = document.getElementById('btn-prev-day');
   var btnNext = document.getElementById('btn-next-day');
